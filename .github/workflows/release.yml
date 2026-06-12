@@ -130,6 +130,33 @@ jobs:
                 exit 1
                 ;;
               missing)
+                # No run for this exact SHA — the workflow was skipped by path
+                # filters (e.g. a release.yml-only commit). Fall back to the
+                # most recent successful run on main: if build-relevant files
+                # didn't change, the prior artifacts are still valid.
+                fallback=$(gh run list \
+                  --repo "${{ github.repository }}" \
+                  --workflow "$wf" \
+                  --branch main \
+                  --status success \
+                  --limit 1 \
+                  --json databaseId,headSha,url 2>/dev/null || echo '[]')
+                fb_id=$(echo "$fallback"  | jq -r '.[0].databaseId // ""')
+                fb_sha=$(echo "$fallback" | jq -r '.[0].headSha // ""')
+                fb_url=$(echo "$fallback" | jq -r '.[0].url // ""')
+                if [ -n "$fb_id" ]; then
+                  # Verify fb_sha is an ancestor of SHA so we don't accept a
+                  # build from an unrelated branch that happened to merge last.
+                  compare=$(gh api \
+                    "repos/${{ github.repository }}/compare/${fb_sha}...${SHA}" \
+                    --jq '.status' 2>/dev/null || echo "unknown")
+                  if [ "$compare" = "ahead" ] || [ "$compare" = "identical" ]; then
+                    echo "✅ $wf skipped for $SHA (path filter); ancestor run succeeded: $fb_url"
+                    break
+                  else
+                    echo "  $wf: fallback $fb_sha is not an ancestor of $SHA (status=$compare); waiting..."
+                  fi
+                fi
                 echo "  $wf has no run for $SHA yet; waiting..."
                 ;;
               *)
