@@ -43,6 +43,8 @@ GroupRoutingLatencyLookup::GroupRoutingLatencyLookup(
 
   directlyAffectedContainers =
       groupRoutingRing->getDirectlyAffectedContainers();
+
+  setInitialValue(applyUsingTrafficTableFromChild());
 }
 
 const std::string_view& GroupRoutingLatencyLookup::getType() const {

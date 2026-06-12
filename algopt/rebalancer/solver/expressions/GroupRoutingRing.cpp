@@ -18,8 +18,6 @@
 #include "algopt/rebalancer/solver/expressions/TopToBottomEvaluator.h"
 #include "algopt/rebalancer/solver/utils/Assignment.h"
 
-#include <cmath>
-
 namespace {
 constexpr std::string_view type = "GroupRoutingRing";
 static constexpr auto DUMMY_VALUE = 0.0;

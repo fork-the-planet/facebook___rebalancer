@@ -42,6 +42,8 @@ GroupRoutingTrafficLookup::GroupRoutingTrafficLookup(
   // directly know if there is an update to the child.
   directlyAffectedContainers =
       groupRoutingRing->getDirectlyAffectedContainers();
+
+  setInitialValue(applyUsingTrafficTableFromChild());
 }
 
 const std::string_view& GroupRoutingTrafficLookup::getType() const {

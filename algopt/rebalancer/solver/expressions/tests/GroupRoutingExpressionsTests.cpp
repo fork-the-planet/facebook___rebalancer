@@ -54,7 +54,6 @@ class GroupRoutingExpressionsTest : public ExpressionTestsBase {
             {"group1", {"tenant1", "tenant2", "tenant3"}}});
 
     const auto regionScopeId = scopeId("region");
-    const auto scopeData = co_await universeBuilder_.getScope(regionScopeId);
     const auto partition1Id = partitionId("partition1");
     const auto partitionData = co_await universeBuilder_.getPartition(
         universeBuilder_.getPartitionId("partition1"));
@@ -127,18 +126,14 @@ class GroupRoutingExpressionsTest : public ExpressionTestsBase {
 
     // Now build the universe
     universe_ = buildUniverse();
+  }
 
-    // Create a GroupRoutingRing expression which in turn maintains the traffic
-    // table
-    Assignment assignment(universe_->getContainers().getInitialAssignment());
-    groupRoutingRing_ = std::make_shared<GroupRoutingRing>(
+  std::shared_ptr<GroupRoutingRing> buildRoutingRing() const {
+    return std::make_shared<GroupRoutingRing>(
         routingConfigId("routing_config"),
-        groupId(partition1Id, "group1"),
+        groupId(partitionId("partition1"), "group1"),
         universe_,
-        assignment);
-    // some basic checks w.r.t. groupRoutingRing expression
-    EXPECT_NEAR(groupRoutingRing_->getMinPossibleLatencyValue(), 0.0, 1e-8);
-    EXPECT_NEAR(groupRoutingRing_->getMaxPossibleLatencyValue(), 10.0, 1e-8);
+        Assignment(universe_->getContainers().getInitialAssignment()));
   }
 
   entities::ObjectId tenant(const int i) const {
@@ -158,6 +153,8 @@ class GroupRoutingExpressionsTest : public ExpressionTestsBase {
       Expression& expr,
       double expectedValueBefore,
       double expectedValueAfter) {
+    EXPECT_NEAR(expectedValueBefore, expr.getInitialValue(), 1e-8);
+
     auto assignment = makeAssignment(
         {{tenant(1), region(1)},
          {tenant(2), region(3)},
@@ -193,7 +190,7 @@ class GroupRoutingExpressionsTest : public ExpressionTestsBase {
     // the aggregated latency of the group using the given metric), and
     // expectedValueAfter is the value after a simple change is applied.
     auto groupLatencyLookup = std::make_shared<GroupRoutingLatencyLookup>(
-        groupRoutingRing_, metric, universe_);
+        buildRoutingRing(), metric, universe_);
     testExpression(
         *groupLatencyLookup, expectedValueBefore, expectedValueAfter);
   }
@@ -207,13 +204,12 @@ class GroupRoutingExpressionsTest : public ExpressionTestsBase {
     // denotes the value of the expression w.r.t. the initial assignment, and
     // expectedValueAfter is the value after a simple change is applied.
     auto groupTrafficLookup = std::make_shared<GroupRoutingTrafficLookup>(
-        groupRoutingRing_, destinationScopeItem, universe_);
+        buildRoutingRing(), destinationScopeItem, universe_);
     testExpression(
         *groupTrafficLookup, expectedValueBefore, expectedValueAfter);
   }
 
   std::shared_ptr<const entities::Universe> universe_;
-  std::shared_ptr<GroupRoutingRing> groupRoutingRing_;
 };
 
 CO_TEST_F(GroupRoutingExpressionsTest, GroupRoutingLatencyLookup) {
@@ -316,13 +312,10 @@ CO_TEST_F(GroupRoutingExpressionsTest, useDefaultOriginToScopeItemSets) {
   }
 }
 
-CO_TEST_F(
-    GroupRoutingExpressionsTest,
-    FullApplyThrowsWhenTrafficTableNotPopulated) {
-  // When all objects are in a dummy region (not a routing destination), the
-  // traffic table is unpopulated (totalTrafficFromAllOrigins == 0). Calling
-  // fullApply directly on a GroupRoutingTrafficLookup throws because the
-  // TrafficTable expects total traffic == 1.0.
+CO_TEST_F(GroupRoutingExpressionsTest, ThrowWhenTrafficTableNotPopulated) {
+  // When all objects are in a dummy container (not in any routing destination),
+  // the traffic table is not fully populated and construction of Lookup
+  // expressions throws because setInitialValue triggers the validation.
   universeBuilder_.setObjectTypeName("tenant");
   universeBuilder_.setContainerTypeName("region");
 
@@ -369,40 +362,27 @@ CO_TEST_F(
 
   universe_ = buildUniverse();
 
-  const Assignment assignment(
-      universe_->getContainers().getInitialAssignment());
-  groupRoutingRing_ = std::make_shared<GroupRoutingRing>(
-      routingConfigId("routing_config"),
-      groupId(partition1Id, "group1"),
-      universe_,
-      assignment);
+  const auto groupRoutingRing = buildRoutingRing();
 
-  // Calling fullApply directly on GroupRoutingTrafficLookup should throw
-  // because the traffic table has totalTrafficFromAllOrigins == 0
-  auto groupTrafficLookup = std::make_shared<GroupRoutingTrafficLookup>(
-      groupRoutingRing_, scopeItem(1), universe_);
   REBALANCER_EXPECT_RUNTIME_ERROR_CONTAINS(
-      _apply(*groupTrafficLookup, assignment),
+      std::make_shared<GroupRoutingTrafficLookup>(
+          groupRoutingRing, scopeItem(1), universe_),
       "Expected total traffic from all origins to equal 1.0");
 
-  // Same for GroupRoutingLatencyLookup
-  auto groupLatencyLookup = std::make_shared<GroupRoutingLatencyLookup>(
-      groupRoutingRing_,
-      thriftUtils::makeRoutingLatencyMetric(
-          interface::RoutingLatencyMetric::AVG),
-      universe_);
   REBALANCER_EXPECT_RUNTIME_ERROR_CONTAINS(
-      _apply(*groupLatencyLookup, assignment),
+      std::make_shared<GroupRoutingLatencyLookup>(
+          groupRoutingRing,
+          thriftUtils::makeRoutingLatencyMetric(
+              interface::RoutingLatencyMetric::AVG),
+          universe_),
       "Expected total traffic from all origins to equal 1.0");
 }
 
-CO_TEST_F(
-    GroupRoutingExpressionsTest,
-    FullApplyThrowsWhenSomeOriginsAreStranded) {
+CO_TEST_F(GroupRoutingExpressionsTest, ThrowWhenSomeOriginsAreStranded) {
   // Two origins with disjoint destination sets. The single tenant lives in
   // region1, which is in origin1's destinations but NOT origin2's. So origin1
   // contributes its full share (0.6) and origin2 is stranded (contributes 0),
-  // making totalTrafficFromAllOrigins == 0.6.
+  // making totalTrafficFromAllOrigins == 0.6 != 1.0, causing a throw.
   universeBuilder_.setObjectTypeName("tenant");
   universeBuilder_.setContainerTypeName("region");
   setInitialAssignment(
@@ -446,25 +426,19 @@ CO_TEST_F(
   co_await addRoutingConfig(
       "routing_config", entities::RoutingConfigData{std::move(routingConfig)});
   universe_ = buildUniverse();
-  const Assignment assignment(
-      universe_->getContainers().getInitialAssignment());
-  groupRoutingRing_ = std::make_shared<GroupRoutingRing>(
-      routingConfigId("routing_config"),
-      groupId(partition1Id, "group1"),
-      universe_,
-      assignment);
-  auto groupTrafficLookup = std::make_shared<GroupRoutingTrafficLookup>(
-      groupRoutingRing_, scopeItem(1), universe_);
+  const auto groupRoutingRing = buildRoutingRing();
+
   REBALANCER_EXPECT_RUNTIME_ERROR(
-      _apply(*groupTrafficLookup, assignment),
+      std::make_shared<GroupRoutingTrafficLookup>(
+          groupRoutingRing, scopeItem(1), universe_),
       "Expected total traffic from all origins to equal 1.0, but found 0.6. Do the traffic values for each (origin, destination) pair reflect the fraction of total traffic from all origins to that destination?");
-  auto groupLatencyLookup = std::make_shared<GroupRoutingLatencyLookup>(
-      groupRoutingRing_,
-      thriftUtils::makeRoutingLatencyMetric(
-          interface::RoutingLatencyMetric::AVG),
-      universe_);
+
   REBALANCER_EXPECT_RUNTIME_ERROR(
-      _apply(*groupLatencyLookup, assignment),
+      std::make_shared<GroupRoutingLatencyLookup>(
+          groupRoutingRing,
+          thriftUtils::makeRoutingLatencyMetric(
+              interface::RoutingLatencyMetric::AVG),
+          universe_),
       "Expected total traffic from all origins to equal 1.0, but found 0.6. Do the traffic values for each (origin, destination) pair reflect the fraction of total traffic from all origins to that destination?");
 }
 
