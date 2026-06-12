@@ -92,7 +92,7 @@ class LinearSum : public Expression {
       Context& context,
       const BoundConstraints& bc) const override;
 
-  double computeValue() const;
+  [[nodiscard]] double computeValue() const;
 
   void rebuildInitialValueFrom(
       const PackerSet<std::shared_ptr<Expression>>& exprs);

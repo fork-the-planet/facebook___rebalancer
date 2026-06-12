@@ -98,13 +98,13 @@ double SumOverThreshold::evaluate(
   }
 
   const bool threshold_changed = threshold != threshold_expr->value;
-  double result = threshold_changed ? evaluate_collection(threshold) : value;
+  double result = threshold_changed ? evaluateCollection(threshold) : value;
   for (auto& p : new_values) {
     auto child = p.first;
     const double old_value = values.at(child);
     const double new_value = p.second;
-    result -= evaluate_single(old_value, threshold);
-    result += evaluate_single(new_value, threshold);
+    result -= evaluateSingle(old_value, threshold);
+    result += evaluateSingle(new_value, threshold);
   }
 
   return snapToZero(result);
@@ -142,7 +142,7 @@ double SumOverThreshold::innerPartialApply(
       }
     }
   }
-  value = snapToZero(evaluate_collection(threshold));
+  value = snapToZero(evaluateCollection(threshold));
   return value;
 }
 
@@ -159,8 +159,8 @@ Bounds SumOverThreshold::innerLowerAndUpperBounds(
       continue;
     }
     auto [min_value, max_value] = child->lowerAndUpperBounds(context, bc);
-    lb += evaluate_single(min_value, max_threshold);
-    ub += evaluate_single(max_value, min_threshold);
+    lb += evaluateSingle(min_value, max_threshold);
+    ub += evaluateSingle(max_value, min_threshold);
   }
   return {.lower_bound = snapToZero(lb), .upper_bound = snapToZero(ub)};
 }
@@ -221,7 +221,7 @@ AbstractContainer<ObjectPotential> SumOverThreshold::getObjectPotentials(
   std::vector<AbstractContainer<ObjectPotential>> potentials;
   const double threshold = threshold_expr->value;
   for (auto& [childExpr, childValue] : values) {
-    const double currentPenalty = evaluate_single(childValue, threshold);
+    const double currentPenalty = evaluateSingle(childValue, threshold);
     if (currentPenalty == 0) {
       continue;
     }
@@ -229,7 +229,7 @@ AbstractContainer<ObjectPotential> SumOverThreshold::getObjectPotentials(
         [this, currentPenalty, threshold, value = childValue](
             ObjectPotential objectPotential) {
           const double newPenalty =
-              evaluate_single(value - objectPotential.potential, threshold);
+              evaluateSingle(value - objectPotential.potential, threshold);
           return ObjectPotential{
               .objectId = objectPotential.objectId,
               .potential = currentPenalty - newPenalty};
@@ -240,7 +240,7 @@ AbstractContainer<ObjectPotential> SumOverThreshold::getObjectPotentials(
   return makeObjectPotentialsMergeContainer(potentials, descending);
 }
 
-double SumOverThreshold::evaluate_collection(double threshold) const {
+double SumOverThreshold::evaluateCollection(double threshold) const {
   auto all = collection.query();
   auto lower = collection.query_le(make_pair(threshold, nullptr));
   auto upper = Node{
@@ -259,7 +259,7 @@ double SumOverThreshold::evaluate_collection(double threshold) const {
   return upper.sum - threshold * upper.count;
 }
 
-double SumOverThreshold::evaluate_single(double value, double threshold) const {
+double SumOverThreshold::evaluateSingle(double value, double threshold) const {
   double result = max(0.0, value - threshold);
   if (squares) {
     result = result * result;
@@ -283,7 +283,7 @@ double SumOverThreshold::populateAndEvaluate(ValueFn&& valueFn) {
         make_pair(val, child.get()),
         Node{.sum = val, .sum_squares = val * val, .count = 1});
   }
-  return snapToZero(evaluate_collection(threshold));
+  return snapToZero(evaluateCollection(threshold));
 }
 
 std::string SumOverThreshold::innerDigest(size_t maxChildren) const {

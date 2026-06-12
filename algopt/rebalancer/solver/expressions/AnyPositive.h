@@ -77,8 +77,8 @@ class AnyPositive : public Expression {
       Context& context,
       const BoundConstraints& bc) const override;
 
-  bool isViolating(double childVal) const;
+  [[nodiscard]] bool isViolating(double childVal) const;
 
-  double computeResult() const;
+  [[nodiscard]] double computeResult() const;
 };
 } // namespace facebook::rebalancer

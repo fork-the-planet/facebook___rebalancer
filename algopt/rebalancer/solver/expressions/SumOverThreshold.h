@@ -63,12 +63,12 @@ class SumOverThreshold : public Expression {
       Context& context,
       const BoundConstraints& bc) const override;
 
-  double evaluate_collection(double threshold) const;
-  double evaluate_single(double value, double threshold) const;
+  [[nodiscard]] double evaluateCollection(double threshold) const;
+  [[nodiscard]] double evaluateSingle(double value, double threshold) const;
   // Rebuilds `values` and `collection` from every child using `valueFn`,
   // and returns the snapped evaluation at the threshold's value.
   template <typename ValueFn>
-  double populateAndEvaluate(ValueFn&& valueFn);
+  [[nodiscard]] double populateAndEvaluate(ValueFn&& valueFn);
 
   std::string innerDigest(size_t maxChildren = 10) const override;
 

@@ -128,7 +128,7 @@ class GroupRoutingExpressionsTest : public ExpressionTestsBase {
     universe_ = buildUniverse();
   }
 
-  std::shared_ptr<GroupRoutingRing> buildRoutingRing() const {
+  [[nodiscard]] std::shared_ptr<GroupRoutingRing> buildRoutingRing() const {
     return std::make_shared<GroupRoutingRing>(
         routingConfigId("routing_config"),
         groupId(partitionId("partition1"), "group1"),
@@ -136,15 +136,15 @@ class GroupRoutingExpressionsTest : public ExpressionTestsBase {
         Assignment(universe_->getContainers().getInitialAssignment()));
   }
 
-  entities::ObjectId tenant(const int i) const {
+  [[nodiscard]] entities::ObjectId tenant(const int i) const {
     return universe_->getObjectId(fmt::format("tenant{}", i));
   }
 
-  entities::ContainerId region(const int i) const {
+  [[nodiscard]] entities::ContainerId region(const int i) const {
     return universe_->getContainerId(fmt::format("region{}", i));
   }
 
-  entities::ScopeItemId scopeItem(const int i) const {
+  [[nodiscard]] entities::ScopeItemId scopeItem(const int i) const {
     return ExpressionTestsBase::scopeItemId(
         scopeId("region"), fmt::format("region{}", i));
   }
