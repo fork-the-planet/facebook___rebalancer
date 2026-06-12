@@ -43,8 +43,10 @@ TEST_F(NthLargestTest, NthLargest) {
   std::shuffle(values.begin(), values.end(), folly::ThreadLocalPRNG());
   auto test = [&values, &universe](int n, bool unique, double expected) {
     NthLargest nthLargest(values, n, unique, universe);
-    const double result = _apply(nthLargest, Assignment());
-    EXPECT_EQ(expected, result);
+    // Constructor seeds `initialValue_` via `computeNthLargest()`; verify it
+    // matches before `_apply` runs.
+    EXPECT_DOUBLE_EQ(expected, nthLargest.getInitialValue());
+    EXPECT_EQ(expected, _apply(nthLargest, Assignment()));
   };
   test(0, false, 100);
   test(1, false, 50);

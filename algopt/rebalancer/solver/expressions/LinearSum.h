@@ -91,5 +91,10 @@ class LinearSum : public Expression {
   virtual Bounds innerLowerAndUpperBounds(
       Context& context,
       const BoundConstraints& bc) const override;
+
+  double computeValue() const;
+
+  void rebuildInitialValueFrom(
+      const PackerSet<std::shared_ptr<Expression>>& exprs);
 };
 } // namespace facebook::rebalancer

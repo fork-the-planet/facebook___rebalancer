@@ -57,6 +57,9 @@ TEST_F(LinearSumTest, Caching) {
       PackerMap<std::shared_ptr<Expression>, double>{
           {sum3, -11.0}, {sum4, -2.0}, {sum5, 10.0}});
 
+  // Constructor self-initializes from children's initial values.
+  EXPECT_DOUBLE_EQ(-11 * 4 + -2 * 3 + 10 * 3, sum6->getInitialValue());
+
   EXPECT_EQ(-11 * 4 + -2 * 3 + 10 * 3, apply(sum6, assignment));
 
   EXPECT_TRUE(descendingChildPotentialsAsExpected(
@@ -184,6 +187,10 @@ TEST_F(LinearSumTest, LinearSumBoundsTests) {
   linearsum /= 2;
   linearsum += t1;
   linearsum -= t2;
+
+  // Constructor + *= (via /=) + += + -= keep initialValue in sync:
+  // 20 + 0 - 2 + 0 = 18, /=2 = 9, +=0 = 9, -=1 = 8
+  EXPECT_DOUBLE_EQ(8, linearsum->getInitialValue());
 
   EXPECT_EQ(15, upper_bound(*linearsum));
   EXPECT_EQ(8, lower_bound(*linearsum));
@@ -381,6 +388,55 @@ TEST_F(LinearSumTest, ContainerOrder) {
         {0.0, 0.0, 0.0},
         std::vector<ExprPtr>{child3, child2, child1}));
   }
+}
+
+TEST_F(LinearSumTest, InitialValueAfterScalarMutatorsAndSnap) {
+  setUpDefaultAssignment();
+  const auto universe = buildUniverse();
+  const Assignment a(universe->getContainers().getInitialAssignment());
+  auto t1 = variable(object(0), container(0), universe, a); // value 1
+  auto t2 = variable(object(1), container(1), universe, a); // value 1
+
+  LinearSum ls(
+      universe,
+      10.0,
+      PackerMap<std::shared_ptr<Expression>, double>{{t1, 2.0}, {t2, 3.0}});
+  ASSERT_EQ(15, ls.getInitialValue()); // 10 + 2*1 + 3*1
+
+  ls += 5.0;
+  EXPECT_DOUBLE_EQ(20, ls.getInitialValue());
+
+  ls -= 3.0;
+  EXPECT_DOUBLE_EQ(17, ls.getInitialValue());
+
+  // Sub-tolerance residual must snap to 0 (default precision is ~1e-10).
+  ls -= 17.0;
+  ls += 1e-15;
+  EXPECT_DOUBLE_EQ(0.0, ls.getInitialValue());
+}
+
+TEST_F(LinearSumTest, InplaceAddInitialValue) {
+  setUpDefaultAssignment();
+  const auto universe = buildUniverse();
+  const Assignment assignment(universe->getContainers().getInitialAssignment());
+
+  // v0=1 (object0 in container0), v1=1, v0_other=0 (object0 not in container1)
+  auto v0 = variable(object(0), container(0), universe, assignment);
+  auto v1 = variable(object(1), container(1), universe, assignment);
+  auto v0_other = variable(object(0), container(1), universe, assignment);
+
+  // inplace_add from nullptr: 0 + 4*v0 = 4
+  ExprPtr expr = nullptr;
+  inplace_add(expr, v0, universe, 4);
+  EXPECT_NEAR(4.0, expr->getInitialValue(), kEps);
+
+  // Negative coef: 4 + (-2)*v1 = 2
+  inplace_add(expr, v1, universe, -2);
+  EXPECT_NEAR(2.0, expr->getInitialValue(), kEps);
+
+  // Zero-valued child: 2 + 5*0 = 2
+  inplace_add(expr, v0_other, universe, 5);
+  EXPECT_NEAR(2.0, expr->getInitialValue(), kEps);
 }
 
 } // namespace facebook::rebalancer::packer::tests

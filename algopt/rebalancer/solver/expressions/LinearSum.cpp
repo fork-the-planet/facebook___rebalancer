@@ -56,7 +56,21 @@ LinearSum::LinearSum(
     }
   }
 
-  value = constant;
+  rebuildInitialValueFrom(children());
+}
+
+double LinearSum::computeValue() const {
+  return snapToZero(constant_ + collection.query());
+}
+
+void LinearSum::rebuildInitialValueFrom(
+    const PackerSet<std::shared_ptr<Expression>>& exprs) {
+  for (const auto& child : exprs) {
+    collection.update(
+        child.get(),
+        child->getInitialValue() * getChildCoefficient(child.get()));
+  }
+  setInitialValue(computeValue());
 }
 
 const std::string_view& LinearSum::getType() const {
@@ -92,7 +106,7 @@ double LinearSum::evaluate(
     sum += expr->delta(evaluator, changes) * getChildCoefficient(expr);
   }
 
-  return getPrecision().isZero(fabs(sum)) ? 0 : sum;
+  return snapToZero(sum);
 }
 
 double LinearSum::innerFullApply(
@@ -100,18 +114,11 @@ double LinearSum::innerFullApply(
     const Assignment& assignment) {
   collection.clear();
   for (const auto& child : children()) {
-    const double coefficient = getChildCoefficient(child.get());
+    const auto coefficient = getChildCoefficient(child.get());
     collection.update(
         child.get(), evaluator.apply(child.get(), assignment) * coefficient);
   }
-  value = constant_ + collection.query();
-
-  // TODO: Improve precision handling:
-  // - make cutover be also relative to the max of the individual item
-  // (here and in upper/lower bounds, etc)
-  if (getPrecision().isZero(fabs(value))) {
-    value = 0;
-  }
+  value = computeValue();
   return value;
 }
 
@@ -124,10 +131,7 @@ double LinearSum::innerPartialApply(
     collection.update(
         expr, evaluator.apply(expr, assignment) * getChildCoefficient(expr));
   }
-  value = constant_ + collection.query();
-  if (getPrecision().isZero(fabs(value))) {
-    value = 0;
-  }
+  value = computeValue();
   return value;
 }
 
@@ -152,14 +156,7 @@ Bounds LinearSum::innerLowerAndUpperBounds(
       ub += childLb * coef;
     }
   }
-  const auto& precision = getPrecision();
-  if (precision.isZero(fabs(lb))) {
-    lb = 0;
-  }
-  if (precision.isZero(fabs(ub))) {
-    ub = 0;
-  }
-  return {.lower_bound = lb, .upper_bound = ub};
+  return {.lower_bound = snapToZero(lb), .upper_bound = snapToZero(ub)};
 }
 
 void LinearSum::lpIntent(const LpEvaluator& evaluator, bool minimizing) {
@@ -294,10 +291,13 @@ void LinearSum::combine(const LinearSum& other, double scale) {
       allCoeffsOne_ = false;
     }
   }
+
+  rebuildInitialValueFrom(other.children());
 }
 
 void LinearSum::operator+=(double other) {
   constant_ += other;
+  setInitialValue(computeValue());
 }
 
 void LinearSum::operator+=(const LinearSum& other) {
@@ -305,7 +305,7 @@ void LinearSum::operator+=(const LinearSum& other) {
 }
 
 void LinearSum::operator-=(double other) {
-  constant_ -= other;
+  *this += -other;
 }
 
 void LinearSum::operator-=(const LinearSum& other) {
@@ -313,12 +313,11 @@ void LinearSum::operator-=(const LinearSum& other) {
 }
 
 LinearSum LinearSum::operator*(double other) const {
-  const double constant = constant_ * other;
+  const auto constant = constant_ * other;
 
   PackerMap<std::shared_ptr<Expression>, double> coef;
-
   for (const auto& child : children()) {
-    const double coefficient = getChildCoefficient(child.get());
+    const auto coefficient = getChildCoefficient(child.get());
     coef[child] = coefficient * other;
   }
 
@@ -334,6 +333,8 @@ void LinearSum::operator*=(double other) {
   if (other != 1.0) {
     allCoeffsOne_ = false;
   }
+
+  rebuildInitialValueFrom(children());
 }
 
 void LinearSum::operator/=(double other) {
@@ -356,6 +357,8 @@ void LinearSum::add(std::shared_ptr<Expression> expr, double coef) {
   if (coef != 1.0) {
     allCoeffsOne_ = false;
   }
+  collection.update(expr.get(), expr->getInitialValue() * coef);
+  setInitialValue(computeValue());
 }
 
 double LinearSum::getChildCoefficient(Expression* child) const {

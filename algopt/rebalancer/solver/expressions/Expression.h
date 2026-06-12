@@ -311,6 +311,9 @@ class Expression {
   double initialValue_;
   void throwIfNotProperlyInitialized() const;
 
+  // Rounds a value within precision tolerance of zero to exactly 0.
+  double snapToZero(double val) const;
+
   // name of the spec which when materialized created this expression, only
   // set for the topmost node that was added to constraint or expression
   // trees

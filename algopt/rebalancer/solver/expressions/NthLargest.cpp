@@ -37,6 +37,10 @@ NthLargest::NthLargest(
   if (children().empty()) {
     throw std::runtime_error("NthLargest requires at least one value");
   }
+  for (const auto& child : children()) {
+    ++valueFrequency_[child->getInitialValue()];
+  }
+  setInitialValue(computeNthLargest());
 }
 
 const std::string_view& NthLargest::getType() const {
@@ -63,7 +67,7 @@ double NthLargest::_applyUsingChildValues(
     const Assignment& assignment) {
   valueFrequency_.clear();
   for (const auto& child : children()) {
-    const double value = evaluator.apply(child.get(), assignment);
+    const auto value = evaluator.apply(child.get(), assignment);
     ++valueFrequency_[value];
   }
   value = computeNthLargest();

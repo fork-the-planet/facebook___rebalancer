@@ -107,8 +107,8 @@ TEST_F(GlobalObjectiveTest, AddToObjective) {
 
     auto objective = objective_builder.build(universe);
 
-    // NOTE: the value should be zero since there is no 'apply'
-    EXPECT_EQ(0, objective.getFirstObjective()->value);
+    // value is 3 (= const_expr(1) + const_expr(2))
+    EXPECT_EQ(3, objective.getFirstObjective()->value);
     ASSERT_EQ(1, objective.size());
 
     const auto& children =

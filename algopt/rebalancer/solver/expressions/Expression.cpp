@@ -748,6 +748,10 @@ const Precision& Expression::getPrecision() const {
   return universe_->getPrecision();
 }
 
+double Expression::snapToZero(double val) const {
+  return getPrecision().isZero(val) ? 0.0 : val;
+}
+
 double Expression::getInitialValue() const {
   return initialValue_;
 }
