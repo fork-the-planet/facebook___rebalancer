@@ -36,8 +36,8 @@ void ExecutorWrapper::add(folly::Func function) {
     // to the real wall clock when no EventHolder is present.
     const auto* holder = static_cast<const EventHolder*>(
         folly::RequestContext::get()->getContextData(EventHolder::key()));
-    const EventHolder::NowFn& nowFn =
-        holder ? holder->nowFn() : algopt::seconds_since_epoch;
+    static const EventHolder::NowFn kDefaultNowFn{algopt::seconds_since_epoch};
+    const EventHolder::NowFn& nowFn = holder ? holder->nowFn() : kDefaultNowFn;
 
     // Step 1: reset metrics
     ThreadMemoryMonitor::reset(nowFn());
