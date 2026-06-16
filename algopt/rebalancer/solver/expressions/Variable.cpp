@@ -23,8 +23,6 @@
 #include "algopt/rebalancer/solver/utils/Change.h"
 #include "algopt/rebalancer/solver/utils/Problem.h"
 
-#include <sstream>
-
 namespace {
 constexpr std::string_view type = "Variable";
 }
