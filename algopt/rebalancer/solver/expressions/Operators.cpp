@@ -536,7 +536,7 @@ ExprPtr object_partition_lookup(
     PackerMap<entities::GroupId, double> groupLimitOverrides,
     PackerSet<entities::ObjectId> initialDuringObjects,
     std::optional<double> defaultGroupLimitOverride,
-    bool squares,
+    ObjectPartitionLookupPenaltyTransform penaltyTransform,
     int groupsAllowed,
     bool minBound) {
   return make_shared<ObjectPartitionLookupDefault>(
@@ -549,7 +549,7 @@ ExprPtr object_partition_lookup(
       std::move(groupLimitOverrides),
       std::move(initialDuringObjects),
       defaultGroupLimitOverride,
-      squares,
+      penaltyTransform,
       groupsAllowed,
       minBound ? ObjectPartitionLookupDefault::Bound::MIN
                : ObjectPartitionLookupDefault::Bound::MAX,

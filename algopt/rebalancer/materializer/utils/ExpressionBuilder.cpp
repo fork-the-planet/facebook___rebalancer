@@ -1178,7 +1178,7 @@ std::shared_ptr<Expression> ExpressionBuilder::getObjectPartitionLookup(
     entities::ScopeItemId scopeItemId,
     ExprPtr objectPartition,
     const entities::Map<entities::GroupId, double>& overrides,
-    bool squares,
+    ObjectPartitionLookupPenaltyTransform penaltyTransform,
     int groupsAllowed,
     bool minBound) {
   if (metric != UtilMetric::AFTER && metric != UtilMetric::DURING) {
@@ -1193,7 +1193,7 @@ std::shared_ptr<Expression> ExpressionBuilder::getObjectPartitionLookup(
         scopeId,
         scopeItemId,
         objectPartition,
-        squares,
+        penaltyTransform,
         groupsAllowed,
         minBound);
 
@@ -1204,7 +1204,7 @@ std::shared_ptr<Expression> ExpressionBuilder::getObjectPartitionLookup(
           scopeItemId,
           objectPartition,
           overrides,
-          squares,
+          penaltyTransform,
           groupsAllowed,
           minBound);
     });
@@ -1217,7 +1217,7 @@ std::shared_ptr<Expression> ExpressionBuilder::getObjectPartitionLookup(
       scopeItemId,
       objectPartition,
       overrides,
-      squares,
+      penaltyTransform,
       groupsAllowed,
       minBound);
 }
@@ -1228,7 +1228,7 @@ std::shared_ptr<Expression> ExpressionBuilder::createObjectPartitionLookup(
     entities::ScopeItemId scopeItemId,
     ExprPtr objectPartition,
     const entities::Map<entities::GroupId, double>& overrides,
-    bool squares,
+    ObjectPartitionLookupPenaltyTransform penaltyTransform,
     int groupsAllowed,
     bool minBound) {
   entities::Set<entities::ObjectId> initialObjects;
@@ -1254,7 +1254,7 @@ std::shared_ptr<Expression> ExpressionBuilder::createObjectPartitionLookup(
       // TODO: consider removing defaultGroupLimitOverride as it seems to be
       // only used in tests (?)
       std::nullopt /* defaultGroupLimitOverride*/,
-      squares,
+      penaltyTransform,
       groupsAllowed,
       minBound);
 

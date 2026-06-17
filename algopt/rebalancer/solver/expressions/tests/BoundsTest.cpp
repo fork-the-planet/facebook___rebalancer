@@ -135,7 +135,7 @@ class BoundsTest : public ExpressionTestsBase {
              object(7),
              object(9)}) /* initialDuringObjects */,
         std::nullopt,
-        false /* squares */,
+        ObjectPartitionLookupPenaltyTransform::IDENTITY,
         0 /* groupsAllowed */,
         boundType);
 

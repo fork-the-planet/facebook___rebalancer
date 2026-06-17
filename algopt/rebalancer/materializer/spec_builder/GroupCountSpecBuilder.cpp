@@ -153,7 +153,8 @@ GroupCountSpecBuilder::buildOptimizedGroupCountExprsForStaticDimensions(
         scopeItemId,
         objectPartition,
         groupLimitOverrides,
-        *spec_.squares(),
+        *spec_.squares() ? ObjectPartitionLookupPenaltyTransform::SQUARE
+                         : ObjectPartitionLookupPenaltyTransform::IDENTITY,
         0,
         bound == GroupCountSpecBound::MIN);
     exprs.emplace_back(expr);
@@ -186,7 +187,8 @@ GroupCountSpecBuilder::buildOptimizedGroupCountExprsForDynamicDimensions(
         scopeItemId,
         objectPartition,
         groupLimitOverrides,
-        *spec_.squares(),
+        *spec_.squares() ? ObjectPartitionLookupPenaltyTransform::SQUARE
+                         : ObjectPartitionLookupPenaltyTransform::IDENTITY,
         0,
         bound == GroupCountSpecBound::MIN);
     exprs.emplace_back(expr);

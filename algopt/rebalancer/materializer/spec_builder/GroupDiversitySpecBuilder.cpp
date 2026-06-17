@@ -165,19 +165,21 @@ folly::coro::Task<ExprPtr> GroupDiversitySpecBuilder::getContinuousPenaltyExpr(
         scopeParams,
         /*filteredGroupIds=*/std::nullopt,
         /*defaultGroupCoefficient=*/1.0 / maxUtilUpperbound);
-    const auto getPenalty = [&](bool squares) {
-      return expressionBuilder.getObjectPartitionLookup(
-          UtilMetric::AFTER,
-          scopeId,
-          scopeItemId,
-          normalizedObjectPartition,
-          /*overrides=*/{},
-          squares,
-          /*groupsAllowed=*/0,
-          /*minBound=*/false);
-    };
-    co_return getPenalty(/*squares=*/false) -
-        (QUADRATIC_TERM_MULTIPLIER * getPenalty(/*squares=*/true));
+    const auto getPenalty =
+        [&](ObjectPartitionLookupPenaltyTransform penaltyTransform) {
+          return expressionBuilder.getObjectPartitionLookup(
+              UtilMetric::AFTER,
+              scopeId,
+              scopeItemId,
+              normalizedObjectPartition,
+              /*overrides=*/{},
+              penaltyTransform,
+              /*groupsAllowed=*/0,
+              /*minBound=*/false);
+        };
+    co_return getPenalty(ObjectPartitionLookupPenaltyTransform::IDENTITY) -
+        (QUADRATIC_TERM_MULTIPLIER *
+         getPenalty(ObjectPartitionLookupPenaltyTransform::SQUARE));
   }
 
   auto totalPenaltyExpression = const_expr(0, universe_);

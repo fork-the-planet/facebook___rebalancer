@@ -29,6 +29,13 @@ class Expression;
 class Change;
 class ObjectPartition;
 
+// Transform applied to each group's penalty before the penalties are summed.
+// IDENTITY leaves the penalty unchanged; SQUARE returns penalty^2.
+enum class ObjectPartitionLookupPenaltyTransform {
+  IDENTITY,
+  SQUARE,
+};
+
 // Default policy for ObjectPartitionLookup
 struct ObjectPartitionLookupDefaultPolicy {
   static constexpr std::string_view typeName = "ObjectPartitionLookup";
@@ -54,7 +61,8 @@ class ObjectPartitionLookup : public Expression {
       PackerMap<entities::GroupId, double> groupLimitOverrides = {},
       PackerSet<entities::ObjectId> initialDuringObjects = {},
       std::optional<double> defaultGroupLimitOverride = std::nullopt,
-      bool squares = false,
+      ObjectPartitionLookupPenaltyTransform penaltyTransform =
+          ObjectPartitionLookupPenaltyTransform::IDENTITY,
       int groupsAllowed = 0,
       Bound bound = Bound::MAX,
       std::conditional_t<
@@ -191,7 +199,7 @@ class ObjectPartitionLookup : public Expression {
   PackerMap<entities::GroupId, double> groupLimitOverrides_;
   std::optional<double> defaultGroupLimitOverride_;
   PackerSet<entities::ObjectId> initialDuringObjects_;
-  bool squares_;
+  ObjectPartitionLookupPenaltyTransform penaltyTransform_;
   int groupsAllowed_;
   Bound bound_;
   entities::ScopeId scopeId_;

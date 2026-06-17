@@ -828,7 +828,7 @@ CO_TEST_F(PackerTests, ObjPartitionLookupBrokenConstraint) {
           {{groupId(partId, "group0"), -1}},
           {},
           std::nullopt,
-          false,
+          ObjectPartitionLookupPenaltyTransform::IDENTITY,
           1));
 
   Context ctx;

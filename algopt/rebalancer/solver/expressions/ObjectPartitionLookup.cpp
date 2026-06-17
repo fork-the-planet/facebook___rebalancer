@@ -39,6 +39,18 @@ const facebook::algopt::SumMap<facebook::rebalancer::entities::ObjectId, double>
 
 namespace facebook::rebalancer {
 
+namespace {
+std::string_view penaltyTransformName(ObjectPartitionLookupPenaltyTransform t) {
+  switch (t) {
+    case ObjectPartitionLookupPenaltyTransform::IDENTITY:
+      return "identity";
+    case ObjectPartitionLookupPenaltyTransform::SQUARE:
+      return "square";
+  }
+  throw std::runtime_error("ObjectPartitionLookup: unknown penalty transform");
+}
+} // namespace
+
 template <typename Policy>
 ObjectPartitionLookup<Policy>::ObjectPartitionLookup(
     std::shared_ptr<Expression> objectPartition,
@@ -50,7 +62,7 @@ ObjectPartitionLookup<Policy>::ObjectPartitionLookup(
     PackerMap<entities::GroupId, double> groupLimitOverrides,
     PackerSet<entities::ObjectId> initialDuringObjects,
     std::optional<double> defaultGroupLimitOverride,
-    bool squares,
+    ObjectPartitionLookupPenaltyTransform penaltyTransform,
     int groupsAllowed,
     Bound bound,
     std::conditional_t<
@@ -63,7 +75,7 @@ ObjectPartitionLookup<Policy>::ObjectPartitionLookup(
       groupLimitOverrides_(std::move(groupLimitOverrides)),
       defaultGroupLimitOverride_(defaultGroupLimitOverride),
       initialDuringObjects_(std::move(initialDuringObjects)),
-      squares_(squares),
+      penaltyTransform_(penaltyTransform),
       groupsAllowed_(groupsAllowed),
       bound_(bound),
       scopeId_(scopeId),
@@ -514,9 +526,9 @@ algopt::lp::Expression ObjectPartitionLookup<Policy>::lp(
     const LpEvaluator& evaluator,
     bool minimizing,
     const interface::OptimalSolverSpec& /* configs */) {
-  if (squares_) {
+  if (penaltyTransform_ != ObjectPartitionLookupPenaltyTransform::IDENTITY) {
     throw std::runtime_error(
-        "ObjectPartitionLookup: squares not supported in LP");
+        "ObjectPartitionLookup: only IDENTITY penalty transform is supported in LP");
   }
   if (groupsAllowed_ > 0 && !minimizing) {
     throw std::runtime_error(
@@ -828,7 +840,7 @@ ExprPtr ObjectPartitionLookup<Policy>::get_do_not_make_worse_copy(
       std::move(newGroupLimitOverrides),
       initialDuringObjects_,
       defaultGroupLimitOverride_,
-      squares_,
+      penaltyTransform_,
       groupsAllowed_,
       bound_ == MIN);
 }
@@ -842,7 +854,9 @@ template <typename Policy>
 ExpressionProperties ObjectPartitionLookup<Policy>::getProperties() const {
   ExpressionProperties properties;
   properties.properties()->emplace(
-      "squares", PropertiesHelper::makeBoolValue(squares_));
+      "penalty_transform",
+      PropertiesHelper::makeStringValue(
+          std::string(penaltyTransformName(penaltyTransform_))));
   properties.properties()->emplace(
       "groups_allowed", PropertiesHelper::makeIntValue(groupsAllowed_));
   properties.properties()->emplace(
@@ -885,7 +899,13 @@ double ObjectPartitionLookup<Policy>::computePenalty(
     double deviationFromLimit) const {
   const double penalty = std::max(
       0.0, (bound_ == Bound::MAX) ? deviationFromLimit : -deviationFromLimit);
-  return squares_ ? (penalty * penalty) : penalty;
+  switch (penaltyTransform_) {
+    case ObjectPartitionLookupPenaltyTransform::IDENTITY:
+      return penalty;
+    case ObjectPartitionLookupPenaltyTransform::SQUARE:
+      return penalty * penalty;
+  }
+  throw std::runtime_error("ObjectPartitionLookup: unknown penalty transform");
 }
 
 template <typename Policy>

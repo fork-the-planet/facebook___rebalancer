@@ -546,12 +546,13 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupWithSquares) {
           /*groupLimitOverrides=*/{},
           /*initialDuringObjects=*/{},
           /*defaultGroupLimitOverride=*/2,
-          /*squares=*/true));
+          /*penaltyTransform=*/
+          ObjectPartitionLookupPenaltyTransform::SQUARE));
 
-  // skip lp expr evaluation since squares is not supported LpAssertOptions
+  // skip lp expr evaluation since only IDENTITY penalty transform is supported
   LpAssertOptions lpAssertOptions = {
       .exceptionForLpExpr =
-          "ObjectPartitionLookup: squares not supported in LP"};
+          "ObjectPartitionLookup: only IDENTITY penalty transform is supported in LP"};
 
   // With normalization, apply() must return (0/3)^2 + (1/4)^2 + (2/5)^2 =
   // 0.2225
@@ -685,7 +686,8 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupGroupsLimit) {
           /*groupLimitOverrides=*/{},
           /*initialDuringObjects=*/{},
           /*defaultGroupLimitOverride=*/std::nullopt,
-          /*squares=*/false,
+          /*penaltyTransform=*/
+          ObjectPartitionLookupPenaltyTransform::IDENTITY,
           /*groupsAllowed=*/1));
 
   LpAssertOptions lpAssertOptions{
@@ -749,13 +751,14 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookup2) {
           /*groupLimitOverrides=*/{},
           /*initialDuringObjects=*/{},
           /*defaultGroupLimitOverride=*/std::nullopt,
-          /*squares=*/true,
+          /*penaltyTransform=*/
+          ObjectPartitionLookupPenaltyTransform::SQUARE,
           /*groupsAllowed=*/0));
 
-  // skip lp expr evaluation since squares is not supported LpAssertOptions
+  // skip lp expr evaluation since only IDENTITY penalty transform is supported
   LpAssertOptions lpAssertOptions = {
       .exceptionForLpExpr =
-          "ObjectPartitionLookup: squares not supported in LP"};
+          "ObjectPartitionLookup: only IDENTITY penalty transform is supported in LP"};
 
   EXPECT_EQ(0.25, apply(objectPartitionLookup, assignment, lpAssertOptions));
 
@@ -864,7 +867,8 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupMinBound) {
           /*groupLimitOverrides=*/{},
           /*initialDuringObjects=*/{},
           /*defaultGroupLimitOverride=*/std::nullopt,
-          /*squares=*/false,
+          /*penaltyTransform=*/
+          ObjectPartitionLookupPenaltyTransform::IDENTITY,
           /*groupsAllowed=*/0,
           ObjectPartitionLookupDefault::Bound::MIN));
 
@@ -1133,7 +1137,8 @@ CO_TEST_F(
           /*groupLimitOverrides=*/{},
           /*initialDuringObjects=*/{},
           /*defaultGroupLimitOverride=*/std::nullopt,
-          /*squares=*/false,
+          /*penaltyTransform=*/
+          ObjectPartitionLookupPenaltyTransform::IDENTITY,
           /*groupsAllowed=*/0,
           ObjectPartitionLookupDefault::Bound::MIN));
 

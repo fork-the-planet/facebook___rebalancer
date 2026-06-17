@@ -18,6 +18,7 @@
 #include "algopt/rebalancer/solver/expressions/Expression.h"
 #include "algopt/rebalancer/solver/expressions/ObjectLookup.h"
 #include "algopt/rebalancer/solver/expressions/ObjectLookupDynamic.h"
+#include "algopt/rebalancer/solver/expressions/ObjectPartitionLookup.h"
 #include "algopt/rebalancer/solver/expressions/ObjectVector.h"
 #include "algopt/rebalancer/solver/expressions/StableStayed.h"
 #include "algopt/rebalancer/solver/expressions/Swaps.h"
@@ -187,7 +188,8 @@ ExprPtr object_partition_lookup(
     PackerMap<entities::GroupId, double> groupLimitOverrides = {},
     PackerSet<entities::ObjectId> initialDuringObjects = {},
     std::optional<double> defaultGroupLimitOverride = std::nullopt,
-    bool squares = false,
+    ObjectPartitionLookupPenaltyTransform penaltyTransform =
+        ObjectPartitionLookupPenaltyTransform::IDENTITY,
     int groupsAllowed = 0,
     bool minBound = false);
 

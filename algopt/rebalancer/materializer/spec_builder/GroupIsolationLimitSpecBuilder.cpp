@@ -52,7 +52,7 @@ GroupIsolationLimitSpecBuilder::constraints(
         scopeItemId,
         objectPartition,
         groupOverrides,
-        false,
+        ObjectPartitionLookupPenaltyTransform::IDENTITY,
         *spec_.groupsAllowed(),
         false);
     exprs.emplace_back(expr);

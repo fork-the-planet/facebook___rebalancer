@@ -25,6 +25,7 @@
 #include "algopt/rebalancer/solver/expressions/GroupRoutingRing.h"
 #include "algopt/rebalancer/solver/expressions/GroupRoutingTrafficLookup.h"
 #include "algopt/rebalancer/solver/expressions/ObjectLookup.h"
+#include "algopt/rebalancer/solver/expressions/ObjectPartitionLookup.h"
 #include "algopt/rebalancer/solver/expressions/ObjectPartitionMoveLimit.h"
 #include "algopt/rebalancer/solver/expressions/ObjectVector.h"
 #include "algopt/rebalancer/solver/expressions/StableStayed.h"
@@ -172,7 +173,7 @@ class ExpressionBuilder {
       entities::ScopeItemId scopeItemId,
       ExprPtr objectPartition,
       const entities::Map<entities::GroupId, double>& overrides,
-      bool squares,
+      ObjectPartitionLookupPenaltyTransform penaltyTransform,
       int groupsAllowed,
       bool minBound);
 
@@ -211,7 +212,7 @@ class ExpressionBuilder {
       entities::ScopeItemId scopeItemId,
       ExprPtr objectPartition,
       const entities::Map<entities::GroupId, double>& overrides,
-      bool squares,
+      ObjectPartitionLookupPenaltyTransform penaltyTransform,
       int groupsAllowed,
       bool minBound);
 
@@ -691,16 +692,14 @@ class ExpressionBuilder {
       ExprPtr>
       objectPartitionCache_;
 
-  // Cache for getObjectPartitionLookup(metric, scopeId, scopeItemId,
-  // objectPartition, squares, groupsAllowed, minBound) Only caches when
-  // overrides is empty
+  // Cache for getObjectPartitionLookup. Only caches when overrides is empty.
   Cache<
       std::tuple<
           UtilMetric,
           entities::ScopeId,
           entities::ScopeItemId,
           ExprPtr,
-          bool,
+          ObjectPartitionLookupPenaltyTransform,
           int,
           bool>,
       ExprPtr>

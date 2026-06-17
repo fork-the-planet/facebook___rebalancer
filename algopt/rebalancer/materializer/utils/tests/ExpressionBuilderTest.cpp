@@ -1453,7 +1453,14 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookup) {
       builder.getObjectPartition(limits, cpu(), job(), false);
 
   auto partitionGroupCount = builder.getObjectPartitionLookup(
-      UtilMetric::AFTER, rack(), rack(0), objectPartition, {}, false, 0, false);
+      UtilMetric::AFTER,
+      rack(),
+      rack(0),
+      objectPartition,
+      {},
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
+      0,
+      false);
 
   // Scope item has more than 1 group
   // = max(0, 0 - 0.01) + max(0, 0.1 - 0.01) + max(0, 0.2 - 0.02) = 0.27
@@ -1472,7 +1479,14 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookup) {
           "ObjectPartitionLookup: groupsAllowed_ > 0 when minimizing=false is not supported in LP"};
   constexpr int k = 1;
   auto partitionGroupCountAllowed = builder.getObjectPartitionLookup(
-      UtilMetric::AFTER, rack(), rack(0), objectPartition, {}, false, k, false);
+      UtilMetric::AFTER,
+      rack(),
+      rack(0),
+      objectPartition,
+      {},
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
+      k,
+      false);
   // Penalty for
   // = max(0, 0 - 0.01) + max(0, 0.1 - 0.01) + max(0, 0.2 - 0.02)
   //   - max(0, 0.2 - 0.02) = 0.09
@@ -1492,7 +1506,14 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupMinBound) {
       builder.getObjectPartition(limits, cpu(), job(), false);
 
   auto partitionGroupCount = builder.getObjectPartitionLookup(
-      UtilMetric::AFTER, rack(), rack(0), objectPartition, {}, false, 0, true);
+      UtilMetric::AFTER,
+      rack(),
+      rack(0),
+      objectPartition,
+      {},
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
+      0,
+      true);
 
   // Scope item has more than 1 group
   // = max(0, 0.15 - 0.1) + max(0, 0.3 - 0.2) = 0.15
@@ -1511,7 +1532,14 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupMinBound) {
           "ObjectPartitionLookup: groupsAllowed_ > 0 when minimizing=false is not supported in LP"};
   constexpr int k = 1;
   auto partitionGroupCountAllowed = builder.getObjectPartitionLookup(
-      UtilMetric::AFTER, rack(), rack(0), objectPartition, {}, false, k, true);
+      UtilMetric::AFTER,
+      rack(),
+      rack(0),
+      objectPartition,
+      {},
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
+      k,
+      true);
   EXPECT_NEAR(
       0.05,
       evaluate(
@@ -2238,7 +2266,14 @@ TEST_F(
   // Verify that getObjectPartitionLookup now supports a different scope (rack
   // instead of parity) for dynamic dimensions by using a scope image
   auto partitionGroupCount = builder.getObjectPartitionLookup(
-      UtilMetric::AFTER, rack(), rack(0), objectPartition, {}, false, 0, false);
+      UtilMetric::AFTER,
+      rack(),
+      rack(0),
+      objectPartition,
+      {},
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
+      0,
+      false);
 
   // Verify that the expression was created successfully
   EXPECT_NE(partitionGroupCount, nullptr);
@@ -2369,7 +2404,14 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupWithMetrics) {
   // Call getObjectPartitionLookup which should trigger the metrics_ code path
   // This will execute lines 1170-1171 where the dynamic_pointer_cast happens
   auto partitionGroupCount = builderWithMetrics->getObjectPartitionLookup(
-      UtilMetric::AFTER, rack(), rack(0), objectPartition, {}, false, 0, false);
+      UtilMetric::AFTER,
+      rack(),
+      rack(0),
+      objectPartition,
+      {},
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
+      0,
+      false);
 
   // Verify that the expression was created successfully
   EXPECT_NE(partitionGroupCount, nullptr);
@@ -2484,7 +2526,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheHit) {
       rack(0),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
   auto expr2 = builder.getObjectPartitionLookup(
@@ -2493,7 +2535,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheHit) {
       rack(0),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
 
@@ -2507,7 +2549,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheHit) {
       rack(0),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
   auto expr4 = builder.getObjectPartitionLookup(
@@ -2516,7 +2558,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheHit) {
       rack(0),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
 
@@ -2543,7 +2585,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheMiss) {
       rack(0),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
 
@@ -2554,19 +2596,19 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheMiss) {
       rack(1),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
   EXPECT_NE(expr1.get(), expr2.get());
 
-  // Different squares parameter
+  // Different penalty transform
   auto expr3 = builder.getObjectPartitionLookup(
       UtilMetric::AFTER,
       rack(),
       rack(0),
       objectPartition,
       emptyOverrides,
-      true,
+      ObjectPartitionLookupPenaltyTransform::SQUARE,
       0,
       false);
   EXPECT_NE(expr1.get(), expr3.get());
@@ -2578,7 +2620,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheMiss) {
       rack(0),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       1,
       false);
   EXPECT_NE(expr1.get(), expr4.get());
@@ -2590,7 +2632,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheMiss) {
       rack(0),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       true);
   EXPECT_NE(expr1.get(), expr5.get());
@@ -2604,7 +2646,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheMiss) {
       rack(0),
       objectPartition2,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
   EXPECT_NE(expr1.get(), expr6.get());
@@ -2627,7 +2669,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupNonCacheable) {
       rack(0),
       objectPartition,
       overrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
   auto expr2 = builder.getObjectPartitionLookup(
@@ -2636,7 +2678,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupNonCacheable) {
       rack(0),
       objectPartition,
       overrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
 
@@ -2667,7 +2709,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheWithDifferentScopes) {
       rack(0),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
   auto expr2 = builder.getObjectPartitionLookup(
@@ -2676,7 +2718,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheWithDifferentScopes) {
       rack(0),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
   EXPECT_EQ(expr1.get(), expr2.get());
@@ -2688,7 +2730,7 @@ TEST_F(ExpressionBuilderTest, ObjectPartitionLookupCacheWithDifferentScopes) {
       host(0),
       objectPartition,
       emptyOverrides,
-      false,
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       0,
       false);
   EXPECT_NE(expr1.get(), expr3.get());

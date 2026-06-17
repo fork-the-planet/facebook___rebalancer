@@ -344,7 +344,7 @@ CO_TEST_F(
           {},
           {},
           std::nullopt,
-          false,
+          ObjectPartitionLookupPenaltyTransform::IDENTITY,
           0,
           ObjectPartitionLookupDefault::Bound::MAX));
 
@@ -360,7 +360,7 @@ CO_TEST_F(
           {},
           {},
           std::nullopt,
-          false,
+          ObjectPartitionLookupPenaltyTransform::IDENTITY,
           0,
           ObjectPartitionLookupDefault::Bound::MAX));
 

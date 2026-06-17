@@ -159,7 +159,8 @@ class ObjectPartitionLookupWithMinPresenceTest : public ExpressionTestsBase {
                 /*groupLimitOverrides=*/{},
                 /*initialDuringObjects=*/{},
                 /*defaultGroupLimitOverride=*/std::nullopt,
-                /*squares=*/false,
+                /*penaltyTransform=*/
+                ObjectPartitionLookupPenaltyTransform::IDENTITY,
                 /*groupsAllowed=*/0,
                 ObjectPartitionLookup<
                     ObjectPartitionLookupWithMinPresencePolicy>::Bound::MAX,
@@ -624,7 +625,8 @@ CO_TEST_F(
               /*groupLimitOverrides=*/{},
               /*initialDuringObjects=*/{},
               /*defaultGroupLimitOverride=*/std::nullopt,
-              /*squares=*/false,
+              /*penaltyTransform=*/
+              ObjectPartitionLookupPenaltyTransform::IDENTITY,
               /*groupsAllowed=*/0,
               ObjectPartitionLookup<
                   ObjectPartitionLookupWithMinPresencePolicy>::Bound::MAX,
@@ -731,7 +733,8 @@ CO_TEST_F(
               /*groupLimitOverrides=*/{},
               /*initialDuringObjects=*/{},
               /*defaultGroupLimitOverride=*/std::nullopt,
-              /*squares=*/false,
+              /*penaltyTransform=*/
+              ObjectPartitionLookupPenaltyTransform::IDENTITY,
               /*groupsAllowed=*/0,
               ObjectPartitionLookup<
                   ObjectPartitionLookupWithMinPresencePolicy>::Bound::MAX,

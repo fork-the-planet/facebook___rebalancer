@@ -441,7 +441,8 @@ ExprPtr CapacityWithGroupPresenceSpecBuilder::createGroupUtilExpr(
       /*groupLimitOverrides=*/PackerMap<entities::GroupId, double>{},
       /*initialDuringObjects=*/PackerSet<entities::ObjectId>{},
       /*defaultGroupLimitOverride=*/std::nullopt,
-      /*squares=*/false,
+      /*penaltyTransform=*/
+      ObjectPartitionLookupPenaltyTransform::IDENTITY,
       /*groupsAllowed=*/0,
       ObjectPartitionLookup<
           ObjectPartitionLookupWithMinPresencePolicy>::Bound::MAX,
