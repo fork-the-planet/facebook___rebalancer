@@ -634,6 +634,82 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupWithSquares) {
   EXPECT_NEAR(0.721111, upper_bound(*objectPartitionLookup), kEps);
 }
 
+CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupWithStep) {
+  // container0 holds 2 objects of group0 and 1 object of group1. group2's only
+  // object starts elsewhere.
+  setInitialAssignment(
+      InitialAssignment{
+          {"container0", {"object0", "object1", "object2"}},
+          {"container1", {"object3"}}});
+
+  co_await addPartition(
+      "partition1",
+      {{"group0", {"object0", "object1"}},
+       {"group1", {"object2"}},
+       {"group2", {"object3"}}});
+
+  co_await addScope("scope", {{"scopeItem", {"container1"}}});
+
+  const auto universe = buildUniverse();
+  auto assignment =
+      Assignment(universe->getContainers().getInitialAssignment());
+
+  // g1 has limit 1 (= its count), so STEP=0 despite being present. g0 and g2
+  // default to limit 0, so any object in them yields STEP=1.
+  auto objectPartition = object_partition(
+      partitionId("partition1"),
+      dimensionId("object_count"),
+      {{group(1), 1}},
+      universe);
+
+  auto objectPartitionLookup = std::make_shared<ObjectPartitionLookupDefault>(
+      ObjectPartitionLookupDefault(
+          objectPartition,
+          std::make_shared<PackerSet<entities::ContainerId>>(
+              PackerSet<entities::ContainerId>{container(0)}),
+          scope(),
+          scopeItem(),
+          universe,
+          assignment,
+          /*groupLimitOverrides=*/{},
+          /*initialDuringObjects=*/{},
+          /*defaultGroupLimitOverride=*/std::nullopt,
+          /*penaltyTransform=*/ObjectPartitionLookupPenaltyTransform::STEP));
+
+  // skip lp expr evaluation since non-IDENTITY penalty transforms are not
+  // supported in LP
+  const LpAssertOptions lpAssertOptions = {
+      .exceptionForLpExpr =
+          "ObjectPartitionLookup: only IDENTITY penalty transform is supported in LP"};
+
+  // g0 over limit -> 1, g1 at limit -> 0, g2 elsewhere -> 0. Sum = 1.
+  EXPECT_EQ(1.0, apply(objectPartitionLookup, assignment, lpAssertOptions));
+
+  // Move g2 into c0: g2 now over limit -> 1. Sum = g0 + g2 = 2.
+  EXPECT_EQ(
+      2.0,
+      evaluate(
+          objectPartitionLookup,
+          {{object(3), container(0)}},
+          assignment,
+          lpAssertOptions));
+
+  // Move g1 out of c0: g1 now under limit, STEP still 0. Sum = g0 = 1.
+  EXPECT_EQ(
+      1.0,
+      evaluate(
+          objectPartitionLookup,
+          {{object(2), container(1)}},
+          assignment,
+          lpAssertOptions));
+
+  // All groups can be at-or-under their limits -> lower_bound = 0.
+  // Max STEP per group: g0 = 1, g1 = 0 (max weight 1 = limit), g2 = 1 ->
+  // upper_bound = 2.
+  EXPECT_EQ(0.0, lower_bound(*objectPartitionLookup));
+  EXPECT_EQ(2.0, upper_bound(*objectPartitionLookup));
+}
+
 CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupGroupsLimit) {
   std::vector<std::string> allObjects;
   for (const auto i : folly::irange(16)) {

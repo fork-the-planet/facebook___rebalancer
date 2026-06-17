@@ -30,10 +30,12 @@ class Change;
 class ObjectPartition;
 
 // Transform applied to each group's penalty before the penalties are summed.
-// IDENTITY leaves the penalty unchanged; SQUARE returns penalty^2.
+// IDENTITY leaves the penalty unchanged; SQUARE returns penalty^2; STEP returns
+// 1 if the penalty is strictly positive and 0 otherwise.
 enum class ObjectPartitionLookupPenaltyTransform {
   IDENTITY,
   SQUARE,
+  STEP,
 };
 
 // Default policy for ObjectPartitionLookup

@@ -27,6 +27,7 @@
 #include "algopt/rebalancer/solver/utils/Problem.h"
 
 #include <folly/container/Enumerate.h>
+#include <folly/CPortability.h>
 
 #include <sstream>
 
@@ -46,6 +47,8 @@ std::string_view penaltyTransformName(ObjectPartitionLookupPenaltyTransform t) {
       return "identity";
     case ObjectPartitionLookupPenaltyTransform::SQUARE:
       return "square";
+    case ObjectPartitionLookupPenaltyTransform::STEP:
+      return "step";
   }
   throw std::runtime_error("ObjectPartitionLookup: unknown penalty transform");
 }
@@ -895,7 +898,7 @@ double ObjectPartitionLookup<Policy>::getGroupPenalty(
 }
 
 template <typename Policy>
-double ObjectPartitionLookup<Policy>::computePenalty(
+FOLLY_ALWAYS_INLINE double ObjectPartitionLookup<Policy>::computePenalty(
     double deviationFromLimit) const {
   const double penalty = std::max(
       0.0, (bound_ == Bound::MAX) ? deviationFromLimit : -deviationFromLimit);
@@ -904,6 +907,8 @@ double ObjectPartitionLookup<Policy>::computePenalty(
       return penalty;
     case ObjectPartitionLookupPenaltyTransform::SQUARE:
       return penalty * penalty;
+    case ObjectPartitionLookupPenaltyTransform::STEP:
+      return getPrecision().isStrictlyGtZero(penalty) ? 1.0 : 0.0;
   }
   throw std::runtime_error("ObjectPartitionLookup: unknown penalty transform");
 }
