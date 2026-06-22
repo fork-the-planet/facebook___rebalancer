@@ -61,9 +61,8 @@ class Orchestrator {
   // returns the set of nodes in the order traversed by orchestrator
   const std::vector<Expression*>& getNodesInPostorder() const;
 
-  // returns the parents map (child -> set of parents)
-  const folly::F14VectorMap<Expression*, PackerSet<Expression*>>& getParents()
-      const;
+  const folly::F14VectorMap<Expression*, std::vector<Expression*>>&
+  getNodeToParents() const;
 
   inline size_t getNumFixedNodes() const {
     return nFixedNodes_;
@@ -163,8 +162,7 @@ class Orchestrator {
   // leaves that need checking regardless of changes
   std::vector<std::vector<LeafId>> toCheckLeaves_;
 
-  // parents_ mapping from a child to its parents
-  folly::F14VectorMap<Expression*, PackerSet<Expression*>> parents_;
+  folly::F14VectorMap<Expression*, std::vector<Expression*>> nodeToParents_;
 
   folly::F14FastMap<Expression*, PriorityInfo> nodeToPriority_;
 

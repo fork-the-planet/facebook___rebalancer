@@ -41,7 +41,6 @@ void Orchestrator::init(
   std::vector<int> nodeRangeByRoots = {0};
   // initialize priorities of all nodes in the graph
   initOrder(nodeRangeByRoots, fixedContainers);
-  // initialize parents_
   initParents();
   // initialize connection between changes and affected leaf nodes, including
   // containerToLeaves_, objectToLeaves_, containerObjectToLeaves_, and
@@ -136,11 +135,10 @@ void Orchestrator::initBoundsBottomUp(
 }
 
 void Orchestrator::initParents() {
-  // check all nodes
-  // add parents to child
+  nodeToParents_.reserve(postOrder_.size());
   for (const auto& node : postOrder_) {
     for (const auto& child : node->children()) {
-      parents_[child.get()].insert(node);
+      nodeToParents_[child.get()].push_back(node);
     }
   }
 }
@@ -362,7 +360,7 @@ void Orchestrator::buildLp(
 void Orchestrator::notifyChange(Context& context, Expression* changedNode)
     const {
   // propagating the changes to its parents
-  auto parentsPtr = folly::get_ptr(parents_, changedNode);
+  auto parentsPtr = folly::get_ptr(nodeToParents_, changedNode);
   if (parentsPtr) {
     // check changedNode's parents
     for (auto& parent : *parentsPtr) {
@@ -530,7 +528,7 @@ Orchestrator::getDynamicChildren(
     Expression* expr = dynamicNodes.top();
     dynamicNodes.pop();
     // propagating the changes to its parents
-    auto parentsPtr = folly::get_ptr(parents_, expr);
+    auto parentsPtr = folly::get_ptr(nodeToParents_, expr);
     if (parentsPtr) {
       // check dynamicNode's parents
       for (auto& parent : *parentsPtr) {
@@ -552,9 +550,9 @@ const std::vector<Expression*>& Orchestrator::getNodesInPostorder() const {
   return postOrder_;
 }
 
-const folly::F14VectorMap<Expression*, PackerSet<Expression*>>&
-Orchestrator::getParents() const {
-  return parents_;
+const folly::F14VectorMap<Expression*, std::vector<Expression*>>&
+Orchestrator::getNodeToParents() const {
+  return nodeToParents_;
 }
 
 } // namespace facebook::rebalancer
