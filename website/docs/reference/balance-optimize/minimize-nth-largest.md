@@ -154,4 +154,3 @@ Don't minimize below a target (useful for avoiding under-utilization):
 
 - Review [Balance Spec](balance) for standard balancing
 - See [Minimize Squares](minimize-squares) for quadratic penalties
-- Check [Cookbook: Load Balancing](../../cookbook/load-balancing) for real-world examples

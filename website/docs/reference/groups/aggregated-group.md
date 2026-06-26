@@ -178,4 +178,3 @@ Use LINEAR_SUM with custom contributions for weighted aggregation:
 
 - Review [Group Capacity](group-capacity) for simpler group limits
 - See [Capacity Spec](../capacity) for basic capacity constraints
-- Check [Cookbook: Multi-tenant](../../cookbook/multi-tenant) for real-world examples

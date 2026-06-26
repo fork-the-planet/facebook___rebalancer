@@ -665,7 +665,6 @@ solver.add_constraint(spec, invalid_cost=1000.0)
 - **Learn Optimal Solver**: [Optimal Solver Guide](optimal)
 - **Performance Tuning**: [Performance Guide](performance)
 - **Multi-Stage Solving**: [Solver Strategies](strategies)
-- **See Examples**: [Cookbook](../cookbook/)
 
 ## Related Documentation
 

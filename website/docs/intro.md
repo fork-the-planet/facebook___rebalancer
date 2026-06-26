@@ -126,7 +126,6 @@ print(solution["assignment"])
 ## Next Steps
 
 - **New to Rebalancer?** Start with the [Installation Guide](getting-started/installation) and [Tutorial: Build Your First Model](getting-started/first-model)
-- **Need to solve a specific problem?** Check out the [Cookbook](cookbook/) for common patterns
 - **Want to understand the concepts?** Read the [Core Concepts](core-concepts/overview) section
 - **Looking for API reference?** Browse the [Goals & Constraints Reference](reference/)
 

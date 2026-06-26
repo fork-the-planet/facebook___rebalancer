@@ -454,16 +454,6 @@ Respect capacity with minimal disruption:
 - [CapacityWithGroupPresenceSpec](groups/capacity-with-group-presence) - Group-aware capacity
 - [MinimizeContainersSpec](balance-optimize/minimize-containers) - Minimize number of used containers
 
-## Examples in Repository
-
-See these complete examples using CapacitySpec:
-
-- [Load Balancing Cookbook](../cookbook/load-balancing) - Capacity constraints with balancing
-- [Bin Packing Cookbook](../cookbook/bin-packing) - Capacity with container minimization
-- [Multi-Tenant Cookbook](../cookbook/multi-tenant) - Per-tenant capacity limits
-- [Disaster Recovery Cookbook](../cookbook/disaster-recovery) - Capacity with DR constraints
-- [Gradual Migration Cookbook](../cookbook/gradual-migration) - Capacity during migrations
-
 ## Source Code
 
 - Thrift definition: [`interface/thrift/ProblemSpecs.thrift:332`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/ProblemSpecs.thrift#L332)
@@ -474,4 +464,3 @@ See these complete examples using CapacitySpec:
 
 - Learn about [Dimensions](../core-concepts/overview#dimensions) to understand capacity modeling
 - See [Scopes](../core-concepts/overview#scopes) for applying capacity at different levels
-- Check [Shard Placement Cookbook](../cookbook/shard-placement) for real-world capacity constraints

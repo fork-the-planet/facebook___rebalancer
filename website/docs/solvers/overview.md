@@ -146,4 +146,3 @@ import TabItem from '@theme/TabItem';
 ## Related Documentation
 
 - [Getting Started: Build Your First Model](../getting-started/first-model) - Basic solver usage
-- [Cookbook: Load Balancing](../cookbook/load-balancing) - Solver selection examples

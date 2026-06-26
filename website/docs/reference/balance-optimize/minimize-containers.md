@@ -409,10 +409,6 @@ Estimate cost savings from consolidation:
 - [CapacitySpec](../capacity) - Ensure capacity constraints during consolidation
 - [NonAcceptingSpec](../placement/non-accepting) - Gradual draining (block new placements)
 
-## See Also
-
-- [Bin Packing Cookbook Example](../../cookbook/bin-packing) - Complete consolidation example
-
 ## Source Code
 
 - Thrift definition: `interface/thrift/ProblemSpecs.thrift` (MinimizeContainersSpec)

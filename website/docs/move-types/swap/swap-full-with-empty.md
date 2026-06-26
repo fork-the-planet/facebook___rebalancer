@@ -310,5 +310,4 @@ SwapFullWithEmpty does NOT help when:
 
 - Learn about [SwapFullContainers](swap-full-containers) for full container swaps
 - Try [MinimizeContainers](../../reference/balance-optimize/minimize-containers) goal for consolidation
-- Review [Bin Packing Guide](../../cookbook/bin-packing) for consolidation strategies
 - See [Move Types Overview](../) for choosing move types

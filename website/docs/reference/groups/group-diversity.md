@@ -139,4 +139,3 @@ For each scope item, the spec counts how many groups have **non-zero** dimension
 
 - Review [Group Count Spec](group-count) for count-based diversity
 - See [Group Isolation Limit](group-isolation-limit) for alternative approach
-- Check [Cookbook: Disaster Recovery](../../cookbook/disaster-recovery) for real-world examples

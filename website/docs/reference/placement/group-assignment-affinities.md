@@ -167,4 +167,3 @@ score = affinity × (actual_dimension_value - target_dimension_value)²
 
 - Review [Assignment Affinities](assignment-affinities) for object-level preferences
 - See [Scope Affinities](scope-affinities) for container-based affinities
-- Check [Cookbook: Affinity Placement](../../cookbook/affinity-placement) for real-world examples

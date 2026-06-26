@@ -243,17 +243,6 @@ Common pattern: balance while respecting capacity:
 - [UtilIncreaseCostSpec](../util-increase-cost) - Alternative that prefers less-utilized containers
 - [MinimizeSquaresSpec](minimize-squares) - Similar to SQUARES formula
 
-## Examples in Repository
-
-See these complete examples using BalanceSpec:
-
-- [Load Balancing Cookbook](../../cookbook/load-balancing) - Basic load balancing patterns
-- [Multi-Objective Cookbook](../../cookbook/multi-objective) - Balance with multiple goals
-- [Multi-Tenant Cookbook](../../cookbook/multi-tenant) - Balanced multi-tenant placement
-- [Shard Placement Cookbook](../../cookbook/shard-placement) - Balanced shard distribution
-- [Colocation Cookbook](../../cookbook/colocation) - Balance with colocation constraints
-- [Disaster Recovery Cookbook](../../cookbook/disaster-recovery) - Balance with DR requirements
-
 ## Source Code
 
 - Thrift definition: [`interface/thrift/ProblemSpecs.thrift:183`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/ProblemSpecs.thrift#L183)
@@ -262,6 +251,5 @@ See these complete examples using BalanceSpec:
 
 ## Next Steps
 
-- See [Load Balancing Cookbook](../../cookbook/load-balancing) for complete example
 - Learn about [Scopes](../../core-concepts/overview#scopes) to use BalanceSpec effectively
 - Understand [Goal Priorities](../../core-concepts/overview#goals-and-constraints) for multi-goal problems

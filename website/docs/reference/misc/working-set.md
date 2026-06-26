@@ -137,4 +137,3 @@ Use weights to prioritize critical coordination paths:
 
 - Review [Pair Affinities](../placement/pair-affinities) for simpler pair colocation
 - See [Colocate Groups](../groups/colocate-groups) for group-based colocation
-- Check [Cookbook: Affinity Placement](../../cookbook/affinity-placement) for real-world examples

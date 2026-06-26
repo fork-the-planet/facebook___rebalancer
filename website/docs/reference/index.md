@@ -433,7 +433,6 @@ balanceSpec.filter() = groupFilter;
 
 - Choose a spec from the table above to see detailed documentation
 - Review [Core Concepts](../core-concepts/overview) to understand how specs work
-- See [Cookbook Examples](../cookbook/) for real-world usage patterns
 
 ## Contributing
 

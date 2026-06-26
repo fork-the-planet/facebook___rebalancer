@@ -141,4 +141,3 @@ Certain datacenters cannot both be used by the same service:
 
 - Review [Avoid Assignments](avoid-assignments) for object-level exclusions
 - See [Group Count](../groups/group-count) for diversity constraints
-- Check [Cookbook: Disaster Recovery](../../cookbook/disaster-recovery) for real-world examples
