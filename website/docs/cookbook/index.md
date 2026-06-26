@@ -91,7 +91,7 @@ See [Contributing Guide](https://github.com/facebookincubator/rebalancer/blob/ma
 
 - Review [Core Concepts](../core-concepts/overview) for DSL basics
 - Check [Goals & Constraints Reference](../reference/) for available specs
-- See [Getting Started](../getting-started/first-problem) for fundamentals
+- See [Getting Started](../getting-started/first-model) for fundamentals
 
 ---
 
