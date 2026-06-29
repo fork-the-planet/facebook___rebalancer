@@ -45,8 +45,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/facebookincubator/rebalancer"
-Repository = "https://github.com/facebookincubator/rebalancer"
+Homepage = "https://github.com/facebook/rebalancer"
+Repository = "https://github.com/facebook/rebalancer"
 
 [tool.scikit-build]
 # Resolve the wheel version from version.txt (single source of truth).

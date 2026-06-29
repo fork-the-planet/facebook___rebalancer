@@ -13,7 +13,7 @@ Examples of assignment problems are:
 * Placing server racks into datacenters
 * Distributing jobs across machines
 * Routing user traffic to web clusters
-* Classic puzzles such as [Sudoku](https://github.com/facebookincubator/rebalancer/tree/main/algopt/rebalancer/examples/sudoku) and the [eight queens problem](https://github.com/facebookincubator/rebalancer/tree/main/algopt/rebalancer/examples/eightqueens)
+* Classic puzzles such as [Sudoku](https://github.com/facebook/rebalancer/tree/main/algopt/rebalancer/examples/sudoku) and the [eight queens problem](https://github.com/facebook/rebalancer/tree/main/algopt/rebalancer/examples/eightqueens)
 
 In this tutorial we'll build a solver for a small but realistic problem: placing **tasks onto hosts** in a compute cluster.
 
@@ -153,7 +153,7 @@ You should see the `=== Final placement ===` output shown above.
 
 ## Full Example
 
-The complete, runnable source for this tutorial is [`tasks_on_hosts.cpp`](https://github.com/facebookincubator/rebalancer/blob/main/algopt/rebalancer/examples/website/getting_started/tasks_on_hosts/tasks_on_hosts.cpp).
+The complete, runnable source for this tutorial is [`tasks_on_hosts.cpp`](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/examples/website/getting_started/tasks_on_hosts/tasks_on_hosts.cpp).
 
 ## Wrapping Up
 
@@ -163,4 +163,4 @@ Here are a few references as you explore more of Rebalancer:
 * [Goals & Constraints](../reference/): a list of all the specs available and their documentation.
 * [Solvers](../solvers/overview): learn about the different solving strategies available and their trade-offs.
 * [Core Concepts](../core-concepts/overview): a deeper look at objects, containers, dimensions, scopes, and partitions.
-* [GitHub repository](https://github.com/facebookincubator/rebalancer): source code, issues, and discussions.
+* [GitHub repository](https://github.com/facebook/rebalancer): source code, issues, and discussions.

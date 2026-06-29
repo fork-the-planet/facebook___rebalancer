@@ -322,9 +322,9 @@ SwapN does NOT help when:
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:522`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L522)
-- Implementation: [`solver/moves/SwapNMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/SwapNMoveType.h)
-- Tests: [`interface/tests/SwapNMoveTypeTest.cpp`](https://github.com/facebookincubator/rebalancer/blob/main/interface/tests/SwapNMoveTypeTest.cpp)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:522`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L522)
+- Implementation: [`solver/moves/SwapNMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/SwapNMoveType.h)
+- Tests: [`interface/tests/SwapNMoveTypeTest.cpp`](https://github.com/facebook/rebalancer/blob/main/interface/tests/SwapNMoveTypeTest.cpp)
 
 ## Next Steps
 

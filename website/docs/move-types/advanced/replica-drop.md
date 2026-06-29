@@ -294,9 +294,9 @@ ReplicaDrop does NOT help when:
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:678`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L678)
-- Implementation: [`solver/moves/ReplicaDropMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/ReplicaDropMoveType.h)
-- Tests: [`interface/tests/ReplicaDropTest.cpp`](https://github.com/facebookincubator/rebalancer/blob/main/interface/tests/ReplicaDropTest.cpp)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:678`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L678)
+- Implementation: [`solver/moves/ReplicaDropMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/ReplicaDropMoveType.h)
+- Tests: [`interface/tests/ReplicaDropTest.cpp`](https://github.com/facebook/rebalancer/blob/main/interface/tests/ReplicaDropTest.cpp)
 
 ## Next Steps
 

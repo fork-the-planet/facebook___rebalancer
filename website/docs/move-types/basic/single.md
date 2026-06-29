@@ -237,9 +237,9 @@ Single move type benefits significantly from multi-threading:
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:511`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L511)
-- Implementation: [`solver/moves/SingleMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/SingleMoveType.h)
-- Tests: [`solver/moves/tests/SingleMoveTypeTest.cpp`](https://github.com/facebookincubator/rebalancer/tree/main/solver/moves/tests/)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:511`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L511)
+- Implementation: [`solver/moves/SingleMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/SingleMoveType.h)
+- Tests: [`solver/moves/tests/SingleMoveTypeTest.cpp`](https://github.com/facebook/rebalancer/tree/main/solver/moves/tests/)
 
 ## Next Steps
 

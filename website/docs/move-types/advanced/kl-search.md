@@ -286,8 +286,8 @@ KLSearch does NOT help when:
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:561`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L561)
-- Implementation: [`solver/moves/KLSearchMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/KLSearchMoveType.h)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:561`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L561)
+- Implementation: [`solver/moves/KLSearchMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/KLSearchMoveType.h)
 - Algorithm reference: [Kernighan-Lin Algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Kernighan%E2%80%93Lin_algorithm)
 
 ## Next Steps

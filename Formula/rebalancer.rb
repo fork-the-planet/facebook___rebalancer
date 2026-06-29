@@ -14,13 +14,13 @@
 
 class Rebalancer < Formula
   desc "Library for balanced assignment optimization"
-  homepage "https://github.com/facebookincubator/rebalancer"
-  url "https://github.com/facebookincubator/rebalancer/archive/refs/tags/v0.0.0.tar.gz"
+  homepage "https://github.com/facebook/rebalancer"
+  url "https://github.com/facebook/rebalancer/archive/refs/tags/v0.0.0.tar.gz"
   sha256 ""
   license "Apache-2.0"
 
   bottle do
-    root_url "https://github.com/facebookincubator/rebalancer/releases/download/v#{version}"
+    root_url "https://github.com/facebook/rebalancer/releases/download/v#{version}"
     sha256 cellar: :any, arm64_sonoma: ""
   end
 

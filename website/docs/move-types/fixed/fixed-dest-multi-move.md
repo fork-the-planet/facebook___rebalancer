@@ -339,9 +339,9 @@ FixedDestMultiMove does NOT help when:
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:596`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L596)
-- Implementation: [`solver/moves/FixedDestMultiMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/FixedDestMultiMoveType.h)
-- Tests: [`solver/moves/tests/`](https://github.com/facebookincubator/rebalancer/tree/main/solver/moves/tests/)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:596`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L596)
+- Implementation: [`solver/moves/FixedDestMultiMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/FixedDestMultiMoveType.h)
+- Tests: [`solver/moves/tests/`](https://github.com/facebook/rebalancer/tree/main/solver/moves/tests/)
 
 ## Next Steps
 

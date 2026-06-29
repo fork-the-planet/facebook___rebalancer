@@ -324,9 +324,9 @@ SingleColdestStratified does NOT help when:
 ## Source Code
 
 - Move type name: `"SINGLE_COLDEST_STRATIFIED"` (legacy string-based)
-- Parameters: [`interface/thrift/SolverSpecs.thrift:168,174`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L168)
-- Implementation: [`solver/moves/SingleColdestStratifiedMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/SingleColdestStratifiedMoveType.h)
-- Tests: [`solver/moves/tests/`](https://github.com/facebookincubator/rebalancer/tree/main/solver/moves/tests/)
+- Parameters: [`interface/thrift/SolverSpecs.thrift:168,174`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L168)
+- Implementation: [`solver/moves/SingleColdestStratifiedMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/SingleColdestStratifiedMoveType.h)
+- Tests: [`solver/moves/tests/`](https://github.com/facebook/rebalancer/tree/main/solver/moves/tests/)
 
 ## Next Steps
 

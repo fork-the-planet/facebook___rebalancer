@@ -307,9 +307,9 @@ GreedyGroupToScopeItem does NOT help when:
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:683`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L683)
-- Implementation: [`solver/moves/GreedyGroupToScopeItemMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/GreedyGroupToScopeItemMoveType.h)
-- Tests: [`interface/tests/GreedyGroupToScopeItemMoveTypeTest.cpp`](https://github.com/facebookincubator/rebalancer/blob/main/interface/tests/GreedyGroupToScopeItemMoveTypeTest.cpp)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:683`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L683)
+- Implementation: [`solver/moves/GreedyGroupToScopeItemMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/GreedyGroupToScopeItemMoveType.h)
+- Tests: [`interface/tests/GreedyGroupToScopeItemMoveTypeTest.cpp`](https://github.com/facebook/rebalancer/blob/main/interface/tests/GreedyGroupToScopeItemMoveTypeTest.cpp)
 
 ## Next Steps
 

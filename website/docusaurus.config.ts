@@ -16,14 +16,14 @@ const config: Config = {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
 
-  url: 'https://facebookincubator.github.io',
+  url: 'https://facebook.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/rebalancer/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'facebookincubator', // Usually your GitHub org/user name.
+  organizationName: 'facebook', // Usually your GitHub org/user name.
   projectName: 'rebalancer', // Usually your repo name.
 
   onBrokenLinks: 'warn',
@@ -45,7 +45,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebookincubator/rebalancer/blob/main/website/',
+            'https://github.com/facebook/rebalancer/blob/main/website/',
           remarkPlugins: [
             [remarkCodeSnippets, {
               baseDir: path.resolve(__dirname, '..'),
@@ -79,9 +79,9 @@ const config: Config = {
           position: 'left',
           label: 'Documentation',
         },
-        {href: 'https://github.com/facebookincubator/rebalancer/blob/main/CHANGELOG.md', label: 'News', position: 'left'},
+        {href: 'https://github.com/facebook/rebalancer/blob/main/CHANGELOG.md', label: 'News', position: 'left'},
         {
-          href: 'https://github.com/facebookincubator/rebalancer',
+          href: 'https://github.com/facebook/rebalancer',
           label: 'GitHub',
           position: 'right',
         },
@@ -121,11 +121,11 @@ const config: Config = {
           items: [
             {
               label: 'News',
-              href: 'https://github.com/facebookincubator/rebalancer/blob/main/CHANGELOG.md',
+              href: 'https://github.com/facebook/rebalancer/blob/main/CHANGELOG.md',
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/facebookincubator/rebalancer',
+              href: 'https://github.com/facebook/rebalancer',
             },
           ],
         },

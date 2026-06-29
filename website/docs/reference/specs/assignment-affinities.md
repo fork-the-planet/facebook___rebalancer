@@ -131,6 +131,6 @@ and third arguments to `addGoal`) set how it trades off against other goals; see
 
 ## Source
 
-- Thrift definition: [`interface/thrift/ProblemSpecs.thrift`](https://github.com/facebookincubator/rebalancer/blob/main/algopt/rebalancer/interface/thrift/ProblemSpecs.thrift) (`AssignmentAffinitiesSpec`, `AssignmentAffinity`)
-- SpecBuilder: [`materializer/spec_builder/AssignmentAffinitiesSpecBuilder.cpp`](https://github.com/facebookincubator/rebalancer/blob/main/algopt/rebalancer/materializer/spec_builder/AssignmentAffinitiesSpecBuilder.cpp)---the code that defines this spec's behavior
-- Tests and runnable examples: [`interface/tests/AssignmentAffinitiesTest.cpp`](https://github.com/facebookincubator/rebalancer/blob/main/algopt/rebalancer/interface/tests/AssignmentAffinitiesTest.cpp)---the unit tests the snippets on this page are drawn from
+- Thrift definition: [`interface/thrift/ProblemSpecs.thrift`](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/interface/thrift/ProblemSpecs.thrift) (`AssignmentAffinitiesSpec`, `AssignmentAffinity`)
+- SpecBuilder: [`materializer/spec_builder/AssignmentAffinitiesSpecBuilder.cpp`](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/materializer/spec_builder/AssignmentAffinitiesSpecBuilder.cpp)---the code that defines this spec's behavior
+- Tests and runnable examples: [`interface/tests/AssignmentAffinitiesTest.cpp`](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/interface/tests/AssignmentAffinitiesTest.cpp)---the unit tests the snippets on this page are drawn from

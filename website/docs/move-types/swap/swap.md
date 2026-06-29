@@ -295,9 +295,9 @@ SwapMoveTypeSpec(
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:537`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L537)
-- Implementation: [`solver/moves/SwapMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/SwapMoveType.h)
-- Tests: [`solver/moves/tests/SwapMoveTypeTest.cpp`](https://github.com/facebookincubator/rebalancer/tree/main/solver/moves/tests/SwapMoveTypeTest.cpp)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:537`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L537)
+- Implementation: [`solver/moves/SwapMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/SwapMoveType.h)
+- Tests: [`solver/moves/tests/SwapMoveTypeTest.cpp`](https://github.com/facebook/rebalancer/tree/main/solver/moves/tests/SwapMoveTypeTest.cpp)
 
 ## Next Steps
 

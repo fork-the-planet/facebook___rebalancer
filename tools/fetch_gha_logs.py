@@ -42,7 +42,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-REPO = "facebookincubator/rebalancer"
+REPO = "facebook/rebalancer"
 META_PROXY = "http://fwdproxy:8080"
 
 

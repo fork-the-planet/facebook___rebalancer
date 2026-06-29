@@ -78,5 +78,5 @@ solver.addConstraint(
 
 ## Source
 
-- Thrift definitions: [`interface/thrift/Types.thrift`](https://github.com/facebookincubator/rebalancer/blob/main/algopt/rebalancer/interface/thrift/Types.thrift) (`ConstraintPolicy`, `ConstraintParams`)
-- API: [`interface/ProblemSolver.h`](https://github.com/facebookincubator/rebalancer/blob/main/algopt/rebalancer/interface/ProblemSolver.h) (`setConstraintPolicy`, `setDefaultConstraintParams`, `addConstraint`)
+- Thrift definitions: [`interface/thrift/Types.thrift`](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/interface/thrift/Types.thrift) (`ConstraintPolicy`, `ConstraintParams`)
+- API: [`interface/ProblemSolver.h`](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/interface/ProblemSolver.h) (`setConstraintPolicy`, `setDefaultConstraintParams`, `addConstraint`)

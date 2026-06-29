@@ -311,6 +311,6 @@ Where N = objects per container, C = number of containers
 
 ## Source Code
 
-- Thrift definitions: [`interface/thrift/SolverSpecs.thrift`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift)
-- Move type implementations: [`solver/moves/`](https://github.com/facebookincubator/rebalancer/tree/main/solver/moves/)
-- Tests: [`solver/moves/tests/`](https://github.com/facebookincubator/rebalancer/tree/main/solver/moves/tests/)
+- Thrift definitions: [`interface/thrift/SolverSpecs.thrift`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift)
+- Move type implementations: [`solver/moves/`](https://github.com/facebook/rebalancer/tree/main/solver/moves/)
+- Tests: [`solver/moves/tests/`](https://github.com/facebook/rebalancer/tree/main/solver/moves/tests/)

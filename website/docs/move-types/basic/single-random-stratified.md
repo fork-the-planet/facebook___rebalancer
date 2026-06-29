@@ -327,9 +327,9 @@ size_class > region > container
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:616`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L616)
-- Implementation: [`solver/moves/SingleRandomStratifiedMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/SingleRandomStratifiedMoveType.h)
-- Tests: [`solver/moves/tests/`](https://github.com/facebookincubator/rebalancer/tree/main/solver/moves/tests/)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:616`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L616)
+- Implementation: [`solver/moves/SingleRandomStratifiedMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/SingleRandomStratifiedMoveType.h)
+- Tests: [`solver/moves/tests/`](https://github.com/facebook/rebalancer/tree/main/solver/moves/tests/)
 
 ## Next Steps
 

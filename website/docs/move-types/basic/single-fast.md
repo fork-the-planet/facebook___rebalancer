@@ -306,9 +306,9 @@ Actual speedup depends on problem characteristics:
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:513`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L513)
-- Implementation: [`solver/moves/SingleFastMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/SingleFastMoveType.h)
-- Tests: [`solver/moves/tests/`](https://github.com/facebookincubator/rebalancer/tree/main/solver/moves/tests/)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:513`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L513)
+- Implementation: [`solver/moves/SingleFastMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/SingleFastMoveType.h)
+- Tests: [`solver/moves/tests/`](https://github.com/facebook/rebalancer/tree/main/solver/moves/tests/)
 
 ## Next Steps
 

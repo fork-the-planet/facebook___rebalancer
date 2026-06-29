@@ -67,4 +67,4 @@ earlier buckets tie:
 
 ## Source
 
-- API: [`interface/ProblemSolver.h`](https://github.com/facebookincubator/rebalancer/blob/main/algopt/rebalancer/interface/ProblemSolver.h) (`addGoal`, `addGoalBoundary`)
+- API: [`interface/ProblemSolver.h`](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/interface/ProblemSolver.h) (`addGoal`, `addGoalBoundary`)

@@ -95,7 +95,7 @@ pip3 install pex --user
 cd ..
 
 # Clone
-git clone https://github.com/facebookincubator/rebalancer.git
+git clone https://github.com/facebook/rebalancer.git
 
 # Configure and build
 cd rebalancer/build
@@ -135,7 +135,7 @@ cmake -GNinja .. && ninja
 brew install cmake ninja boost fmt folly googletest fbthrift
 
 # Clone
-git clone https://github.com/facebookincubator/rebalancer.git
+git clone https://github.com/facebook/rebalancer.git
 
 # Configure and build
 cd rebalancer/build
@@ -188,11 +188,11 @@ Then try the Python snippet from the [Quick Example](#quick-example) above.
 
 ```bash
 # Primary (requires gh CLI — https://cli.github.com)
-gh release download --repo facebookincubator/rebalancer --pattern "*.deb"
+gh release download --repo facebook/rebalancer --pattern "*.deb"
 sudo dpkg -i rebalancer_*.deb
 
 # Fallback (curl)
-curl -sL $(curl -s https://api.github.com/repos/facebookincubator/rebalancer/releases/latest \
+curl -sL $(curl -s https://api.github.com/repos/facebook/rebalancer/releases/latest \
   | grep "browser_download_url.*amd64\.deb" | cut -d'"' -f4) -o rebalancer.deb
 sudo dpkg -i rebalancer.deb
 ```
@@ -202,7 +202,7 @@ The package's postinstall script runs `ldconfig` automatically.
 Compile and run the smoke test:
 
 ```bash
-curl -LO https://raw.githubusercontent.com/facebookincubator/rebalancer/main/tools/packages/test_solve.cpp
+curl -LO https://raw.githubusercontent.com/facebook/rebalancer/main/tools/packages/test_solve.cpp
 g++ -std=c++20 test_solve.cpp -I/usr/local/include -L/usr/local/lib -lrebalancer \
     -Wl,-rpath,/usr/local/lib -o test_solve && ./test_solve
 # → PASS: 2-2 split achieved
@@ -211,14 +211,14 @@ g++ -std=c++20 test_solve.cpp -I/usr/local/include -L/usr/local/lib -lrebalancer
 #### Fedora / RHEL
 
 ```bash
-gh release download --repo facebookincubator/rebalancer --pattern "*.rpm"
+gh release download --repo facebook/rebalancer --pattern "*.rpm"
 sudo rpm -i rebalancer-*.rpm
 ```
 
 Compile and run the smoke test:
 
 ```bash
-curl -LO https://raw.githubusercontent.com/facebookincubator/rebalancer/main/tools/packages/test_solve.cpp
+curl -LO https://raw.githubusercontent.com/facebook/rebalancer/main/tools/packages/test_solve.cpp
 g++ -std=c++20 test_solve.cpp -I/usr/local/include -L/usr/local/lib -lrebalancer \
     -Wl,-rpath,/usr/local/lib -o test_solve && ./test_solve
 # → PASS: 2-2 split achieved
@@ -230,13 +230,13 @@ g++ -std=c++20 test_solve.cpp -I/usr/local/include -L/usr/local/lib -lrebalancer
 > directly — Homebrew will fetch the prebuilt bottle from GitHub Releases.
 
 ```bash
-brew install https://raw.githubusercontent.com/facebookincubator/rebalancer/main/Formula/rebalancer.rb
+brew install https://raw.githubusercontent.com/facebook/rebalancer/main/Formula/rebalancer.rb
 ```
 
 Compile and run the smoke test:
 
 ```bash
-curl -LO https://raw.githubusercontent.com/facebookincubator/rebalancer/main/tools/packages/test_solve.cpp
+curl -LO https://raw.githubusercontent.com/facebook/rebalancer/main/tools/packages/test_solve.cpp
 clang++ -std=c++20 test_solve.cpp \
     -I$(brew --prefix rebalancer)/include \
     -L$(brew --prefix rebalancer)/lib -lrebalancer \
@@ -276,7 +276,7 @@ A complexity of contributing to rebalancer is that it must compile both on Meta'
 * Deployment
   * If you push a branch or make a pull request containing changes to the [website/](website/) directory or [docs.yml](.github/workflows/docs.yml) that will launch a GitHub Action to rebuild the docs.
   * The deployment step will only step will only be run if the base branch is `main` or `docs`. This branches can only be committed to by members of the core development team.
-* View the website at: https://facebookincubator.github.io/rebalancer/
+* View the website at: https://facebook.github.io/rebalancer/
 
 
 ## License

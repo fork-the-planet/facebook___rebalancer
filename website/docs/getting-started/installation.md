@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Installation
 
-Installation instructions are maintained in the [GitHub README.md](https://github.com/facebookincubator/rebalancer#installation) to ensure they stay up-to-date.
+Installation instructions are maintained in the [GitHub README.md](https://github.com/facebook/rebalancer#installation) to ensure they stay up-to-date.
 
 ## Quick Overview
 
@@ -21,7 +21,7 @@ The README provides detailed platform-specific instructions for:
 
 ## Installation Steps
 
-Please follow the installation instructions in the [README.md file](https://github.com/facebookincubator/rebalancer#installation).
+Please follow the installation instructions in the [README.md file](https://github.com/facebook/rebalancer#installation).
 
 ## Optional MIP Solvers
 

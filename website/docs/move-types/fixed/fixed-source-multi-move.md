@@ -339,9 +339,9 @@ FixedSourceMultiMove does NOT help when:
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:588`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L588)
-- Implementation: [`solver/moves/FixedSrcMultiMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/FixedSrcMultiMoveType.h)
-- Tests: [`solver/moves/tests/`](https://github.com/facebookincubator/rebalancer/tree/main/solver/moves/tests/)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:588`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L588)
+- Implementation: [`solver/moves/FixedSrcMultiMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/FixedSrcMultiMoveType.h)
+- Tests: [`solver/moves/tests/`](https://github.com/facebook/rebalancer/tree/main/solver/moves/tests/)
 
 ## Next Steps
 

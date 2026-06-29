@@ -297,9 +297,9 @@ SingleGreedy does NOT help when:
 
 ## Source Code
 
-- Thrift definition: [`interface/thrift/SolverSpecs.thrift:518`](https://github.com/facebookincubator/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L518)
-- Implementation: [`solver/moves/SingleGreedyMoveType.h`](https://github.com/facebookincubator/rebalancer/blob/main/solver/moves/SingleGreedyMoveType.h)
-- Tests: [`solver/moves/tests/`](https://github.com/facebookincubator/rebalancer/tree/main/solver/moves/tests/)
+- Thrift definition: [`interface/thrift/SolverSpecs.thrift:518`](https://github.com/facebook/rebalancer/blob/main/interface/thrift/SolverSpecs.thrift#L518)
+- Implementation: [`solver/moves/SingleGreedyMoveType.h`](https://github.com/facebook/rebalancer/blob/main/solver/moves/SingleGreedyMoveType.h)
+- Tests: [`solver/moves/tests/`](https://github.com/facebook/rebalancer/tree/main/solver/moves/tests/)
 
 ## Next Steps
 
