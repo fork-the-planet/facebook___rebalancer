@@ -44,7 +44,7 @@ to the spec's unit tests.
 | CapacityWithGroupPresence | Both | Limit each scope item's utilization, with every present group counting for at least a minimum weight | [unit tests](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/interface/tests/CapacityWithGroupPresenceTest.cpp) |
 | GroupCapacity | Both | Limit each group's total utilization across all scope items in a scope | [unit tests](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/interface/tests/GroupCapacitySpecTest.cpp) |
 | GroupIsolationLimit | Both | Limit how many groups may exceed their utilization limit in the same scope item (default 1) | [unit tests](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/interface/tests/GroupIsolationLimitSpecTest.cpp) |
-| DisasterRecoveryCapacity | Both | Reserve enough spare capacity so scope items can survive correlated failure scenarios | [unit tests](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/interface/tests/DisasterRecoveryCapacitySpecTest.cpp) |
+| [DisasterRecoveryCapacity](specs/disaster-recovery-capacity) | Both | Reserve enough spare capacity so scope items can survive correlated failure scenarios | [unit tests](https://github.com/facebook/rebalancer/blob/main/algopt/rebalancer/interface/tests/DisasterRecoveryCapacitySpecTest.cpp) |
 
 ### Balancing and packing
 
