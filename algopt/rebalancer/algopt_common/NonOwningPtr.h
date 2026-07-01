@@ -46,7 +46,7 @@ class NonOwningPtr {
     return ptr_;
   }
 
-  /// Deference pointer held by NonOwningPtr.
+  /// Dereference pointer held by NonOwningPtr.
   T& operator*() const {
     assert(ptr_ != nullptr);
     return *ptr_;
