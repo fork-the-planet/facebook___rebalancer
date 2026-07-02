@@ -73,12 +73,6 @@ const config: Config = {
         src: 'img/logo.svg',
       },
       items: [
-        {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Documentation',
-        },
         {href: 'https://github.com/facebook/rebalancer/blob/main/CHANGELOG.md', label: 'News', position: 'left'},
         {
           href: 'https://github.com/facebook/rebalancer',
