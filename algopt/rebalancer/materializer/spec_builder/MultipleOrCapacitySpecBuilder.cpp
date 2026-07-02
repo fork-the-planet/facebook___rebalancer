@@ -36,7 +36,7 @@ MultipleOrCapacitySpecBuilder::constraints(
   for (auto& spec : *spec_.capacitySpecs()) {
     const CapacitySpecBuilder builder(universe_, spec);
     constraints.push_back(getAggregatedConstraintViolation(
-        co_await builder.constraints(expressionBuilder), universe_));
+        co_await builder.constraints(expressionBuilder), *universe_));
   }
 
   // The "or" condition means at least one of capacityConstraints must be
@@ -44,7 +44,7 @@ MultipleOrCapacitySpecBuilder::constraints(
   // are broken, this is equivalent to enforcing that the minimum of
   // capacityConstraints is non-positive.
   co_return std::vector<ConstraintInfo>{
-      ConstraintInfo(min(constraints, universe_))};
+      ConstraintInfo(min(constraints, *universe_))};
 }
 
 folly::coro::Task<ExprPtr> MultipleOrCapacitySpecBuilder::goalCoro(

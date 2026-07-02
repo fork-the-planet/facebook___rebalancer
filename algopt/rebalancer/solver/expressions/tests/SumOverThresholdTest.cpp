@@ -36,9 +36,10 @@ class SumOverThresholdTest : public ExpressionTestsBase {
 };
 
 TEST_F(SumOverThresholdTest, SumOverThreshold) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto var_t0 = variable(object(0), container(1), universe, initialAssignment);
   auto var_t1 = variable(object(1), container(1), universe, initialAssignment);
   auto var_t2 = variable(object(2), container(1), universe, initialAssignment);
@@ -112,9 +113,10 @@ TEST_F(SumOverThresholdTest, SumOverThreshold) {
 }
 
 TEST_F(SumOverThresholdTest, SumOverThreshold2) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto var_t0 = variable(object(0), container(1), universe, initialAssignment);
   auto var_t1 = variable(object(1), container(1), universe, initialAssignment);
   auto var_t2 = variable(object(2), container(1), universe, initialAssignment);

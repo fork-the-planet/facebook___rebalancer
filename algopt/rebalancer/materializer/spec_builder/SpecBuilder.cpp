@@ -47,7 +47,7 @@ void SpecBuilder::populateInvalidMoveFilter(
 /*static*/
 ExprPtr SpecBuilder::getAggregatedConstraintViolation(
     const std::vector<ConstraintInfo>& constraints,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   auto aggregatedViolation = const_expr(0, universe);
   for (auto& constraint : constraints) {
     inplace_add(
@@ -63,8 +63,8 @@ ExprPtr SpecBuilder::getConstraintViolation(const ConstraintInfo& constraint) {
   if (constraintExpr == nullptr) {
     throw std::runtime_error("Constraint expression is not set");
   }
-  auto universe = constraintExpr->getUniversePtr();
-  static const auto kZero = const_expr(0, universe);
+  const auto& universe = constraintExpr->getUniverse();
+  const auto kZero = const_expr(0, universe);
   if (!additionalPenaltyExpr) {
     return max(kZero, constraintExpr, universe);
   }

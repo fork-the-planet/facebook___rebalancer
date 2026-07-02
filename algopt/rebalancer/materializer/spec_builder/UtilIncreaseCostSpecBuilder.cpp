@@ -35,18 +35,18 @@ folly::coro::Task<ExprPtr> UtilIncreaseCostSpecBuilder::goalCoro(
   auto lb = *spec_.lowerBound();
 
   auto transform = [squares, this](ExprPtr expr) {
-    return squares ? power(std::move(expr), 1.1, universe_) : std::move(expr);
+    return squares ? power(std::move(expr), 1.1, *universe_) : std::move(expr);
   };
 
-  auto goalExpr = const_expr(0, universe_);
+  auto goalExpr = const_expr(0, *universe_);
   auto remainingScopeItemIds = filter.getScopeItemIds();
   for (auto scopeItemId : remainingScopeItemIds) {
     auto util = co_await expressionBuilder.getRelativeUtil(
         UtilMetric::AFTER, dimensionId, scopeId, scopeItemId);
-    auto limit = transform(max({const_expr(lb, universe_), util}, universe_))
+    auto limit = transform(max({const_expr(lb, *universe_), util}, *universe_))
                      ->getInitialValue();
     goalExpr +=
-        max({const_expr(0, universe_), transform(util) - limit}, universe_) /
+        max({const_expr(0, *universe_), transform(util) - limit}, *universe_) /
         remainingScopeItemIds.size();
   }
   co_return goalExpr;

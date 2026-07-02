@@ -25,7 +25,7 @@ class BinaryOperation : public Expression {
   explicit BinaryOperation(
       std::shared_ptr<Expression> expr1,
       std::shared_ptr<Expression> expr2,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   void updateEquivalenceSets(EquivalenceSets& equivSets) const override;
 

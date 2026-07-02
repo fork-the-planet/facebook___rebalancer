@@ -111,7 +111,7 @@ ObjectVectors materializeCompactSlices(const Fixture& data) {
       slices.push_back(
           std::make_shared<ObjectVector>(
               source.sliceGroup(*data.partition, GroupId(groupIndex)),
-              data.universe));
+              *data.universe));
     }
   }
   return slices;
@@ -125,7 +125,7 @@ ObjectVectors materializeCrossPartitionFallbackSlices(const Fixture& data) {
       slices.push_back(
           std::make_shared<ObjectVector>(
               source.sliceGroup(*data.fallbackPartition, GroupId(groupIndex)),
-              data.universe));
+              *data.universe));
     }
   }
   return slices;
@@ -146,7 +146,7 @@ ObjectVectors materializeExpandedSlices(const Fixture& data) {
       }
       slices.push_back(
           std::make_shared<ObjectVector>(
-              ObjectValues(std::move(objectValues)), data.universe));
+              ObjectValues(std::move(objectValues)), *data.universe));
     }
   }
   return slices;

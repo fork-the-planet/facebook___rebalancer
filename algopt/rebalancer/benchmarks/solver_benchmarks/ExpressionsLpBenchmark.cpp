@@ -77,19 +77,19 @@ static ExprPtr getSumOfContainersUsingVars(
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   std::vector<ExprPtr> containerSum;
   for (const auto i : folly::irange(containerCount)) {
-    containerSum.push_back(const_expr(0, universe));
+    containerSum.push_back(const_expr(0, *universe));
     for (const auto j : folly::irange(objectCount)) {
       containerSum[i] += rebalancer::variable(
           universe->getObjectId(fmt::format("object{}", j)),
           universe->getContainerId(fmt::format("container{}", i)),
-          universe,
+          *universe,
           assignment);
     }
   }
 
-  auto sumOfAllContainers = rebalancer::const_expr(0, universe);
+  auto sumOfAllContainers = rebalancer::const_expr(0, *universe);
   for (const auto i : folly::irange(containerCount)) {
-    inplace_add(sumOfAllContainers, containerSum.at(i), universe);
+    inplace_add(sumOfAllContainers, containerSum.at(i), *universe);
   }
 
   return sumOfAllContainers;
@@ -105,7 +105,7 @@ static ExprPtr getObjectVector(
     vec.emplace(
         universe->getObjectId(fmt::format("object{}", i)), i * containerIndex);
   }
-  return makeObjectVector(vec, universe);
+  return makeObjectVector(vec, *universe);
 }
 
 static ExprPtr getSumOfPairsOfContainers(
@@ -113,7 +113,7 @@ static ExprPtr getSumOfPairsOfContainers(
     int objectCount,
     int containerCount) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
-  auto sumOfContainers = const_expr(0, universe);
+  auto sumOfContainers = const_expr(0, *universe);
   for (const auto i : folly::irange(containerCount)) {
     auto objectVector = getObjectVector(universe, objectCount, i);
     for (int j = i + 1; j < containerCount; ++j) {
@@ -125,9 +125,9 @@ static ExprPtr getSumOfPairsOfContainers(
                   PackerSet<entities::ContainerId>{
                       universe->getContainerId(fmt::format("container{}", i)),
                       universe->getContainerId(fmt::format("container{}", j))}),
-              universe,
+              *universe,
               assignment),
-          universe);
+          *universe);
     }
   }
 
@@ -139,7 +139,7 @@ static ExprPtr getMaxOfContainers(
     int objectCount,
     int containerCount) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
-  auto maxOfContainers = const_expr(0, universe);
+  auto maxOfContainers = const_expr(0, *universe);
   for (const auto i : folly::irange(containerCount)) {
     auto objectVector = getObjectVector(universe, objectCount, i);
     maxOfContainers = rebalancer::max(
@@ -149,9 +149,9 @@ static ExprPtr getMaxOfContainers(
             std::make_shared<PackerSet<entities::ContainerId>>(
                 PackerSet<entities::ContainerId>{
                     universe->getContainerId(fmt::format("container{}", i))}),
-            universe,
+            *universe,
             assignment),
-        universe);
+        *universe);
   }
 
   return maxOfContainers;
@@ -171,7 +171,7 @@ BENCHMARK(AvoidCopyingDynamicChildren) {
   auto sumOfAllContainers =
       getSumOfContainersUsingVars(universe, objectCount, containerCount);
   auto problem_ptr = packer::tests::createTestProblem(
-      universe, {const_expr(0, universe)}, sumOfAllContainers);
+      universe, {const_expr(0, *universe)}, sumOfAllContainers);
   auto& problem = *problem_ptr;
   suspend.dismiss();
 
@@ -210,7 +210,7 @@ BENCHMARK(ParallelLpBuilding) {
   auto problemPtr = packer::tests::createTestProblem(
       universe,
       {objectiveExpr},
-      const_expr(0, universe),
+      const_expr(0, *universe),
       /*nonAcceptingContainers=*/{},
       ProblemConfigs{.enableParallelizedLpBuilding = true});
   auto& problem = *problemPtr;

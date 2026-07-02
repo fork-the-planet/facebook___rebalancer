@@ -29,7 +29,7 @@ CapacityWithSupplyAndDrSpecBuilder::CapacityWithSupplyAndDrSpecBuilder(
 folly::coro::Task<ExprPtr> CapacityWithSupplyAndDrSpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 folly::coro::Task<std::vector<ConstraintInfo>>
@@ -46,7 +46,7 @@ CapacityWithSupplyAndDrSpecBuilder::constraints(
   double defaultRatio = *spec_.ratio();
 
   const ScopeItemFilterWrapper filter(*universe_, *spec_.filter(), scopeId);
-  const LimitWrapper limits(universe_, *spec_.limit(), scopeId, partitionId);
+  const LimitWrapper limits(*universe_, *spec_.limit(), scopeId, partitionId);
 
   auto& partition = universe_->getPartition(partitionId);
   auto& supplyPartition = universe_->getPartition(supplyPartitionId);
@@ -77,11 +77,11 @@ CapacityWithSupplyAndDrSpecBuilder::constraints(
           supplyPartitionId,
           supplyGroupId);
     } else {
-      supplyCap = const_expr(0, universe_);
+      supplyCap = const_expr(0, *universe_);
     }
 
     double limit = limits.getLimit(groupId);
-    auto usage = const_expr(0, universe_);
+    auto usage = const_expr(0, *universe_);
 
     // Regular usage.
     for (auto objectId : objectIds) {
@@ -89,7 +89,7 @@ CapacityWithSupplyAndDrSpecBuilder::constraints(
           expressionBuilder.isAssigned(prodScopeId, prodScopeItemId, objectId);
       const double weight = objectDimension.getValue(objectId);
       if (weight != 0) {
-        auto objectUsage = const_expr(0, universe_);
+        auto objectUsage = const_expr(0, *universe_);
         objectUsage += isAssigned;
 
         auto& objectName = universe_->getEntityName(objectId);
@@ -112,10 +112,10 @@ CapacityWithSupplyAndDrSpecBuilder::constraints(
         objectIds.begin(), objectIds.end());
 
     // DR usage.
-    auto drUsage = const_expr(0, universe_);
+    auto drUsage = const_expr(0, *universe_);
     for (auto scopeItemId : filter.getScopeItemIds()) {
       // DR usage assuming scopeItemId is down.
-      auto singleDrUsage = const_expr(0, universe_);
+      auto singleDrUsage = const_expr(0, *universe_);
       for (auto& [drObjectName, regularObjectName] : drPairs) {
         auto drObjectId = universe_->getObjectId(drObjectName);
         auto regularObjectId = universe_->getObjectId(regularObjectName);
@@ -141,7 +141,7 @@ CapacityWithSupplyAndDrSpecBuilder::constraints(
         auto& scpoeItemName = universe_->getEntityName(scopeItemId);
         singleDrUsage->description =
             fmt::format("assuming {} down", scpoeItemName);
-        inplace_max(drUsage, singleDrUsage, universe_);
+        inplace_max(drUsage, singleDrUsage, *universe_);
       }
     }
     usage += drUsage;

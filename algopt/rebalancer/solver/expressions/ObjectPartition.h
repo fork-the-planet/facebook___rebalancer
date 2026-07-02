@@ -33,7 +33,7 @@ class ObjectPartition : public Expression {
       entities::PartitionId partitionId,
       entities::DimensionId dimensionId,
       PackerMap<entities::GroupId, double> groupLimits,
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       std::optional<PackerSet<entities::ScopeItemId>> scopeItemIds =
           std::nullopt,
       std::optional<PackerSet<entities::GroupId>> filteredGroupIds =
@@ -107,7 +107,6 @@ class ObjectPartition : public Expression {
  private:
   entities::PartitionId partitionId_;
   entities::DimensionId dimensionId_;
-  std::shared_ptr<const entities::Universe> universe_;
 
   // Maps a groupId to its limit. Use param 'defaultGroupLimit' to set a default
   // limit; if nothing is provided, it is set to 0.

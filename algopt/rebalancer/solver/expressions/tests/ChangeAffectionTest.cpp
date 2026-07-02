@@ -65,8 +65,8 @@ class ChangeAffectionTest : public ExpressionTestsBase {
 class ChangeAffectionTestCustom : public ExpressionTestsBase {};
 
 TEST_F(ChangeAffectionTest, AnyPositive) {
-  const auto universe = buildUniverse();
-  const AnyPositive anyPositive({}, universe, 1e-3);
+  buildUniverse();
+  const AnyPositive anyPositive({}, getUniverse(), 1e-3);
   EXPECT_FALSE(anyPositive.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       anyPositive.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==
@@ -74,8 +74,8 @@ TEST_F(ChangeAffectionTest, AnyPositive) {
 }
 
 TEST_F(ChangeAffectionTest, BipartiteSwaps) {
-  const auto universe = buildUniverse();
-  const BipartiteSwaps bipartiteSwaps({}, {}, {}, universe);
+  buildUniverse();
+  const BipartiteSwaps bipartiteSwaps({}, {}, {}, getUniverse());
   EXPECT_TRUE(bipartiteSwaps.getDirectlyAffectedContainers().isEmpty());
   EXPECT_TRUE(
       bipartiteSwaps.isAffectedByChange(AffectedByChangeDecisionData(0, 0))
@@ -83,7 +83,8 @@ TEST_F(ChangeAffectionTest, BipartiteSwaps) {
 }
 
 TEST_F(ChangeAffectionTest, Ceil) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Ceil ceil(const_expr(1, universe), universe);
   EXPECT_FALSE(ceil.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
@@ -92,8 +93,8 @@ TEST_F(ChangeAffectionTest, Ceil) {
 }
 
 TEST_F(ChangeAffectionTest, LinearSum) {
-  const auto universe = buildUniverse();
-  const LinearSum sum(universe, 10, {});
+  buildUniverse();
+  const LinearSum sum(getUniverse(), 10, {});
   EXPECT_FALSE(sum.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       sum.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==
@@ -101,7 +102,8 @@ TEST_F(ChangeAffectionTest, LinearSum) {
 }
 
 TEST_F(ChangeAffectionTest, Log) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Log log(const_expr(1, universe), universe);
   EXPECT_FALSE(log.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
@@ -110,7 +112,8 @@ TEST_F(ChangeAffectionTest, Log) {
 }
 
 TEST_F(ChangeAffectionTest, Max) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Max max({const_expr(1, universe)}, universe);
   EXPECT_FALSE(max.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
@@ -119,7 +122,8 @@ TEST_F(ChangeAffectionTest, Max) {
 }
 
 TEST_F(ChangeAffectionTest, NthLargest) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const NthLargest nthLargest({const_expr(1, universe)}, 4, false, universe);
   EXPECT_FALSE(nthLargest.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
@@ -128,8 +132,8 @@ TEST_F(ChangeAffectionTest, NthLargest) {
 }
 
 TEST_F(ChangeAffectionTest, ObjectVector) {
-  const auto universe = buildUniverse();
-  const auto objectVector = makeObjectVector({}, universe);
+  buildUniverse();
+  const auto objectVector = makeObjectVector({}, getUniverse());
   EXPECT_FALSE(objectVector->getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       objectVector->isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==
@@ -137,8 +141,9 @@ TEST_F(ChangeAffectionTest, ObjectVector) {
 }
 
 TEST_F(ChangeAffectionTest, ObjectLookupObjectsOnly) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto allContainersPtr = std::make_shared<PackerSet<entities::ContainerId>>(
       PackerSet<entities::ContainerId>{container(10), container(11)});
   constexpr int numTotalObjects = 1000;
@@ -169,8 +174,9 @@ TEST_F(ChangeAffectionTest, ObjectLookupObjectsOnly) {
 }
 
 TEST_F(ChangeAffectionTest, ObjectLookupContainerOnly) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   entities::ObjectIdToDoubleMap objectValues(
       /*totalSize=*/getNumObjects(),
       /*defaultValue=*/0.0,
@@ -217,13 +223,13 @@ CO_TEST_F(ChangeAffectionTestCustom, ObjectPartition) {
   const auto objectCountDimensionId = dimensionId("object_count");
   co_await addPartition("partition1", {});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
 
   const ObjectPartition objectPartition(
       partitionId("partition1"),
       objectCountDimensionId,
       entities::Map<entities::GroupId, double>{},
-      universe);
+      getUniverse());
   const AffectedByChangeDecisionData data(1, 1);
   EXPECT_FALSE(objectPartition.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(objectPartition.isAffectedByChange(data) == std::nullopt);
@@ -239,8 +245,9 @@ CO_TEST_F(ChangeAffectionTestCustom, ObjectPartitionLookup) {
   const auto objectCountDimensionId = dimensionId("object_count");
   co_await addPartition("partition1", {});
 
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   const auto containerScopeId = scopeId("container");
   const auto container1ScopeItemId =
       scopeItemId(containerScopeId, "container1");
@@ -290,7 +297,8 @@ CO_TEST_F(ChangeAffectionTestCustom, ObjectPartitionMoveLimit) {
   const auto objectCountDimensionId = dimensionId("object_count");
   co_await addPartition("partition1", {});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto partition1Id = partitionId("partition1");
 
   {
@@ -354,7 +362,8 @@ CO_TEST_F(ChangeAffectionTestCustom, ObjectPartitionMoveLimit) {
 }
 
 TEST_F(ChangeAffectionTest, Piecewise) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Piecewise pw(
       {{0.0, 10.0}, {10.0, 5.0}}, const_expr(2.5, universe), universe);
   EXPECT_FALSE(pw.getDirectlyAffectedContainers().exists());
@@ -364,7 +373,8 @@ TEST_F(ChangeAffectionTest, Piecewise) {
 }
 
 TEST_F(ChangeAffectionTest, Power) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Power power(const_expr(1, universe), 2, universe);
   EXPECT_FALSE(power.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
@@ -373,7 +383,8 @@ TEST_F(ChangeAffectionTest, Power) {
 }
 
 TEST_F(ChangeAffectionTest, ProductOperation) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const ProductOperation product(
       const_expr(1, universe), const_expr(1, universe), universe);
   EXPECT_FALSE(product.getDirectlyAffectedContainers().exists());
@@ -383,7 +394,8 @@ TEST_F(ChangeAffectionTest, ProductOperation) {
 }
 
 TEST_F(ChangeAffectionTest, QuotientOperation) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const QuotientOperation quotient(
       const_expr(1, universe), const_expr(1, universe), universe);
   EXPECT_FALSE(quotient.getDirectlyAffectedContainers().exists());
@@ -393,7 +405,8 @@ TEST_F(ChangeAffectionTest, QuotientOperation) {
 }
 
 TEST_F(ChangeAffectionTest, Rectangle) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Rectangle rectangle(const_expr(1, universe), 2, 5, universe);
   EXPECT_FALSE(rectangle.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
@@ -402,7 +415,8 @@ TEST_F(ChangeAffectionTest, Rectangle) {
 }
 
 TEST_F(ChangeAffectionTest, Step) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Step step(const_expr(1, universe), universe);
   EXPECT_FALSE(step.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
@@ -411,7 +425,8 @@ TEST_F(ChangeAffectionTest, Step) {
 }
 
 TEST_F(ChangeAffectionTest, SumOverThreshold) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const SumOverThreshold sot(const_expr(1, universe), {}, false, universe);
   EXPECT_FALSE(sot.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
@@ -420,8 +435,8 @@ TEST_F(ChangeAffectionTest, SumOverThreshold) {
 }
 
 TEST_F(ChangeAffectionTest, Swaps) {
-  const auto universe = buildUniverse();
-  const Swaps swaps({}, universe);
+  buildUniverse();
+  const Swaps swaps({}, getUniverse());
   EXPECT_TRUE(swaps.getDirectlyAffectedContainers().isEmpty());
   EXPECT_TRUE(
       swaps.isAffectedByChange(AffectedByChangeDecisionData(0, 0))->getType() ==
@@ -429,8 +444,9 @@ TEST_F(ChangeAffectionTest, Swaps) {
 }
 
 TEST_F(ChangeAffectionTest, Variable) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   const Variable variable(object(2), container(5), universe, assignment);
 
   auto affectedChangeInfo =
@@ -526,15 +542,13 @@ class GroupRoutingRingAffectedTest : public ExpressionTestsBase {
         "routing_config",
         entities::RoutingConfigData{std::move(routingConfig)});
 
-    auto universe = buildUniverse();
+    buildUniverse();
+    const auto& universe = getUniverse();
     const auto assignment =
-        Assignment(universe->getContainers().getInitialAssignment());
+        Assignment(universe.getContainers().getInitialAssignment());
 
     co_return std::make_shared<GroupRoutingRing>(
-        routingConfigId("routing_config"),
-        group1Id,
-        std::move(universe),
-        assignment);
+        routingConfigId("routing_config"), group1Id, universe, assignment);
   }
 };
 

@@ -28,7 +28,7 @@ class Max : public Expression {
  public:
   explicit Max(
       const std::vector<std::shared_ptr<Expression>>&,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   void combine(const ExprPtr& expr);
   void add(const ExprPtr& expr);

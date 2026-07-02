@@ -43,7 +43,7 @@ folly::coro::Task<ExprPtr> GroupAssignmentAffinitiesSpecBuilder::goalCoro(
     groupSize.emplace(groupId, size);
   }
 
-  auto result = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
   for (auto& affinity : *spec_.affinities()) {
     auto groupId = universe_->getGroupId(partitionId, *affinity.group());
     auto scopeItemId =
@@ -63,9 +63,9 @@ folly::coro::Task<ExprPtr> GroupAssignmentAffinitiesSpecBuilder::goalCoro(
     const double targetFraction = targetDimensionValue / groupSize.at(groupId);
 
     result +=
-        max({const_expr(0, universe_),
+        max({const_expr(0, *universe_),
              weight * (targetFraction - assignedFraction)},
-            universe_);
+            *universe_);
   }
   co_return result;
 }

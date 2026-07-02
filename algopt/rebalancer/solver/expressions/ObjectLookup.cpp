@@ -50,9 +50,9 @@ namespace facebook::rebalancer {
 ObjectLookup::ObjectLookup(
     std::shared_ptr<Expression> expr,
     std::shared_ptr<const PackerSet<entities::ContainerId>> containersPtr,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const Assignment& initialAssignment)
-    : Expression(std::move(universe)), containersPtr_(containersPtr) {
+    : Expression(universe), containersPtr_(containersPtr) {
   if (containersPtr_ == nullptr) {
     throw std::runtime_error("Expected 'containerPtr' to be non-null");
   }

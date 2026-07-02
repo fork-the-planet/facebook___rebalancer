@@ -61,13 +61,13 @@ std::shared_ptr<const ObjectScores> getObjectOrderingDimensionValuesIfExists(
 } // namespace
 
 Problem::Problem(
-    const std::shared_ptr<const entities::Universe> universe,
+    std::shared_ptr<const entities::Universe> universe,
     const std::shared_ptr<const MaterializedProblem> materializedProblem,
     const ProblemConfigs& configs,
     std::shared_ptr<RebalancerLog> logger)
-    : objective(materializedProblem->globalObjective),
+    : universe_(std::move(universe)),
+      objective(materializedProblem->globalObjective),
       configs(configs),
-      universe_(universe),
       materializedProblem_(materializedProblem),
       invalidMoveFilter_(materializedProblem_->invalidMoveFilter.get()),
       logger_(logger),
@@ -147,7 +147,7 @@ Problem::Problem(
 
   XLOG(DBG1) << fmt::format(
       "Total objects {}, fixed: {}",
-      universe->getNumObjects(),
+      universe_->getNumObjects(),
       materializedProblem_->fixedObjects.size());
 
   XLOG(DBG1) << fmt::format(

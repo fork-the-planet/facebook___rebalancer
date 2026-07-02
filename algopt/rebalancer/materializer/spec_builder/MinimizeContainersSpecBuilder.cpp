@@ -82,7 +82,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
   auto [objectDimensionSum, minPositiveDimensionValue] =
       getObjectDimensionSumAndMinPositiveValue(objectDimension_);
   if (universe_->getPrecision().compare(objectDimensionSum, 0) == 0) {
-    co_return const_expr(0, universe_);
+    co_return const_expr(0, *universe_);
   }
   /*
     objective funtion: minimize the following, where afterUtil() is a single
@@ -136,8 +136,8 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
   potential
   */
 
-  ExprPtr occupiedScopeItemsCount = const_expr(0, universe_);
-  ExprPtr sumOverUtilSquared = const_expr(0, universe_);
+  ExprPtr occupiedScopeItemsCount = const_expr(0, *universe_);
+  ExprPtr sumOverUtilSquared = const_expr(0, *universe_);
   for (auto& scopeItemId : filteredScopeItemIds) {
     const double cost = folly::get_default(
         containerCosts_, universe_->getEntityName(scopeItemId), 1.0);
@@ -146,13 +146,13 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
 
     inplace_add(
         sumOverUtilSquared,
-        (1 / cost) * power(absoluteUtil, 1.1, universe_),
-        universe_);
+        (1 / cost) * power(absoluteUtil, 1.1, *universe_),
+        *universe_);
 
     // if absoluteUtil > 0 then step(absoluteUtil) = 1
     // else step(absoluteUtil) = 0
     inplace_add(
-        occupiedScopeItemsCount, step(absoluteUtil, universe_), universe_);
+        occupiedScopeItemsCount, step(absoluteUtil, *universe_), *universe_);
   }
 
   // create a single lookup expr over all scopeItemIdsToFree
@@ -164,7 +164,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
   auto freeScopeItemsCount =
       filteredScopeItemIds.size() - occupiedScopeItemsCount;
   auto isAboveMaxFreeLimit =
-      step(maxFreeLimit - freeScopeItemsCount, universe_) /
+      step(maxFreeLimit - freeScopeItemsCount, *universe_) /
       (2 * filteredScopeItemIds.size());
 
   // this formula will continue until the number of free scopeItems is equal
@@ -172,7 +172,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
   co_return product(
       coeff1 * totalAfterUtil - coeff2 * sumOverUtilSquared,
       isAboveMaxFreeLimit,
-      universe_);
+      *universe_);
 }
 
 folly::coro::Task<ExprPtr> MinimizeContainersSpecBuilder::getObjectiveExpr(
@@ -201,7 +201,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersDiscreteFormulaExpr(
       ? std::min(*spec_.maxFreeLimit(), int(filteredScopeItemIds.size()))
       : filteredScopeItemIds.size();
 
-  auto result = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
   for (auto scopeItemId : filteredScopeItemIds) {
     // Each container may have some cost depending on usecase
     // and we minimize total sum of the cost of containers being used
@@ -210,14 +210,14 @@ MinimizeContainersSpecBuilder::getMinimizeContainersDiscreteFormulaExpr(
     auto hasObject = step(
         co_await expressionBuilder.getRelativeUtil(
             UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId),
-        universe_);
+        *universe_);
     result += hasObject * containerCost;
   }
 
   co_return max(
-      {const_expr(0, universe_),
+      {const_expr(0, *universe_),
        result - filteredScopeItemIds.size() + maxFreeLimit},
-      universe_);
+      *universe_);
 }
 
 folly::coro::Task<ExprPtr>
@@ -243,7 +243,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainerLegacyFormulaExpr(
     dimensionSum += sum->getInitialValue();
   }
 
-  auto result = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
   for (auto scopeItemId : filteredScopeItemIds) {
     // Each container may have some cost depending on usecase
     // and we minimize total sum of the cost of containers being used
@@ -255,7 +255,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainerLegacyFormulaExpr(
         power(co_await expressionBuilder.getRelativeUtil(
                   UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId),
               1.25,
-              universe_);
+              *universe_);
     result += expr;
   }
 

@@ -29,9 +29,8 @@ namespace facebook::rebalancer {
 GroupRoutingTrafficLookup::GroupRoutingTrafficLookup(
     std::shared_ptr<GroupRoutingRing> groupRoutingRing,
     entities::ScopeItemId destinationScopeItemId,
-    std::shared_ptr<const entities::Universe> universe)
-    : Expression(std::move(universe)),
-      destinationScopeItemId_(destinationScopeItemId) {
+    const entities::Universe& universe)
+    : Expression(universe), destinationScopeItemId_(destinationScopeItemId) {
   add_child(groupRoutingRing);
 
   // Moving objects in or out of any container related to routing ring of the

@@ -153,8 +153,8 @@ class GroupRoutingMoveTypeTest : public MoveTestBase {
       nonAccepting.insert(container(name));
     }
     createProblem(
-        /*objectiveTuple=*/{const_expr(0, universe)},
-        /*constraint=*/const_expr(0, universe),
+        /*objectiveTuple=*/{const_expr(0, *universe)},
+        /*constraint=*/const_expr(0, *universe),
         /*higherPriorityObjConfig=*/std::nullopt,
         /*nonAcceptingContainers=*/nonAccepting);
   }
@@ -320,10 +320,10 @@ CO_TEST_F(GroupRoutingMoveTypeTest, ConstraintBlockedDestination) {
           PackerMap<entities::ObjectId, double>{},
           1,
           tenantCount * objectCountPerTenant,
-          universe),
+          *universe),
       {container("region0")});
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
+      /*objectiveTuple=*/{const_expr(0, *universe)},
       /*constraint=*/countInRegion0 - 2.0);
 
   // tenant2 has all 4 replicas in region2. Source0's min-latency destination

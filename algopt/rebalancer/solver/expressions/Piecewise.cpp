@@ -66,9 +66,9 @@ bool isNonDecreasing(const std::vector<std::pair<double, double>>& points) {
 Piecewise::Piecewise(
     const std::vector<std::pair<double, double>>& points,
     std::shared_ptr<Expression> expr,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     bool continuous)
-    : Expression(std::move(universe)), points_(points) {
+    : Expression(universe), points_(points) {
   if (points_.size() < 2) {
     throw std::runtime_error("Needs to define at least 2 points for Piecewise");
   }
@@ -333,8 +333,8 @@ algopt::lp::Expression build_piecewise_linear_function(
       // would make z_expr = points[i].second)
       const auto diff = expr - currX;
       const auto isEqual = 1 -
-          step(max(diff, -1 * diff, evaluator.getProblem().getUniversePtr()),
-               evaluator.getProblem().getUniversePtr());
+          step(max(diff, -1 * diff, evaluator.getProblem().getUniverse()),
+               evaluator.getProblem().getUniverse());
       PIECEWISE_NEWCTR(
           lambda.at(i) >=
           evaluator.lp(isEqual.get(), /*minimizing=*/false, configs));

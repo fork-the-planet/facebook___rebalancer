@@ -27,7 +27,7 @@ class AnyPositive : public Expression {
   // then when expr == 1e-5, it is regarded as NON-POSITIVE
   explicit AnyPositive(
       const std::vector<ExprPtr>& exprs,
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       const double feasibilityTolerance);
 
   void add(const ExprPtr& expr);

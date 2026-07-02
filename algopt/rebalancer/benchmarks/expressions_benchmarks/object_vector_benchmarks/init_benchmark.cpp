@@ -31,7 +31,7 @@ void objectVectorInit(size_t numObjects, double value) {
   }
   auto universe = std::make_shared<entities::Universe>();
   folly::doNotOptimizeAway(
-      ObjectVector(entities::ObjectValues(std::move(objectValues)), universe));
+      ObjectVector(entities::ObjectValues(std::move(objectValues)), *universe));
 }
 
 BENCHMARK(ObjectVectorInit_10K) {

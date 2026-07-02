@@ -27,12 +27,12 @@ using namespace facebook::rebalancer::entities;
 namespace {
 
 Map<GroupId, double> extractGroupLimits(
-    std::shared_ptr<const Universe> universe,
+    const Universe& universe,
     entities::PartitionId partitionId,
     const Limit& limit) {
   Map<GroupId, double> groupLimits;
   for (auto& [groupName, groupLimit] : *limit.groupLimits()) {
-    auto groupId = universe->getGroupId(partitionId, groupName);
+    auto groupId = universe.getGroupId(partitionId, groupName);
     groupLimits.emplace(groupId, groupLimit);
   }
   return groupLimits;
@@ -41,10 +41,10 @@ Map<GroupId, double> extractGroupLimits(
 } // namespace
 
 LimitWrapper::LimitWrapper(
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const Limit& limit,
     ScopeId scopeId)
-    : universe_(std::move(universe)),
+    : universe_(&universe),
       scopeId_(scopeId),
       type_(*limit.type()),
       globalLimit_(parseGlobalLimit(limit)) {
@@ -52,11 +52,11 @@ LimitWrapper::LimitWrapper(
 }
 
 LimitWrapper::LimitWrapper(
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const facebook::rebalancer::interface::Limit& limit,
     ScopeId scopeId,
     PartitionId partitionId)
-    : universe_(universe),
+    : universe_(&universe),
       scopeId_(scopeId),
       partitionId_(partitionId),
       type_(*limit.type()),
@@ -75,7 +75,8 @@ void LimitWrapper::parseScopeLimit(const Limit& limit) {
 }
 
 void LimitWrapper::parseGroupLimit(const Limit& limit) {
-  groupItemLimits_ = extractGroupLimits(universe_, partitionId_.value(), limit);
+  groupItemLimits_ =
+      extractGroupLimits(*universe_, partitionId_.value(), limit);
 }
 
 void LimitWrapper::parseScopeGroupLimit(const Limit& limit) {
@@ -185,12 +186,12 @@ LimitWrapper::getAllGroupLimitsIndptOfScopeItem() const {
 }
 
 Map<GroupId, double> LimitWrapper::getAllGroupLimits(
-    std::shared_ptr<const Universe> universe,
+    const Universe& universe,
     entities::PartitionId partitionId,
     const Limit& limit) {
   auto groupLimits = extractGroupLimits(universe, partitionId, limit);
   // use globalLimit for groups where limit was not specified
-  for (auto groupId : universe->getPartition(partitionId).getGroupIds()) {
+  for (auto groupId : universe.getPartition(partitionId).getGroupIds()) {
     if (!groupLimits.contains(groupId)) {
       groupLimits.emplace(groupId, parseGlobalLimit(limit));
     }

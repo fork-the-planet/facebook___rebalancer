@@ -25,7 +25,7 @@ class GroupRoutingLatencyLookup : public Expression {
   GroupRoutingLatencyLookup(
       std::shared_ptr<GroupRoutingRing> groupRoutingRing,
       interface::RoutingLatencyMetricInfo aggregationMetric,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   const std::string_view& getType() const override;
 

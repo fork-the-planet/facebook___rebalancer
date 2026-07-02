@@ -218,7 +218,7 @@ static void createProblemBuildLpExprAndAssert(
     const std::optional<LpAssertOptions>& lpAssertOptions) {
   auto coeff = shouldMinimize ? 1.0 : -1.0;
   const ExprPtr objective = std::make_shared<LinearSum>(
-      universe,
+      *universe,
       /*initial=*/0,
       PackerMap<ExprPtr, double>{{exprToEvaluate, coeff}});
   objective->value = coeff * exprToEvaluate->value;
@@ -245,7 +245,7 @@ static void createProblemBuildLpExprAndAssert(
     auto problemPtr = createTestProblem(
         universe,
         {objective},
-        /*constraint=*/const_expr(0, universe),
+        /*constraint=*/const_expr(0, *universe),
         /*nonAcceptingContainers=*/{},
         rebalancer::ProblemConfigs{},
         /*performInitialFullApply=*/false);

@@ -29,7 +29,7 @@ class BipartiteSwaps : public Expression {
       PackerMap<entities::ObjectId, entities::ContainerId> initial_assignment,
       PackerSet<entities::ContainerId> left_subset,
       PackerSet<entities::ContainerId> right_subset,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   ExpressionProperties getProperties() const override;
 

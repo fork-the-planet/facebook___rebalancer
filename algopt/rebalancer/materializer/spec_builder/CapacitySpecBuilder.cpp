@@ -52,7 +52,7 @@ CapacitySpecBuilder::CapacitySpecBuilder(
       spec_(std::move(spec)),
       scopeId_(universe_->getScopeId(*spec_.scope())),
       dimensionId_(universe_->getDimensionId(*spec_.dimension())),
-      limits_(universe_, *spec_.limit(), scopeId_),
+      limits_(*universe_, *spec_.limit(), scopeId_),
       scopeFilter_(*universe_, *spec_.filter(), scopeId_) {
   if (auto bound = getGroupUtilizationBound(spec_)) {
     initilizePerGroupUtilizationBounds(*bound);
@@ -116,7 +116,7 @@ folly::coro::Task<ExprPtr> CapacitySpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   auto metrics = getUtilMetrics(*spec_.definition(), true);
   auto exprs = co_await getConstraint(expressionBuilder, metrics);
-  co_return getAggregatedConstraintViolation(exprs, universe_);
+  co_return getAggregatedConstraintViolation(exprs, *universe_);
 }
 
 folly::coro::Task<std::vector<ConstraintInfo>> CapacitySpecBuilder::constraints(
@@ -186,11 +186,11 @@ folly::coro::Task<std::optional<ExprPtr>> CapacitySpecBuilder::getExpression(
         expr = piecewise(
             {{0, 0}, {0, threshold}, {threshold, 0}, {ub, 0}},
             util,
-            universe_,
+            *universe_,
             false);
       } else {
         expr = piecewise(
-            {{0, 0}, {0, threshold}, {threshold, 0}}, util, universe_, false);
+            {{0, 0}, {0, threshold}, {threshold, 0}}, util, *universe_, false);
       }
     } else {
       expr = threshold - util;
@@ -448,7 +448,7 @@ void CapacitySpecBuilder::initilizePerGroupUtilizationBounds(
     const interface::GroupUtilizationBound& bound) {
   auto partitionId = universe_->getPartitionId(*bound.partitionName());
   perGroupUtilizationBounds_ =
-      LimitWrapper(universe_, *bound.perGroupValues(), scopeId_, partitionId);
+      LimitWrapper(*universe_, *bound.perGroupValues(), scopeId_, partitionId);
 }
 
 folly::coro::Task<ExprPtr> CapacitySpecBuilder::getBoundedUtil(

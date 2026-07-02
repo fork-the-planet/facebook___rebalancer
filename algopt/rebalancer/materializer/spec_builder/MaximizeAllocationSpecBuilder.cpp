@@ -31,7 +31,7 @@ folly::coro::Task<ExprPtr> MaximizeAllocationSpecBuilder::goalCoro(
   auto scopeId = universe_->getScopeId(*spec_.scope());
   auto dimensionId = universe_->getDimensionId(*spec_.dimension());
 
-  auto result = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
   const double objectCount = universe_->getNumObjects();
   const double coef = (-1.0 / objectCount);
 

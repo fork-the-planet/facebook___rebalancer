@@ -27,12 +27,11 @@ namespace facebook::rebalancer {
 GroupRoutingRing::GroupRoutingRing(
     entities::RoutingConfigId routingConfigId,
     entities::GroupId groupId,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const Assignment& initialAssignment)
-    : Expression(std::move(universe)),
+    : Expression(universe),
       routingConfigId_(routingConfigId),
       groupId_(groupId),
-      universe_(getUniversePtr()),
       routingConfigPtr_(&universe_->getRoutingConfig(routingConfigId_)) {
   auto localDirectlyAffectedContainersPtr =
       std::make_shared<PackerSet<entities::ContainerId>>();

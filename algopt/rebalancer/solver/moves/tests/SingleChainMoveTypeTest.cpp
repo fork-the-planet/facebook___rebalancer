@@ -117,13 +117,13 @@ class SingleChainMoveTypeTest : public MoveTestBase {
     for (const auto id : folly::irange(1, 9)) {
       objectValues.emplace(object(id), id);
     }
-    auto objectVector = makeObjectVector(objectValues, getUniversePtr());
+    auto objectVector = makeObjectVector(objectValues, getUniverse());
     const Assignment assignment(
         getUniverse().getContainers().getInitialAssignment());
     return std::make_shared<ObjectLookup>(
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(containers),
-        getUniversePtr(),
+        getUniverse(),
         assignment);
   }
 };
@@ -136,8 +136,7 @@ CO_TEST_F(SingleChainMoveTypeTest, TestMoveSet) {
 
   // objective and constraint are not relevant when directly testing
   // for the moves evaluated in 'generateMoveSetAndGetResult'
-  const auto universe = getUniversePtr();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, getUniverse())}, const_expr(0, getUniverse()));
 
   auto moveResult = mockSingleChainMoveType.generateMoveSetAndGetResult(
       getMovesEvaluator(),
@@ -169,7 +168,7 @@ CO_TEST_F(
 
   const auto universe = co_await setUpUniverse();
   // lookup expression ensures that the no two objects are equivalent
-  createProblem({getLookupExprOn({container(1)})}, const_expr(0, universe));
+  createProblem({getLookupExprOn({container(1)})}, const_expr(0, *universe));
 
   mockSingleChainMoveType.exploreWithinGroupAndGetBestResult(
       getMovesEvaluator(),
@@ -190,7 +189,7 @@ CO_TEST_F(SingleChainMoveTypeTest, ExploreMovesWithAllObjectsInOtherContainer) {
 
   const auto universe = co_await setUpUniverse();
   // lookup expression ensures that the no two objects are equivalent
-  createProblem({getLookupExprOn({container(1)})}, const_expr(0, universe));
+  createProblem({getLookupExprOn({container(1)})}, const_expr(0, *universe));
 
   mockSingleChainMoveType.exploreAllAndGetBestResult(
       getMovesEvaluator(),
@@ -218,7 +217,7 @@ CO_TEST_F(
   const auto universe = co_await setUpUniverse();
   // since objective and constraint are const_expr(0), all
   // objects will be equivalent
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   mockSingleChainMoveType.exploreWithinGroupAndGetBestResult(
       getMovesEvaluator(),
@@ -239,7 +238,7 @@ CO_TEST_F(SingleChainMoveTypeTest, IgnoreEquivalentObjectsWhenExploringAll) {
   const auto universe = co_await setUpUniverse();
   // since objective and constraint are const_expr(0, universe), all
   // objects will be equivalent
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   mockSingleChainMoveType.exploreAllAndGetBestResult(
       getMovesEvaluator(),
@@ -258,7 +257,7 @@ CO_TEST_F(SingleChainMoveTypeTest, TestTotalNumberOfEvaluations) {
 
   const auto universe = co_await setUpUniverse();
   // lookup expression ensures that the no two objects are equivalent
-  createProblem({getLookupExprOn({container(1)})}, const_expr(0, universe));
+  createProblem({getLookupExprOn({container(1)})}, const_expr(0, *universe));
 
   mockSingleChainMoveType.exploreFromAllSingleMoves(
       getMovesEvaluator(),

@@ -24,7 +24,7 @@ using namespace facebook::rebalancer;
 using namespace std;
 
 TEST(LabeledExpressionsTest, LabeledConstraintsSummary) {
-  auto universe = std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
   auto expr1 = const_expr(-2, universe);
   auto expr2 = const_expr(0, universe);
   auto expr3 = const_expr(2, universe);
@@ -54,7 +54,7 @@ TEST(LabeledExpressionsTest, LabeledConstraintsSummary) {
 }
 
 TEST(LabeledExpressionsTest, LabeledObjectivesSummary) {
-  auto universe = std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
   auto expr1 = const_expr(2, universe);
   auto expr2 = const_expr(8, universe);
   auto expr3 = expr1 + 4 * expr2;
@@ -81,7 +81,7 @@ TEST(LabeledExpressionsTest, LabeledObjectivesSummary) {
 }
 
 TEST(LabeledExpressionsTest, Iterator) {
-  auto universe = std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
   auto expr1 = const_expr(1, universe);
   auto expr2 = const_expr(2, universe);
   auto expr3 = const_expr(3, universe);

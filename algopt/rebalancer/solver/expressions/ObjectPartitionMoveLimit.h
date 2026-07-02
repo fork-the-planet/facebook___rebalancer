@@ -32,7 +32,7 @@ class ObjectPartitionMoveLimit : public Expression {
 
  public:
   explicit ObjectPartitionMoveLimit(
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       Assignment originalAssignment,
       entities::PartitionId partitionId,
       entities::DimensionId dimensionId,
@@ -108,7 +108,6 @@ class ObjectPartitionMoveLimit : public Expression {
 
  private:
   // from constructor
-  std::shared_ptr<const entities::Universe> universe_;
   Assignment originalAssignment_;
   entities::PartitionId partitionId_;
   PackerMap<entities::GroupId, double> groupLimits_;

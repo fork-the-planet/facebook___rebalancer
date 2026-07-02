@@ -62,17 +62,17 @@ folly::coro::Task<ExprPtr> MinimizeNthLargestUtilizationSpecBuilder::goalCoro(
   if (scopeItemRelativeUtils.empty()) {
     // Degenerate case where there are no scope items with non-zero size,
     // just return constant zero penalty.
-    co_return const_expr(0, universe_);
+    co_return const_expr(0, *universe_);
   }
 
-  auto nthLargestUtil = nth_largest(scopeItemRelativeUtils, n, universe_);
+  auto nthLargestUtil = nth_largest(scopeItemRelativeUtils, n, *universe_);
 
   if (targetUtilization > 0) {
     // if 'targetUtilization' > 0, this ensures that there is no incentive to
     // minimize 'nthLargestUtil' below value of 'targetUtilization'
     co_return max(
-        {const_expr(0, universe_), nthLargestUtil - targetUtilization},
-        universe_);
+        {const_expr(0, *universe_), nthLargestUtil - targetUtilization},
+        *universe_);
   }
 
   co_return nthLargestUtil;

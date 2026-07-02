@@ -213,7 +213,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
     std::optional<entities::PartitionId> partitionId,
     std::optional<entities::GroupId> groupId) FOLLY_TS_REQUIRES(!applyfunc) {
   if (scopeItemIds.size() == 0) {
-    co_return const_expr(0, universe_);
+    co_return const_expr(0, *universe_);
   }
 
   if (metric != UtilMetric::AFTER) {
@@ -227,7 +227,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
     //  if there is only one scopeItemId or the sets of containers of scopeItems
     //  is not disjoint, then use the corresponding getAbsoluteUtil() as they
     //  are cached; the 'not disjoint' case can be optimzed further if required
-    auto totalUtil = const_expr(0, universe_);
+    auto totalUtil = const_expr(0, *universe_);
     if (partitionId.has_value() && groupId.has_value()) {
       for (auto scopeItemId : scopeItemIds) {
         totalUtil += co_await getAbsoluteUtil(
@@ -259,7 +259,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
       : getObjectVector(dimensionId, 0);
 
   co_return object_lookup(
-      objectVector, relevantContainerIds, universe_, initialAssignment_);
+      objectVector, relevantContainerIds, *universe_, initialAssignment_);
 }
 
 double ExpressionBuilder::getUpperBound(const Expression& expression) {
@@ -287,7 +287,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
             scalarUtils.push_back(
                 co_await getAbsoluteUtil(metric, descriptor, i));
           }
-          absoluteUtil = max(scalarUtils, universe_);
+          absoluteUtil = max(scalarUtils, *universe_);
         }
 
         if (metrics_ && descriptor.outOfScope == false) {
@@ -332,7 +332,7 @@ ExprPtr ExpressionBuilder::maybeApplyBoundsOverrideForDuringExpr(
   } else {
     const auto duringLb = duringExpr->getInitialValue();
     return boundsOverride(
-        std::move(duringExpr), duringLb, /*ub=*/std::nullopt, universe_);
+        std::move(duringExpr), duringLb, /*ub=*/std::nullopt, *universe_);
   }
 }
 
@@ -382,9 +382,9 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
           totalFractionOfTrafficToScopeItem->getInitialValue();
       const auto initialGroupUtil =
           initialFractionOfTrafficToScopeItem * groupValue;
-      groupUtil = max(groupUtil, initialGroupUtil, universe_);
+      groupUtil = max(groupUtil, initialGroupUtil, *universe_);
     }
-    groupUtil += step(totalFractionOfTrafficToScopeItem, universe_) *
+    groupUtil += step(totalFractionOfTrafficToScopeItem, *universe_) *
         objectPartitionRoutingDimension.getStaticValue(groupId);
     if (metrics_) {
       // we need to create a copy of the descriptor, since we need to set
@@ -414,9 +414,9 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
     co_return getGroupUtil(routingConfigId, groupId);
   }
 
-  auto totalUtil = const_expr(0, universe_);
+  auto totalUtil = const_expr(0, *universe_);
   for (auto& [groupId, _] : routingConfig.getGroupToRoutingRings()) {
-    inplace_add(totalUtil, getGroupUtil(routingConfigId, groupId), universe_);
+    inplace_add(totalUtil, getGroupUtil(routingConfigId, groupId), *universe_);
   }
 
   co_return totalUtil;
@@ -487,7 +487,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtilAfterDynamic(
       [&](const auto& it) -> ExprPtr {
         const auto& [dimensionScopeItemId, containerIds] = *it;
         if (containerIds == nullptr) {
-          return const_expr(0, universe_);
+          return const_expr(0, *universe_);
         }
 
         auto objectVector = descriptor.partitionId.has_value()
@@ -502,8 +502,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtilAfterDynamic(
                   dimensionIndex,
                   dimensionScopeItemId);
 
-        return getObjectLookup(
-            containerIds, std::move(objectVector), universe_);
+        return getObjectLookup(containerIds, std::move(objectVector));
       },
       [&](ExprPtr& accumulator, const ExprPtr& partial) {
         accumulator += partial;
@@ -521,15 +520,14 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtilAfterDynamic(
         : getObjectVector(
               descriptor.dimensionId.value(), dimensionIndex, std::nullopt);
 
-    result += getObjectLookup(
-        scopeImage.outOfScope, std::move(objectVector), universe_);
+    result += getObjectLookup(scopeImage.outOfScope, std::move(objectVector));
   }
 
   if (!result) {
-    co_return const_expr(0, universe_);
+    co_return const_expr(0, *universe_);
   }
 
-  co_return object_lookup_dynamic(result, objectDimension, universe_);
+  co_return object_lookup_dynamic(result, objectDimension, *universe_);
 }
 
 folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtilInitial(
@@ -572,7 +570,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtilInitial(
         : universe_->getContainers().getInitialObjectIds(containerId);
     util += objectDimension.values(objectDimensionScopeItemId).sum(objectIds);
   }
-  co_return const_expr(util, universe_);
+  co_return const_expr(util, *universe_);
 }
 
 folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtilStayed(
@@ -655,7 +653,7 @@ std::shared_ptr<ObjectVector> ExpressionBuilder::getObjectVector(
     return object_vector(
         objectDimension.values().sliceGroup(
             universe_->getPartition(partitionId), groupId),
-        universe_);
+        *universe_);
   });
 }
 
@@ -687,13 +685,13 @@ std::shared_ptr<ObjectVector> ExpressionBuilder::getObjectVector(
     return object_vector(
         objectDimension.values(scopeItemId)
             .sliceGroup(universe_->getPartition(partitionId), groupId),
-        universe_);
+        *universe_);
   });
 }
 
 std::shared_ptr<ObjectVector> ExpressionBuilder::getObjectVector(
     const entities::ObjectScalarDimension& objectDimension) {
-  return object_vector(objectDimension.values(), universe_);
+  return object_vector(objectDimension.values(), *universe_);
 }
 
 std::shared_ptr<ObjectVector> ExpressionBuilder::getObjectVector(
@@ -707,9 +705,9 @@ std::shared_ptr<ObjectVector> ExpressionBuilder::getObjectVector(
             numObjects,
             defaultObjectValue,
             /*expectedNonDefaultSize=*/0),
-        universe_);
+        *universe_);
   }
-  return object_vector(objectDimension.values(*scopeItemId), universe_);
+  return object_vector(objectDimension.values(*scopeItemId), *universe_);
 }
 
 std::shared_ptr<ObjectVector> ExpressionBuilder::getInitialObjectVector(
@@ -767,7 +765,7 @@ std::shared_ptr<ObjectVector> ExpressionBuilder::getInitialObjectVector(
     }
   }
 
-  return object_vector(std::move(objectToInitialValue), universe_);
+  return object_vector(std::move(objectToInitialValue), *universe_);
 }
 
 std::shared_ptr<ObjectVector> ExpressionBuilder::getInitialObjectVectorFull(
@@ -811,18 +809,16 @@ std::shared_ptr<ObjectLookup> ExpressionBuilder::getObjectLookup(
     std::shared_ptr<ObjectVector> objectVector) {
   return getObjectLookup(
       universe_->getScope(scopeId).getContainerIdsPtr(scopeItemId),
-      std::move(objectVector),
-      universe_);
+      std::move(objectVector));
 }
 
 std::shared_ptr<ObjectLookup> ExpressionBuilder::getObjectLookup(
     std::shared_ptr<const PackerSet<entities::ContainerId>> containerIds,
-    std::shared_ptr<ObjectVector> objectVector,
-    std::shared_ptr<const entities::Universe> universe) {
+    std::shared_ptr<ObjectVector> objectVector) {
   return object_lookup(
       std::move(objectVector),
       std::move(containerIds),
-      std::move(universe),
+      *universe_,
       initialAssignment_);
 }
 
@@ -832,7 +828,7 @@ std::shared_ptr<ObjectLookup> ExpressionBuilder::getObjectLookupOutOfScope(
   return object_lookup(
       std::move(objectVector),
       getContainersOutOfScopePtr(scopeId),
-      universe_,
+      *universe_,
       initialAssignment_);
 }
 
@@ -844,20 +840,18 @@ std::shared_ptr<StableStayed> ExpressionBuilder::getStableStayed(
   return getStableStayed(
       universe_->getScope(scopeId).getContainerIdsPtr(scopeItemId),
       std::move(initialObjectVector),
-      std::move(fullObjectVector),
-      universe_);
+      std::move(fullObjectVector));
 }
 
 std::shared_ptr<StableStayed> ExpressionBuilder::getStableStayed(
     std::shared_ptr<const PackerSet<entities::ContainerId>> containerIds,
     std::shared_ptr<ObjectVector> initialObjectVector,
-    std::shared_ptr<ObjectVector> fullObjectVector,
-    std::shared_ptr<const entities::Universe> universe) {
+    std::shared_ptr<ObjectVector> fullObjectVector) {
   return stable_stayed(
       std::move(initialObjectVector),
       std::move(fullObjectVector),
       std::move(containerIds),
-      std::move(universe),
+      *universe_,
       initialAssignment_);
 }
 
@@ -868,8 +862,7 @@ std::shared_ptr<StableStayed> ExpressionBuilder::getStableStayedOutOfScope(
   return getStableStayed(
       getContainersOutOfScopePtr(scopeId),
       std::move(initialObjectVector),
-      std::move(fullObjectVector),
-      universe_);
+      std::move(fullObjectVector));
 }
 
 const std::vector<entities::ObjectId>& ExpressionBuilder::getInitialObjects(
@@ -1035,7 +1028,7 @@ std::shared_ptr<Expression> ExpressionBuilder::isAssigned(
   auto key = std::make_tuple(objectId, containerId);
   return isAssignedContainerCache_.getSavedOrCompute(key, [&]() {
     return rebalancer::variable(
-        objectId, containerId, universe_, initialAssignment_);
+        objectId, containerId, *universe_, initialAssignment_);
   });
 }
 
@@ -1047,10 +1040,10 @@ std::shared_ptr<Expression> ExpressionBuilder::isAssigned(
   // representing if object belongs to the scope item
   auto key = std::make_tuple(scopeItemId, objectId);
   return isAssignedScopeItemCache_.getSavedOrCompute(key, [&]() {
-    std::shared_ptr<Expression> expr = const_expr(0, universe_);
+    std::shared_ptr<Expression> expr = const_expr(0, *universe_);
     auto& scope = universe_->getScope(scopeId);
     for (auto containerId : scope.getContainerIds(scopeItemId)) {
-      inplace_binary_max(expr, isAssigned(containerId, objectId), universe_);
+      inplace_binary_max(expr, isAssigned(containerId, objectId), *universe_);
     }
     return expr;
   });
@@ -1162,7 +1155,7 @@ ExprPtr ExpressionBuilder::createObjectPartition(
       partitionId,
       dimensionId,
       groupLimits,
-      universe_,
+      *universe_,
       std::move(scopeItemIdsOpt),
       std::move(filteredGroupIds),
       std::move(normalizationCoefs),
@@ -1247,7 +1240,7 @@ std::shared_ptr<Expression> ExpressionBuilder::createObjectPartitionLookup(
       universe_->getScope(scopeId).getContainerIdsPtr(scopeItemId),
       scopeId,
       scopeItemId,
-      universe_,
+      *universe_,
       initialAssignment_,
       overrides,
       std::move(initialObjects),
@@ -1278,7 +1271,7 @@ ExpressionBuilder::getObjectPartitionMoveLimit(
   const entities::Map<entities::ObjectId, std::vector<entities::GroupId>>
       objectToGroupIds;
   return std::make_shared<ObjectPartitionMoveLimit>(
-      universe_,
+      *universe_,
       initialAssignment_,
       partitionId,
       dimensionId,
@@ -1293,7 +1286,7 @@ std::shared_ptr<GroupRoutingRing> ExpressionBuilder::getGroupRoutingRing(
   auto key = std::make_pair(routingConfigId, groupId);
   return routingConfigToGroupRoutingRing_.getSavedOrCompute(key, [&]() {
     auto groupRoutingRing = std::make_shared<GroupRoutingRing>(
-        routingConfigId, groupId, universe_, initialAssignment_);
+        routingConfigId, groupId, *universe_, initialAssignment_);
 
     if (metrics_) {
       metrics_->addToGroupRoutingTrafficCollection(
@@ -1314,7 +1307,7 @@ ExpressionBuilder::getGroupRoutingTrafficLookup(
       std::tuple(routingConfigId, groupId, scopeItemId), [&]() {
         auto routingRingExpr = getGroupRoutingRing(routingConfigId, groupId);
         return std::make_shared<GroupRoutingTrafficLookup>(
-            routingRingExpr, scopeItemId, universe_);
+            routingRingExpr, scopeItemId, *universe_);
       });
 }
 
@@ -1330,7 +1323,7 @@ ExpressionBuilder::getGroupRoutingLatencyLookup(
       metric.percentile().to_optional());
   return groupRoutingLatencyLookupCache_.getSavedOrCompute(key, [&]() {
     auto latencyLookup = std::make_shared<GroupRoutingLatencyLookup>(
-        getGroupRoutingRing(routingConfigId, groupId), metric, universe_);
+        getGroupRoutingRing(routingConfigId, groupId), metric, *universe_);
     latencyLookup->description = fmt::format(
         "{} latency of group '{}' w.r.t. routing config '{}'",
         interface::thriftUtils::toString(metric),
@@ -1351,7 +1344,7 @@ cached operations on ExprPtr
 */
 ExprPtr ExpressionBuilder::binaryMin(ExprPtr A, ExprPtr B) {
   return binaryMinCache_.getSavedOrCompute(std::make_pair(A, B), [&]() {
-    return binary_min(std::move(A), std::move(B), universe_);
+    return binary_min(std::move(A), std::move(B), *universe_);
   });
 }
 
@@ -1392,14 +1385,14 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getBoundedAbsoluteUtil(
 
   auto boundedUtilExpr = [&](const auto& groupUtilExpr, auto boundValue) {
     auto boundedExpr = isUpperBound
-        ? min(groupUtilExpr, const_expr(boundValue, universe_), universe_)
+        ? min(groupUtilExpr, const_expr(boundValue, *universe_), *universe_)
         : max(groupUtilExpr,
-              step(groupUtilExpr, universe_) * boundValue,
-              universe_);
+              step(groupUtilExpr, *universe_) * boundValue,
+              *universe_);
     return boundedExpr;
   };
 
-  auto utilExpr = const_expr(0, universe_);
+  auto utilExpr = const_expr(0, *universe_);
   if (!isDefaultUnbounded(defaultValue, isUpperBound)) {
     assert(defaultValue.has_value());
     // Bound utilization of all groups
@@ -1408,23 +1401,23 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getBoundedAbsoluteUtil(
       auto boundValue = folly::get_default(groupLimits, groupId, *defaultValue);
       auto groupUtilExpr = co_await getGroupUtilExpr(groupId);
       inplace_add(
-          utilExpr, boundedUtilExpr(groupUtilExpr, boundValue), universe_);
+          utilExpr, boundedUtilExpr(groupUtilExpr, boundValue), *universe_);
     }
   } else {
     // Optimized way: only bound utilization of groups that have a limit
     // associated with them, Representation size: 2 * |groupToCapValue|
-    auto boundedGroupsTotalUtil = const_expr(0, universe_);
+    auto boundedGroupsTotalUtil = const_expr(0, *universe_);
     for (auto& [groupId, boundValue] : groupLimits) {
       auto groupUtilExpr = co_await getGroupUtilExpr(groupId);
-      inplace_add(boundedGroupsTotalUtil, groupUtilExpr, universe_);
+      inplace_add(boundedGroupsTotalUtil, groupUtilExpr, *universe_);
       inplace_add(
-          utilExpr, boundedUtilExpr(groupUtilExpr, boundValue), universe_);
+          utilExpr, boundedUtilExpr(groupUtilExpr, boundValue), *universe_);
     }
     // collect util of remaining groups succinctly as follows
     auto remainingGroupsUtil =
         co_await getAbsoluteUtil(metric, dimensionId, scopeId, scopeItemId) -
         boundedGroupsTotalUtil;
-    inplace_add(utilExpr, remainingGroupsUtil, universe_);
+    inplace_add(utilExpr, remainingGroupsUtil, *universe_);
   }
   co_return utilExpr;
 }
@@ -1549,7 +1542,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAggregatedAbsoluteUtil(
   // aggregationScope: |-a1-|-a2-|---a3---|
   // image(s1) = {a1, a2}, image(s2) = {a3}
 
-  auto aggregatedUtil = const_expr(0, universe_);
+  auto aggregatedUtil = const_expr(0, *universe_);
   for (auto aggregationScopeItemId :
        getNestedImage(scopeId, aggregationScopeId, scopeItemId)) {
     aggregatedUtil += co_await getAbsoluteUtil(

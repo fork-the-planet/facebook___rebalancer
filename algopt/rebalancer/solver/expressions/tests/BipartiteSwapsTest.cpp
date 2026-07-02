@@ -35,7 +35,7 @@ class BipartiteSwapsTest : public ExpressionTestsBase {
 };
 
 TEST_F(BipartiteSwapsTest, BipartiteOppositeSwaps) {
-  const auto universe = buildUniverse();
+  buildUniverse();
   // Initial assignment:
   //   Container 10: Object 1
   //   Container 20: Object 2
@@ -52,7 +52,7 @@ TEST_F(BipartiteSwapsTest, BipartiteOppositeSwaps) {
       initialAssignment,
       {{container(10), container(20)}},
       {{container(30), container(40)}},
-      universe);
+      getUniverse());
 
   auto assignment = makeAssignment(initialAssignment);
 
@@ -89,7 +89,7 @@ TEST_F(BipartiteSwapsTest, BipartiteOppositeSwaps) {
 }
 
 TEST_F(BipartiteSwapsTest, BipartiteSwapsSameSide) {
-  const auto universe = buildUniverse();
+  buildUniverse();
   // Initial assignment:
   //   Container 10: Object 1
   //   Container 20: Object 2
@@ -106,7 +106,7 @@ TEST_F(BipartiteSwapsTest, BipartiteSwapsSameSide) {
       initialAssignment,
       {{container(10), container(20)}},
       {{container(30), container(40)}},
-      universe);
+      getUniverse());
 
   auto assignment = makeAssignment(initialAssignment);
 

@@ -105,7 +105,7 @@ class MetricCollectionImpl : public MetricCollection {
         std::back_inserter(exprs),
         [](const auto& pair) { return pair.second; });
 
-    rootExpr_ = std::make_shared<Max>(exprs, universe);
+    rootExpr_ = std::make_shared<Max>(exprs, *universe);
   }
 
   Expression* getRootExprRawPtr() const override {

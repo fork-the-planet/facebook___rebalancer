@@ -43,9 +43,9 @@ TEST_F(GroupRoutingLatencyMetricsTest, AddAndGetSummary) {
       interface::RoutingLatencyMetric::AVG);
 
   // Add some latency metrics
-  auto p99Expr = const_expr(13, universe);
-  auto p100Expr = const_expr(20, universe);
-  auto avgExpr = const_expr(5, universe);
+  auto p99Expr = const_expr(13, *universe);
+  auto p100Expr = const_expr(20, *universe);
+  auto avgExpr = const_expr(5, *universe);
 
   metrics.add(p99Expr, routingConfig1Id, p99Metric, tenant1Id);
   metrics.add(p100Expr, routingConfig1Id, p100Metric, tenant1Id);
@@ -130,11 +130,11 @@ TEST_F(GroupRoutingLatencyMetricsTest, DuplicateInsertFailure) {
       interface::RoutingLatencyMetric::PERCENTILE, 99);
 
   // Add a metric
-  auto expr1 = const_expr(10, universe);
+  auto expr1 = const_expr(10, *universe);
   metrics.add(expr1, routingConfig1Id, p99Metric, tenant1Id);
 
   // Try to add another metric with the same key
-  auto expr2 = const_expr(20, universe);
+  auto expr2 = const_expr(20, *universe);
   REBALANCER_EXPECT_RUNTIME_ERROR(
       metrics.add(expr2, routingConfig1Id, p99Metric, tenant1Id),
       "unexpected failure to insert to groupLatencyMetrics. Duplicates are unexpected since GroupRoutingLatencyLookup exprs are cached in expressionBuilder");

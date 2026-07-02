@@ -36,8 +36,9 @@ class PiecewiseTest : public ExpressionTestsBase {
 };
 
 TEST_F(PiecewiseTest, PiecewiseNonContinuous) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   // x = 6*var(obj1,c0) + var(obj2,c0) - 1; initial value -1, out of [0, 5].
   auto x = 6 * variable(object(1), container(0), universe, assignment) +
@@ -58,7 +59,8 @@ TEST_F(PiecewiseTest, PiecewiseNonContinuous) {
 }
 
 TEST_F(PiecewiseTest, PiecewiseNonContinuousDecreasing) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment assignment(
       {{container(0), {}}, {container(1), {object(1)}}});
 
@@ -79,7 +81,8 @@ TEST_F(PiecewiseTest, PiecewiseNonContinuousDecreasing) {
 }
 
 TEST_F(PiecewiseTest, PiecewiseNonMontonic) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment assignment(
       {{container(0), {}}, {container(1), {object(1)}}});
 
@@ -97,7 +100,8 @@ TEST_F(PiecewiseTest, PiecewiseNonMontonic) {
 }
 
 TEST_F(PiecewiseTest, PiecewiseNonDecreasing) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment assignment(
       {{container(0), {}}, {container(1), {object(1)}}});
 
@@ -115,7 +119,8 @@ TEST_F(PiecewiseTest, PiecewiseNonDecreasing) {
 }
 
 TEST_F(PiecewiseTest, PiecewiseDecreasing) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment assignment(
       {{container(0), {}}, {container(1), {object(1)}}});
 
@@ -133,8 +138,9 @@ TEST_F(PiecewiseTest, PiecewiseDecreasing) {
 }
 
 TEST_F(PiecewiseTest, PiecewiseInitialValue) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto v = variable(object(0), container(0), universe, assignment);
   // v = 1, so piecewise({(1, 9), (2, 5)})(1) = 9.

@@ -37,8 +37,9 @@ TEST_F(QuotientOperationTest, LpExactWhenQuotientInUnitInterval) {
   setUpDefaultAssignment();
   // a/b = 1 / (0 + 2) = 0.5, inside the [0, 1] range that lp() can
   // represent.
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto x = variable(object(1), container(0), universe, assignment);
   auto q = quotient(const_expr(1, universe), x + 2, universe);
 
@@ -53,8 +54,9 @@ TEST_F(QuotientOperationTest, LpInfeasibleWhenQuotientExceedsOne) {
   // still gets the exact value, but lp()'s relaxation hardcodes the
   // quotient's bound to [0, 1] (see `approximate_quotient_log` in
   // QuotientOperation.cpp) and the MIP comes back infeasible.
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto x = variable(object(1), container(0), universe, assignment);
   auto q = quotient(const_expr(3, universe), x + 2, universe);
 
@@ -69,9 +71,10 @@ TEST_F(QuotientOperationTest, Bounds) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {}}, {"container1", {"object1", "object2"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   const double inf = std::numeric_limits<double>::infinity();
   const double nan = 0 * inf;
   std::array<double, 8> v1coeff = {4, 2, 2, 2, -3, 5, 5, 5};

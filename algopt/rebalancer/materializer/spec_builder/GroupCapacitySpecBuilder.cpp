@@ -46,22 +46,22 @@ GroupCapacitySpecBuilder::GroupCapacitySpecBuilder(
       objectCountDimensionId_(universe_->getDimensionId(
           fmt::format("{}_count", universe_->getObjectTypeName()))),
       groupToCapacityLimit_(
-          LimitWrapper(universe_, *spec_.limit(), scopeId_, mainPartitionId_)),
+          LimitWrapper(*universe_, *spec_.limit(), scopeId_, mainPartitionId_)),
       contributionMultipliers_(LimitWrapper(
-          universe_,
+          *universe_,
           *spec_.contribution(),
           scopeId_,
           contributionPartitionId_)),
       mainGroupToContributionGroups_(getMainGroupIdToContributionGroupIds()) {
   if (auto bundleConfig = spec_.bundleConfig()) {
-    perScopeItemBundleSize_ = LimitWrapper(universe_, *bundleConfig, scopeId_);
+    perScopeItemBundleSize_ = LimitWrapper(*universe_, *bundleConfig, scopeId_);
   }
 }
 
 folly::coro::Task<ExprPtr> GroupCapacitySpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 /**
@@ -141,7 +141,7 @@ GroupCapacitySpecBuilder::getConstraint(
   std::vector<ConstraintInfo> exprs;
   for (auto& [mainGroupId, contributionGroupIds] :
        mainGroupToContributionGroups_) {
-    auto groupUtil = const_expr(0, universe_);
+    auto groupUtil = const_expr(0, *universe_);
 
     if (definition == GroupCapacitySpecDefinition::AFTER) {
       groupUtil = getAfterUtilForMainGroup(
@@ -201,7 +201,7 @@ ExprPtr GroupCapacitySpecBuilder::getAfterUtilForMainGroup(
   };
 
   auto groupScopeItemTransformUtilType = getTransformType();
-  auto groupUtil = const_expr(0, universe_);
+  auto groupUtil = const_expr(0, *universe_);
   TransformFunctionData transformData;
   if (perScopeItemBundleSize_.has_value()) {
     // problem checker ensures that provided bundle sizes are positive integers
@@ -219,7 +219,7 @@ ExprPtr GroupCapacitySpecBuilder::getAfterUtilForMainGroup(
     }
 
     auto util = std::make_shared<GroupScopeItemTransformUtil>(
-        universe_,
+        *universe_,
         contributionPartitionId_,
         contributionGroupId,
         objectCountDimensionId_,
@@ -233,7 +233,7 @@ ExprPtr GroupCapacitySpecBuilder::getAfterUtilForMainGroup(
         /*normalizationConstant=*/1,
         transformData);
 
-    inplace_add(groupUtil, util, universe_);
+    inplace_add(groupUtil, util, *universe_);
   }
 
   return groupUtil;
@@ -250,16 +250,16 @@ folly::coro::Task<ExprPtr> GroupCapacitySpecBuilder::getDuringUtilForMainGroup(
       case GroupCapacitySpecUtilType::LINEAR:
         return util;
       case GroupCapacitySpecUtilType::STEP:
-        return step(util, universe_);
+        return step(util, *universe_);
       case GroupCapacitySpecUtilType::STEP_MOD_K:
         assert(perScopeItemBundleSize_.has_value());
         return step_mod_k(
-            util, perScopeItemBundleSize_->getLimit(scopeItemId), universe_);
+            util, perScopeItemBundleSize_->getLimit(scopeItemId), *universe_);
       default:
         throw std::runtime_error("Unhandled GroupCapacitySpecUtilType");
     }
   };
-  auto groupUtil = const_expr(0, universe_);
+  auto groupUtil = const_expr(0, *universe_);
   for (auto contributionGroupId : contributionGroupIds) {
     for (auto scopeItemId : scopeItemIds) {
       auto util = co_await expressionBuilder.getAbsoluteUtil(

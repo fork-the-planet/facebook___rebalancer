@@ -39,7 +39,7 @@ ColocateGroupsSpecBuilder::ColocateGroupsSpecBuilder(
       partitionId_(universe_->getPartitionId(*spec_.partitionName())),
       partition_(universe_->getPartition(partitionId_)),
       scopeId_(universe_->getScopeId(*spec_.scope())),
-      limits_(universe_, *spec_.limits(), scopeId_, partitionId_),
+      limits_(*universe_, *spec_.limits(), scopeId_, partitionId_),
       allowedScopeItems_(
           ScopeItemFilterWrapper(*universe_, *spec_.filter(), scopeId_)
               .getScopeItemIds()),
@@ -72,7 +72,7 @@ folly::coro::Task<ExprPtr> ColocateGroupsSpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   const auto& groupIds = partition_.getGroupIds();
   const auto& initialAssignment = expressionBuilder.getInitialAssignment();
-  auto aggregatedViolation = const_expr(0, universe_);
+  auto aggregatedViolation = const_expr(0, *universe_);
   for (const auto groupId : groupIds) {
     const auto groupWeight = folly::get_default(
         *spec_.groupToWeight(), universe_->getEntityName(groupId), 1);
@@ -110,7 +110,7 @@ ConstraintInfo ColocateGroupsSpecBuilder::getConstraint(
   ExprPtr howManyWeightedItems;
   // optimized linear size expression
   howManyWeightedItems += std::make_shared<GroupScopeItemTransformUtil>(
-      universe_,
+      *universe_,
       partitionId_,
       groupId,
       dimensionId_,
@@ -128,7 +128,7 @@ ConstraintInfo ColocateGroupsSpecBuilder::getConstraint(
   }
 
   return {
-      *spec_.squares() ? power(std::move(howManyWeightedItems), 1.1, universe_)
+      *spec_.squares() ? power(std::move(howManyWeightedItems), 1.1, *universe_)
                        : std::move(howManyWeightedItems),
       getContinuousPenaltyExpr(groupId, groupWeight, initialAssignment)};
 }
@@ -239,7 +239,7 @@ std::shared_ptr<Expression> ColocateGroupsSpecBuilder::getContinuousPenaltyExpr(
 
   // normalize each util so that it is within [0, 1]
   auto normalizedLinearTerm = std::make_shared<GroupScopeItemTransformUtil>(
-      universe_,
+      *universe_,
       partitionId_,
       groupId,
       dimensionId_,
@@ -253,7 +253,7 @@ std::shared_ptr<Expression> ColocateGroupsSpecBuilder::getContinuousPenaltyExpr(
       maxUtilPossible);
 
   auto normalizedQuadraticTerm = std::make_shared<GroupScopeItemTransformUtil>(
-      universe_,
+      *universe_,
       partitionId_,
       groupId,
       dimensionId_,

@@ -79,13 +79,13 @@ class SwapMoveTypeTest : public MoveTestBaseWithTwoBinaryParams {
     for (const auto id : folly::irange(1, 9)) {
       objectValues.emplace(object(id), id);
     }
-    auto objectVector = makeObjectVector(objectValues, getUniversePtr());
+    auto objectVector = makeObjectVector(objectValues, getUniverse());
     const Assignment assignment(
         getUniverse().getContainers().getInitialAssignment());
     return std::make_shared<ObjectLookup>(
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(containers),
-        getUniversePtr(),
+        getUniverse(),
         assignment);
   }
 
@@ -121,7 +121,7 @@ CO_TEST_P(SwapMoveTypeTest, VerifyMoveSet) {
   const auto universe = co_await setUpUniverse();
   // since objective and constraint are const_expr(0, universe), all
   // objects will be equivalent
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   auto swapMoveType =
       MockSwapMoveType(interface::LocalSearchSolverSpec{}, getMoveTypeSpec());
@@ -156,7 +156,7 @@ CO_TEST_P(SwapMoveTypeTest, CheckMoveCounts) {
   // Lookup value = 5 + 6 + 7 = 18
   auto hotContainer = container(3);
   // lookup expression ensures that no two objects are equivalent
-  createProblem({getLookupExprOn({hotContainer})}, const_expr(0, universe));
+  createProblem({getLookupExprOn({hotContainer})}, const_expr(0, *universe));
 
   auto bestResult = swapMoveType.findBestMove(
       getMovesEvaluator(),
@@ -219,7 +219,7 @@ CO_TEST_P(SwapMoveTypeTest, Sampled) {
   // lookup expression ensures that no two objects are equivalent
   // Lookup value = 5 + 6 + 7 = 18
   auto hotContainer = container(3);
-  createProblem({getLookupExprOn({hotContainer})}, const_expr(0, universe));
+  createProblem({getLookupExprOn({hotContainer})}, const_expr(0, *universe));
 
   SwapMoveType::makeSampled(swapSpec, 1);
   // make fixed destination to be container(1) to reduce randomness
@@ -265,7 +265,7 @@ CO_TEST_P(SwapMoveTypeTest, DestinationsToExplore) {
   // container3 contributes the most to objective
   // Lookup value = 5 + 6 + 7 = 18
   auto hotContainer = container(3);
-  createProblem({getLookupExprOn({hotContainer})}, const_expr(0, universe));
+  createProblem({getLookupExprOn({hotContainer})}, const_expr(0, *universe));
 
   SwapMoveType::makeFixedDest(
       swapSpec,
@@ -332,7 +332,7 @@ CO_TEST_P(SwapMoveTypeTest, ExploreAllDynamicObjectsIgnoreEquivalentObjects) {
 
   // since objective and constraint are const_expr(0, universe), all
   // objects will be equivalent
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   auto bestResult =
       swapMoveType.exploreSwappingHotObjectWithObjectsInColdContainer(
@@ -353,7 +353,7 @@ CO_TEST_P(SwapMoveTypeTest, ExploreAllDynamicObjectsInEmptyColdContainer) {
 
   const auto universe = co_await setUpUniverse();
   // lookup expression ensures that no two objects are equivalent
-  createProblem({getLookupExprOn({container(1)})}, const_expr(0, universe));
+  createProblem({getLookupExprOn({container(1)})}, const_expr(0, *universe));
 
   auto bestResult =
       swapMoveType.exploreSwappingHotObjectWithObjectsInColdContainer(
@@ -376,7 +376,7 @@ CO_TEST_P(SwapMoveTypeTest, ExploreOnlyWithinSamePartition) {
 
   const auto universe = co_await setUpUniverse();
   // lookup expression ensures that no two objects are equivalent
-  createProblem({getLookupExprOn({container(1)})}, const_expr(0, universe));
+  createProblem({getLookupExprOn({container(1)})}, const_expr(0, *universe));
 
   auto bestResult =
       swapMoveType.exploreSwappingHotObjectWithObjectsInColdContainer(
@@ -404,7 +404,7 @@ CO_TEST_P(
   const auto universe = co_await setUpUniverse();
   // since objective and constraint are const_expr(0, universe), all objects are
   // equivalent
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   auto bestResult =
       swapMoveType.exploreSwappingHotObjectWithObjectsInColdContainer(
@@ -563,7 +563,7 @@ class SwapMoveTypeDirectionTest : public MoveTestBase {
 // (rru=1.0) Expect 1 move set of 4 moves (1 hot out + 3 cold in)
 CO_TEST_F(SwapMoveTypeDirectionTest, OneToK_MoveComposition) {
   const auto universe = co_await setUpUniverseOneToK();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   const auto spec = makeRatioSpec();
   auto swapMoveType =
@@ -590,7 +590,7 @@ CO_TEST_F(
     SwapMoveTypeDirectionTest,
     OneToK_DynamicDimensionUsesHotContainerScope) {
   const auto universe = co_await setUpUniverseOneToKDynamic();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   const auto spec = makeRatioSpec();
   auto swapMoveType =
@@ -620,7 +620,7 @@ CO_TEST_F(SwapMoveTypeDirectionTest, KToOne_MoveComposition) {
   ProblemConfigs::enableKToOneSwaps = true;
 
   const auto universe = co_await setUpUniverseKToOne();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   const auto spec = makeRatioSpec();
   auto swapMoveType =
@@ -662,7 +662,7 @@ CO_TEST_F(
   ProblemConfigs::enableKToOneSwaps = true;
 
   const auto universe = co_await setUpUniverseKToOneDynamic();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   const auto spec = makeRatioSpec();
   auto swapMoveType =
@@ -721,7 +721,7 @@ CO_TEST_F(SwapMoveTypeFilterTest, FilterReducesEvaluatedSwaps) {
   auto objectiveTuple = std::vector<ExprPtr>{object_lookup(
       makeAllUnequalObjectVector(3),
       containers,
-      universe,
+      *universe,
       Assignment(universe->getContainers().getInitialAssignment()))};
 
   interface::SwapMoveTypeSpec swapSpec;
@@ -730,7 +730,7 @@ CO_TEST_F(SwapMoveTypeFilterTest, FilterReducesEvaluatedSwaps) {
 
   // Without filter
   auto problemNoFilter =
-      createTestProblem(universe, objectiveTuple, const_expr(0, universe));
+      createTestProblem(universe, objectiveTuple, const_expr(0, *universe));
   const MovesEvaluator evalNoFilter(*problemNoFilter, 0, 1, "stage");
   MoveStatsAggregator statsNoFilter(universe->getPrecision());
   auto resultNoFilter =
@@ -748,7 +748,7 @@ CO_TEST_F(SwapMoveTypeFilterTest, FilterReducesEvaluatedSwaps) {
   auto problemWithFilter = createTestProblem(
       universe,
       objectiveTuple,
-      const_expr(0, universe),
+      const_expr(0, *universe),
       /*nonAcceptingContainers=*/{},
       /*config=*/{},
       /*performInitialFullApply=*/true,

@@ -29,7 +29,8 @@ class NthLargestTest : public ExpressionTestsBase {};
 TEST_F(NthLargestTest, NthLargest) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{{"container0", {}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   std::vector<std::shared_ptr<Expression>> values = {
       const_expr(-10, universe),
       const_expr(-10, universe),

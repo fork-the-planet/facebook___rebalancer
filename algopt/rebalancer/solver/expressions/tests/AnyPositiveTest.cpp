@@ -37,8 +37,9 @@ class AnyPositiveTest : public ExpressionTestsBase {
 
 TEST_F(AnyPositiveTest, InitialValue) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   // v0c0 = 1 (object0 in container0); v0c1 = 0 (object0 not in container1);
   // v1c0 = 0 (object1 in container1, not container0).
@@ -58,8 +59,9 @@ TEST_F(AnyPositiveTest, InitialValue) {
 
 TEST_F(AnyPositiveTest, AddInitialValue) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   // Start with no violating children.
   auto v0c1 = variable(object(0), container(1), universe, assignment);

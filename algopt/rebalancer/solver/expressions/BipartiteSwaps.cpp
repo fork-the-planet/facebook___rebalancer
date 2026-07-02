@@ -38,8 +38,8 @@ BipartiteSwaps::BipartiteSwaps(
     PackerMap<ObjectId, ContainerId> initial_assignment,
     PackerSet<ContainerId> left_subset,
     PackerSet<ContainerId> right_subset,
-    std::shared_ptr<const entities::Universe> universe)
-    : Expression(std::move(universe), /*initialValue=*/1.0),
+    const entities::Universe& universe)
+    : Expression(universe, /*initialValue=*/1.0),
       initial_assignment(std::move(initial_assignment)),
       left_subset_(std::move(left_subset)),
       right_subset_(std::move(right_subset)) {
@@ -113,7 +113,7 @@ ExprPtr BipartiteSwaps::getExprForLp(const LpEvaluator& evaluator) const {
   auto& problem = evaluator.getProblem();
   const Assignment& lpAssignment = problem.initial_assignment;
   auto& equivalenceSets = problem.getEquivalenceSets();
-  auto invalidSwapsCount = const_expr(0, getUniversePtr());
+  auto invalidSwapsCount = const_expr(0, getUniverse());
   PackerMap<ContainerId, PackerSet<EquivalenceSetId>> containerToEqSet;
   PackerSet<EquivalenceSetId> all_equivalence_sets;
   for (auto& [object, container] : initial_assignment) {
@@ -131,43 +131,43 @@ ExprPtr BipartiteSwaps::getExprForLp(const LpEvaluator& evaluator) const {
       auto repObject = *equivalenceSets.getSet(eqSetId).begin();
       inplace_max(
           invalidSwapsCount,
-          variable(repObject, container, getUniversePtr(), lpAssignment),
-          getUniversePtr());
+          variable(repObject, container, getUniverse(), lpAssignment),
+          getUniverse());
     }
   }
 
   for (auto leftContainer : left_subset_) {
     for (auto rightContainer : right_subset_) {
-      auto movingLeftToRight = const_expr(0, getUniversePtr());
+      auto movingLeftToRight = const_expr(0, getUniverse());
       for (auto leftEqSetId : containerToEqSet[leftContainer]) {
         // for each equivalence class of object initially in the left container,
         // we count how many objects end up in the right container
         auto repObject = *equivalenceSets.getSet(leftEqSetId).begin();
         auto size = equivalenceSets.getSet(leftEqSetId).size();
         movingLeftToRight += size *
-            variable(repObject, rightContainer, getUniversePtr(), lpAssignment);
+            variable(repObject, rightContainer, getUniverse(), lpAssignment);
       }
 
-      auto movingRightToLeft = const_expr(0, getUniversePtr());
+      auto movingRightToLeft = const_expr(0, getUniverse());
       for (auto rightEqSetId : containerToEqSet[rightContainer]) {
         // symmetrical case: count objects from the right container that show up
         // in the left container
         auto repObject = *equivalenceSets.getSet(rightEqSetId).begin();
         auto size = equivalenceSets.getSet(rightEqSetId).size();
         movingRightToLeft += size *
-            variable(repObject, leftContainer, getUniversePtr(), lpAssignment);
+            variable(repObject, leftContainer, getUniverse(), lpAssignment);
       }
 
       // Difference between each pair of left and right container should be 0
       // NOTE: This doesn't guarante no moves within same side of the
       // bipartite
       auto diff = movingRightToLeft - movingLeftToRight;
-      inplace_max(invalidSwapsCount, diff, getUniversePtr());
-      inplace_max(invalidSwapsCount, -1 * diff, getUniversePtr());
+      inplace_max(invalidSwapsCount, diff, getUniverse());
+      inplace_max(invalidSwapsCount, -1 * diff, getUniverse());
     }
   }
 
-  return 1 - step(std::move(invalidSwapsCount), getUniversePtr());
+  return 1 - step(std::move(invalidSwapsCount), getUniverse());
 }
 
 algopt::lp::Expression BipartiteSwaps::lp(

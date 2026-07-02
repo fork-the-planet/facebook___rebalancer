@@ -192,7 +192,7 @@ class SpecBuilderTestBase : public ::testing::TestWithParam<T>,
       throw std::runtime_error(
           "expected to call any_positive only after buildUniverse() is called");
     }
-    return facebook::rebalancer::any_positive(exprs, universe_);
+    return facebook::rebalancer::any_positive(exprs, *universe_);
   }
 
   [[nodiscard]] std::string digest(

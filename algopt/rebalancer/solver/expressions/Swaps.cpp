@@ -36,10 +36,10 @@ using entities::ObjectId;
 
 Swaps::Swaps(
     const PackerMap<ObjectId, ContainerId>& initial_assignment,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const folly::Optional<PackerSet<ObjectId>>& subset,
     SubsetDefinition subsetDefinition)
-    : Expression(std::move(universe), /*initialValue=*/1.0),
+    : Expression(universe, /*initialValue=*/1.0),
       initial_assignment(initial_assignment),
       subset(subset),
       subsetDefinition_(subsetDefinition) {
@@ -133,7 +133,7 @@ ExprPtr Swaps::getEquivExprForLp(const LpEvaluator& evaluator) const {
   auto& problem = evaluator.getProblem();
   auto& equivalenceSets = problem.getEquivalenceSets();
   const Assignment& lpAssignment = problem.initial_assignment;
-  auto invalidSwapCount = const_expr(0, getUniversePtr());
+  auto invalidSwapCount = const_expr(0, getUniverse());
   PackerMap<ContainerId, PackerSet<EquivalenceSetId>>
       containerToDynamicEquivalenceSets;
   PackerSet<EquivalenceSetId> dynamicEquivalenceSets;
@@ -159,11 +159,8 @@ ExprPtr Swaps::getEquivExprForLp(const LpEvaluator& evaluator) const {
           invalidSwapCount,
           eqSet.size() *
               variable(
-                  representativeObject,
-                  container,
-                  getUniversePtr(),
-                  lpAssignment),
-          getUniversePtr());
+                  representativeObject, container, getUniverse(), lpAssignment),
+          getUniverse());
     }
   }
 
@@ -185,42 +182,42 @@ ExprPtr Swaps::getEquivExprForLp(const LpEvaluator& evaluator) const {
         continue;
       }
       // Objects in subset that move from src to dst.
-      auto src_subset = const_expr(0, getUniversePtr());
+      auto src_subset = const_expr(0, getUniverse());
       // Objects not in subset that move from src to dst.
-      auto src_other = const_expr(0, getUniversePtr());
+      auto src_other = const_expr(0, getUniverse());
       for (auto eqSetId : srcEqSets) {
         auto& eqSet = equivalenceSets.getSet(eqSetId);
         auto repObjId = *eqSet.begin();
         auto objectCountInEqSet = eqSet.size();
         if (subset.has_value() && !subset->contains(repObjId)) {
           src_other += objectCountInEqSet *
-              variable(repObjId, dst_container, getUniversePtr(), lpAssignment);
+              variable(repObjId, dst_container, getUniverse(), lpAssignment);
         } else {
           src_subset += objectCountInEqSet *
-              variable(repObjId, dst_container, getUniversePtr(), lpAssignment);
+              variable(repObjId, dst_container, getUniverse(), lpAssignment);
         }
       }
       // Objects in subset that move from dst to src.
-      auto dst_subset = const_expr(0, getUniversePtr());
+      auto dst_subset = const_expr(0, getUniverse());
       // Objects not in subset that move from dst to src.
-      auto dst_other = const_expr(0, getUniversePtr());
+      auto dst_other = const_expr(0, getUniverse());
       for (auto eqSetId : dstEqSets) {
         auto& eqSet = equivalenceSets.getSet(eqSetId);
         auto repObjId = *eqSet.begin();
         auto objectCountInEqSet = eqSet.size();
         if (subset.has_value() && !subset->contains(repObjId)) {
           dst_other += objectCountInEqSet *
-              variable(repObjId, src_container, getUniversePtr(), lpAssignment);
+              variable(repObjId, src_container, getUniverse(), lpAssignment);
         } else {
           dst_subset += objectCountInEqSet *
-              variable(repObjId, src_container, getUniversePtr(), lpAssignment);
+              variable(repObjId, src_container, getUniverse(), lpAssignment);
         }
       }
       auto src_total = src_subset + src_other;
       auto dst_total = dst_subset + dst_other;
       // Moved in one direction must match moved in the opposite direction.
-      inplace_max(invalidSwapCount, src_total - dst_total, getUniversePtr());
-      inplace_max(invalidSwapCount, dst_total - src_total, getUniversePtr());
+      inplace_max(invalidSwapCount, src_total - dst_total, getUniverse());
+      inplace_max(invalidSwapCount, dst_total - src_total, getUniverse());
       if (!subset.has_value()) {
         continue;
       }
@@ -228,10 +225,8 @@ ExprPtr Swaps::getEquivExprForLp(const LpEvaluator& evaluator) const {
       if (subsetDefinition_ == SubsetDefinition::BOTH_SAME_SIDE_OF_SUBSET) {
         // For this definition, the objects should be swapped within the subset.
         // in subset count of both sides should match.
-        inplace_max(
-            invalidSwapCount, src_subset - dst_subset, getUniversePtr());
-        inplace_max(
-            invalidSwapCount, dst_subset - src_subset, getUniversePtr());
+        inplace_max(invalidSwapCount, src_subset - dst_subset, getUniverse());
+        inplace_max(invalidSwapCount, dst_subset - src_subset, getUniverse());
         continue;
       }
 
@@ -239,22 +234,22 @@ ExprPtr Swaps::getEquivExprForLp(const LpEvaluator& evaluator) const {
       // must be swapped with subset objects of the other side, so the
       // non-subset object count of one side must not exceed the subset object
       // count of the other side.
-      inplace_max(invalidSwapCount, src_other - dst_subset, getUniversePtr());
-      inplace_max(invalidSwapCount, dst_other - src_subset, getUniversePtr());
+      inplace_max(invalidSwapCount, src_other - dst_subset, getUniverse());
+      inplace_max(invalidSwapCount, dst_other - src_subset, getUniverse());
       if (subsetDefinition_ == SubsetDefinition::EXACTLY_ONE_IN_SUBSET) {
         // Definition 2: a valid swap exchanges an object inside the subset with
         // an object outside the subset. This means not only non-subset object
         // count of one side must not exceed the subset object count of the
         // other side, but such counts must match excactly. Here we add the
         // complementary constraint to guarantee that.
-        inplace_max(invalidSwapCount, dst_subset - src_other, getUniversePtr());
-        inplace_max(invalidSwapCount, src_subset - dst_other, getUniversePtr());
+        inplace_max(invalidSwapCount, dst_subset - src_other, getUniverse());
+        inplace_max(invalidSwapCount, src_subset - dst_other, getUniverse());
         continue;
       }
     }
   }
 
-  return 1 - step(invalidSwapCount, getUniversePtr());
+  return 1 - step(invalidSwapCount, getUniverse());
 }
 
 algopt::lp::Expression Swaps::lp(

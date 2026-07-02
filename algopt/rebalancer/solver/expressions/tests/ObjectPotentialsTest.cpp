@@ -56,10 +56,16 @@ class ObjectPotentialsTest : public ExpressionTestsBase {};
 
 class MockExpression : public Expression {
  public:
+  // Process-lifetime dummy Universe; outlives the mock's non-owning pointer.
+  static const entities::Universe& dummyUniverse() {
+    static const auto universe = std::make_shared<const entities::Universe>();
+    return *universe;
+  }
+
   explicit MockExpression(
       std::vector<ObjectPotential> objectPotentials,
       double value = 0)
-      : Expression(std::make_shared<entities::Universe>(), value),
+      : Expression(dummyUniverse(), value),
         objectPotentials_(std::move(objectPotentials)) {}
   double innerFullApply(
       const TopToBottomEvaluator& /* evaluator */,
@@ -126,9 +132,10 @@ TEST_F(ObjectPotentialsTest, VariableInactive) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container100", {}}, {"container101", {"object10"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   Variable variable(object(10), container(100), universe, initialAssignment);
   const Assignment assignment({{container(101), {object(10)}}});
   Context context;
@@ -143,9 +150,10 @@ TEST_F(ObjectPotentialsTest, VariableActive) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container100", {"object10"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   Variable variable(object(10), container(100), universe, initialAssignment);
   const Assignment assignment({{container(100), {object(10)}}});
   Context context;
@@ -162,9 +170,10 @@ TEST_F(ObjectPotentialsTest, ObjectLookup) {
           {"container100", {"object10"}},
           {"container101", {"object11"}},
           {"container102", {"object12"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   entities::ObjectIdToDoubleMap objectValues(
       /*totalSize=*/13, /*defaultValue=*/0.0, /*expectedNonDefaultSize=*/3);
   objectValues.emplace(object(10), 1000);
@@ -236,7 +245,7 @@ TEST_F(ObjectPotentialsTest, LinearSum) {
             "object5",
             "object6",
             "object7"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
   auto child1 = std::make_shared<MockExpression>(std::vector<ObjectPotential>(
       {{.objectId = object(1), .potential = 1000},
        {.objectId = object(2), .potential = 2500}}));
@@ -249,7 +258,7 @@ TEST_F(ObjectPotentialsTest, LinearSum) {
       {{.objectId = object(6), .potential = -500},
        {.objectId = object(7), .potential = 500}}));
   const LinearSum sum(
-      universe, 42, {{child1, 1}, {child2, 2}, {child3, 0}, {child4, -3}});
+      getUniverse(), 42, {{child1, 1}, {child2, 2}, {child3, 0}, {child4, -3}});
   auto potentials = sum.getObjectPotentials(true);
   const std::vector<ObjectPotential> expected = {
       {.objectId = object(4), .potential = 4000},
@@ -268,7 +277,7 @@ TEST_F(ObjectPotentialsTest, SumOverThreshold) {
       entities::Map<std::string, std::vector<std::string>>{
           {"container1",
            {"object1", "object2", "object3", "object4", "object5"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
   auto threshold =
       std::make_shared<MockExpression>(std::vector<ObjectPotential>(), 50);
   auto child1 = std::make_shared<MockExpression>(
@@ -282,7 +291,7 @@ TEST_F(ObjectPotentialsTest, SumOverThreshold) {
           {{.objectId = object(4), .potential = 10},
            {.objectId = object(5), .potential = 20}}),
       45);
-  SumOverThreshold sot(threshold, {child1, child2}, false, universe);
+  SumOverThreshold sot(threshold, {child1, child2}, false, getUniverse());
   Context context;
   const Assignment assignment;
   sot.fullApply(TopToBottomEvaluator(context), assignment);
@@ -300,7 +309,7 @@ TEST_F(ObjectPotentialsTest, SumOverThresholdWithSquares) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container1", {"object1", "object2", "object3", "object4"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
   auto threshold =
       std::make_shared<MockExpression>(std::vector<ObjectPotential>(), 10);
   auto child1 = std::make_shared<MockExpression>(
@@ -313,7 +322,7 @@ TEST_F(ObjectPotentialsTest, SumOverThresholdWithSquares) {
           {{.objectId = object(3), .potential = 1},
            {.objectId = object(4), .potential = 2}}),
       14);
-  SumOverThreshold sot(threshold, {child1, child2}, true, universe);
+  SumOverThreshold sot(threshold, {child1, child2}, true, getUniverse());
   Context context;
   const Assignment assignment;
   sot.fullApply(TopToBottomEvaluator(context), assignment);
@@ -332,13 +341,13 @@ TEST_F(ObjectPotentialsTest, TransformPower) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container1", {"object1", "object2"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
   auto child = std::make_shared<MockExpression>(
       std::vector<ObjectPotential>(
           {{.objectId = object(1), .potential = 1},
            {.objectId = object(2), .potential = 2}}),
       10);
-  Power power(child, 2, universe);
+  Power power(child, 2, getUniverse());
   Context context;
   const Assignment assignment;
   power.fullApply(TopToBottomEvaluator(context), assignment);
@@ -355,7 +364,7 @@ TEST_F(ObjectPotentialsTest, Max) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container1", {"object1", "object2", "object3", "object4"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
   auto children = std::vector<std::shared_ptr<Expression>>(
       {std::make_shared<MockExpression>(
            std::vector<ObjectPotential>(
@@ -372,7 +381,7 @@ TEST_F(ObjectPotentialsTest, Max) {
                {{.objectId = object(2), .potential = 4},
                 {.objectId = object(4), .potential = 8}}),
            9)});
-  Max max(children, universe);
+  Max max(children, getUniverse());
   Context context;
   const Assignment assignment;
   max.fullApply(TopToBottomEvaluator(context), assignment);
@@ -406,16 +415,16 @@ CO_TEST_F(ObjectPotentialsTest, ObjectPartitionLookup) {
       {{"group1", {"object1", "object2", "object3"}},
        {"group2", {"object4", "object5", "object6"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto scope1Id = scopeId("scope1");
   const auto scopeItem0Id = scopeItemId(scope1Id, "scopeItem0");
   const auto partition1Id = partitionId("partition1");
   const auto objectCountDimId = dimensionId("object_count");
-  const auto group1 = universe->getGroupId(partition1Id, "group1");
-  const auto group2 = universe->getGroupId(partition1Id, "group2");
+  const auto group1 = universe.getGroupId(partition1Id, "group1");
+  const auto group2 = universe.getGroupId(partition1Id, "group2");
 
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto partition = std::make_shared<ObjectPartition>(
       partition1Id,

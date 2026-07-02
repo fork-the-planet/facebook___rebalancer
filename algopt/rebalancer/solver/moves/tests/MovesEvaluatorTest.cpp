@@ -73,15 +73,15 @@ TEST_F(MovesEvaluatorTest, DoNotWorsenGoalConfigNoHigherPriorityObjConfig) {
 
   const auto universe = buildUniverse();
 
-  auto objectVector =
-      makeObjectVector(PackerMap<entities::ObjectId, double>{}, 1, 8, universe);
+  auto objectVector = makeObjectVector(
+      PackerMap<entities::ObjectId, double>{}, 1, 8, *universe);
   auto container1Util = makeObjectLookup(objectVector, {container(1)});
   auto container2Util = makeObjectLookup(objectVector, {container(2)});
   auto container3Util = makeObjectLookup(objectVector, {container(3)});
 
   createProblem(
       /*objectiveTuple=*/{container1Util, container2Util, container3Util},
-      /*constraint=*/const_expr(0, universe));
+      /*constraint=*/const_expr(0, *universe));
 
   auto& problem = getProblem();
   auto doNotWorsenGoalConfig = MockMovesEvaluator::makeDoNotWorsenGoalConfig(
@@ -147,15 +147,15 @@ TEST_F(MovesEvaluatorTest, DoNotWorsenGoalConfigHigherPriorityObjConfig1) {
 
   const auto universe = buildUniverse();
 
-  auto objectVector =
-      makeObjectVector(PackerMap<entities::ObjectId, double>{}, 1, 8, universe);
+  auto objectVector = makeObjectVector(
+      PackerMap<entities::ObjectId, double>{}, 1, 8, *universe);
   auto container1Util = makeObjectLookup(objectVector, {container(1)});
   auto container2Util = makeObjectLookup(objectVector, {container(2)});
   auto container3Util = makeObjectLookup(objectVector, {container(3)});
 
   createProblem(
       /*objectiveTuple=*/{container1Util, container2Util, container3Util},
-      /*constraint=*/const_expr(0, universe));
+      /*constraint=*/const_expr(0, *universe));
 
   auto& problem = getProblem();
   auto doNotWorsenGoalConfig = MockMovesEvaluator::makeDoNotWorsenGoalConfig(
@@ -226,15 +226,15 @@ TEST_F(MovesEvaluatorTest, DoNotWorsenGoalConfigHigherPriorityObjConfig2) {
 
   const auto universe = buildUniverse();
 
-  auto objectVector =
-      makeObjectVector(PackerMap<entities::ObjectId, double>{}, 1, 8, universe);
+  auto objectVector = makeObjectVector(
+      PackerMap<entities::ObjectId, double>{}, 1, 8, *universe);
   auto container1Util = makeObjectLookup(objectVector, {container(1)});
   auto container2Util = makeObjectLookup(objectVector, {container(2)});
   auto container3Util = makeObjectLookup(objectVector, {container(3)});
 
   createProblem(
       /*objectiveTuple=*/{container1Util, container2Util, container3Util},
-      /*constraint=*/const_expr(0, universe));
+      /*constraint=*/const_expr(0, *universe));
 
   auto& problem = getProblem();
   auto doNotWorsenGoalConfig = MockMovesEvaluator::makeDoNotWorsenGoalConfig(
@@ -309,14 +309,14 @@ TEST_F(MovesEvaluatorTest, TestConstraintViolations) {
 
   const auto universe = buildUniverse();
 
-  auto objectVector =
-      makeObjectVector(PackerMap<entities::ObjectId, double>{}, 1, 4, universe);
+  auto objectVector = makeObjectVector(
+      PackerMap<entities::ObjectId, double>{}, 1, 4, *universe);
   // Set up constraint: container(1) can hold max 2 objects
   auto container1Objects = makeObjectLookup(objectVector, {container(1)});
-  auto constraint = container1Objects - const_expr(2.0, universe);
+  auto constraint = container1Objects - const_expr(2.0, *universe);
 
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
+      /*objectiveTuple=*/{const_expr(0, *universe)},
       /*constraint=*/constraint);
 
   auto& problem = getProblem();
@@ -347,14 +347,14 @@ TEST_F(MovesEvaluatorTest, TestSatisfiesConstraints) {
 
   const auto universe = buildUniverse();
 
-  auto objectVector =
-      makeObjectVector(PackerMap<entities::ObjectId, double>{}, 1, 4, universe);
+  auto objectVector = makeObjectVector(
+      PackerMap<entities::ObjectId, double>{}, 1, 4, *universe);
   // Set up constraint: container(1) can hold max 2 objects
   auto container1Objects = makeObjectLookup(objectVector, {container(1)});
-  auto constraint = container1Objects - const_expr(2.0, universe);
+  auto constraint = container1Objects - const_expr(2.0, *universe);
 
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
+      /*objectiveTuple=*/{const_expr(0, *universe)},
       /*constraint=*/constraint);
 
   auto& problem = getProblem();

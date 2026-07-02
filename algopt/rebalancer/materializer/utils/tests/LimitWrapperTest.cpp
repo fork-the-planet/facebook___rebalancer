@@ -20,8 +20,6 @@
 #include <folly/coro/BlockingWait.h>
 #include <gtest/gtest.h>
 
-#include <memory>
-
 namespace facebook::rebalancer::materializer::tests {
 class LimitWrapperTest : public SpecBuilderTestBase<> {
  protected:
@@ -60,7 +58,8 @@ class LimitWrapperTest : public SpecBuilderTestBase<> {
 TEST_F(LimitWrapperTest, DefaultLimit) {
   const interface::Limit limit;
 
-  const LimitWrapper wrapper(buildUniverse(), limit, host());
+  const auto universe = buildUniverse();
+  const LimitWrapper wrapper(*universe, limit, host());
 
   EXPECT_EQ(interface::LimitType::RELATIVE, wrapper.getType());
   EXPECT_EQ(1.0, wrapper.getLimit(host(0)));
@@ -74,7 +73,8 @@ TEST_F(LimitWrapperTest, ScopeItemLimit) {
   limit.globalLimit() = 2.7;
   limit.scopeItemLimits() = {{"host0", 1.5}, {"host1", 3.5}};
 
-  const LimitWrapper wrapper(buildUniverse(), limit, host());
+  const auto universe = buildUniverse();
+  const LimitWrapper wrapper(*universe, limit, host());
 
   EXPECT_EQ(interface::LimitType::ABSOLUTE, wrapper.getType());
   EXPECT_EQ(1.5, wrapper.getLimit(host(0)));
@@ -88,7 +88,8 @@ TEST_F(LimitWrapperTest, GroupItemLimit) {
   limit.globalLimit() = 2.7;
   limit.groupLimits() = {{"job1", 1}, {"job2", 3}};
 
-  const LimitWrapper wrapper(buildUniverse(), limit, host(), job());
+  const auto universe = buildUniverse();
+  const LimitWrapper wrapper(*universe, limit, host(), job());
 
   EXPECT_EQ(1, wrapper.getLimit(job(1)));
   EXPECT_EQ(3, wrapper.getLimit(job(2)));
@@ -99,8 +100,9 @@ TEST_F(LimitWrapperTest, AllGroupItemLimits) {
   limit.type() = interface::LimitType::ABSOLUTE;
   limit.globalLimit() = 1;
   limit.groupLimits() = {{"job2", 2}};
+  const auto universe = buildUniverse();
   const entities::Map<entities::GroupId, double> parsedLimits =
-      LimitWrapper::getAllGroupLimits(buildUniverse(), job(), limit);
+      LimitWrapper::getAllGroupLimits(*universe, job(), limit);
   EXPECT_EQ(2, parsedLimits.size());
   EXPECT_EQ(1, parsedLimits.at(job(1)));
   EXPECT_EQ(2, parsedLimits.at(job(2)));
@@ -111,7 +113,8 @@ TEST_F(LimitWrapperTest, ScopeItemTogroupItemLimits) {
   limit.type() = interface::LimitType::ABSOLUTE;
   limit.globalLimit() = 2.7;
   limit.scopeItemToGroupLimits() = {{"host0", {{"job1", 1}}}};
-  const LimitWrapper wrapper(buildUniverse(), limit, host(), job());
+  const auto universe = buildUniverse();
+  const LimitWrapper wrapper(*universe, limit, host(), job());
 
   EXPECT_EQ(1, wrapper.getLimit(host(0), job(1)));
 }
@@ -125,7 +128,7 @@ TEST_F(LimitWrapperTest, GroupsOverride) {
     limit.globalLimit() = 3;
     limit.scopeItemLimits() = {{"host0", 1.5}, {"host1", 3.5}};
 
-    const LimitWrapper wrapper(universe, limit, host(), job());
+    const LimitWrapper wrapper(*universe, limit, host(), job());
 
     const entities::Map<entities::GroupId, double> expected0 = {
         {job(1), 1.5}, {job(2), 1.5}};
@@ -142,7 +145,7 @@ TEST_F(LimitWrapperTest, GroupsOverride) {
     limit.globalLimit() = 3;
     limit.groupLimits() = {{"job1", 1.5}, {"job2", 3.5}};
 
-    const LimitWrapper wrapper(universe, limit, host(), job());
+    const LimitWrapper wrapper(*universe, limit, host(), job());
 
     const entities::Map<entities::GroupId, double> expected = {
         {job(1), 1.5}, {job(2), 3.5}};
@@ -161,7 +164,7 @@ TEST_F(LimitWrapperTest, GroupsOverride) {
     // host0 we have scopeItemLimit of 1.5 while job limit of 2.5 and 3.5. In
     // this case we choose scopeItem value as the override
 
-    const LimitWrapper wrapper(universe, limit, host(), job());
+    const LimitWrapper wrapper(*universe, limit, host(), job());
 
     const entities::Map<entities::GroupId, double> expected0 = {
         {job(1), 1.5}, {job(2), 1.5}};
@@ -178,7 +181,7 @@ TEST_F(LimitWrapperTest, GroupsOverride) {
     limit.scopeItemLimits() = {{"host0", 1.5}, {"host1", 3.5}};
     limit.scopeItemToGroupLimits() = {{"host0", {{"job1", 1}}}};
 
-    const LimitWrapper wrapper(universe, limit, host(), job());
+    const LimitWrapper wrapper(*universe, limit, host(), job());
 
     const entities::Map<entities::GroupId, double> expected0 = {
         {job(1), 1}, {job(2), 1.5}};
@@ -198,7 +201,7 @@ TEST_F(LimitWrapperTest, CheckAndGetIntegralScopeItemLimits) {
     limit.globalLimit() = 2.0;
     limit.scopeItemLimits() = {{"host0", 1.0}, {"host1", 3.0}, {"host2", 5.0}};
 
-    const LimitWrapper wrapper(universe, limit, host());
+    const LimitWrapper wrapper(*universe, limit, host());
 
     const auto integralLimits =
         wrapper.checkAndGetPositiveIntegerScopeItemLimits();
@@ -215,7 +218,7 @@ TEST_F(LimitWrapperTest, CheckAndGetIntegralScopeItemLimits) {
     limit.globalLimit() = 2.0;
     limit.scopeItemLimits() = {{"host0", 1.5}, {"host1", 3.0}};
 
-    const LimitWrapper wrapper(universe, limit, host());
+    const LimitWrapper wrapper(*universe, limit, host());
 
     REBALANCER_EXPECT_RUNTIME_ERROR(
         wrapper.checkAndGetPositiveIntegerScopeItemLimits(),
@@ -229,7 +232,7 @@ TEST_F(LimitWrapperTest, CheckAndGetIntegralScopeItemLimits) {
     limit.globalLimit() = 2.0;
     // No scopeItemLimits specified
 
-    const LimitWrapper wrapper(universe, limit, host());
+    const LimitWrapper wrapper(*universe, limit, host());
 
     const auto integralLimits =
         wrapper.checkAndGetPositiveIntegerScopeItemLimits();

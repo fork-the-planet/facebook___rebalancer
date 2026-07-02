@@ -115,7 +115,7 @@ class BoundsTest : public ExpressionTestsBase {
 
     // Create ObjectPartition
     auto objectPartition = std::make_shared<ObjectPartition>(
-        partition1Id, objectWeightDimensionId, groupLimits, universe_);
+        partition1Id, objectWeightDimensionId, groupLimits, *universe_);
 
     // Create ObjectPartitionLookup
     Assignment assignment(universe_->getContainers().getInitialAssignment());
@@ -126,7 +126,7 @@ class BoundsTest : public ExpressionTestsBase {
                 container0}) /* lookupContainers */,
         scope1Id,
         scopeItem0,
-        universe_,
+        *universe_,
         assignment,
         PackerMap<entities::GroupId, double>({}) /* groupLimitOverrides */,
         PackerSet<entities::ObjectId>(
@@ -191,8 +191,8 @@ CO_TEST_F(BoundsTest, SerialComputing) {
 
   auto p = createTestProblem(
       universe_,
-      {std::make_shared<LinearSum>(universe_, 0, exprToCoef)},
-      std::make_shared<LinearSum>(universe_, 0));
+      {std::make_shared<LinearSum>(*universe_, 0, exprToCoef)},
+      std::make_shared<LinearSum>(*universe_, 0));
 
   Context context;
   auto [lb, ub] =
@@ -212,8 +212,8 @@ CO_TEST_F(BoundsTest, ParallelComputing) {
 
   auto p = createTestProblem(
       universe_,
-      {std::make_shared<LinearSum>(universe_, 0, exprToCoef)},
-      std::make_shared<LinearSum>(universe_, 0),
+      {std::make_shared<LinearSum>(*universe_, 0, exprToCoef)},
+      std::make_shared<LinearSum>(*universe_, 0),
       {},
       {},
       /*performInitialFullApply=*/true,

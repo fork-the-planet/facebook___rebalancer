@@ -44,17 +44,17 @@ folly::coro::Task<ExprPtr> WorkingSetSpecBuilder::goalCoro(
     workingUnits.emplace_back(weight, std::move(objects));
   }
 
-  auto result = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
 
   for (auto scopeItemId : scopeItemIds) {
-    auto workingSetSize = const_expr(0, universe_);
+    auto workingSetSize = const_expr(0, *universe_);
     for (auto& [weight, objects] : workingUnits) {
-      auto objectCount = const_expr(0, universe_);
+      auto objectCount = const_expr(0, *universe_);
       for (auto& [objectId, objectWeight] : objects) {
         objectCount += objectWeight *
             expressionBuilder.isAssigned(scopeId, scopeItemId, objectId);
       }
-      workingSetSize += weight * step(objectCount, universe_);
+      workingSetSize += weight * step(objectCount, *universe_);
     }
     workingSetSize->description = fmt::format(
         "Working set size of {} {}",
@@ -64,9 +64,9 @@ folly::coro::Task<ExprPtr> WorkingSetSpecBuilder::goalCoro(
     if (metric == WorkingSetMetric::AVG) {
       auto util = co_await expressionBuilder.getAbsoluteUtil(
           UtilMetric::AFTER, dimensionId, scopeId, scopeItemId);
-      result += product(util, workingSetSize, universe_);
+      result += product(util, workingSetSize, *universe_);
     } else if (metric == WorkingSetMetric::MAX) {
-      inplace_max(result, workingSetSize, universe_);
+      inplace_max(result, workingSetSize, *universe_);
     } else {
       throw std::runtime_error("unknown working set metric");
     }

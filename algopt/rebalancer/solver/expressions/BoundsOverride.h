@@ -28,7 +28,7 @@ class BoundsOverride : public Expression {
       std::shared_ptr<Expression> child,
       std::optional<double> lowerBound,
       std::optional<double> upperBound,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   void updateEquivalenceSets(EquivalenceSets& equivSets) const override;
 

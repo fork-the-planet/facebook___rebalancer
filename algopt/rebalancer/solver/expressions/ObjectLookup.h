@@ -33,7 +33,7 @@ class ObjectLookup : public Expression {
   explicit ObjectLookup(
       std::shared_ptr<Expression>,
       std::shared_ptr<const PackerSet<entities::ContainerId>> containersPtr,
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       const Assignment& initialAssignment);
 
   void updateEquivalenceSets(EquivalenceSets& equivSets) const override;

@@ -63,7 +63,7 @@ static void combine(ExprPtr& lhs, ExprPtr rhs, double coef) {
     return;
   }
   if (lhs == nullptr) {
-    lhs = const_expr(0, rhs->getUniversePtr());
+    lhs = const_expr(0, rhs->getUniverse());
   }
   const bool lhs_is_ls = is_linearsum(*lhs);
   const bool rhs_is_ls = is_linearsum(*rhs);
@@ -71,7 +71,7 @@ static void combine(ExprPtr& lhs, ExprPtr rhs, double coef) {
     /* make left side a linearsum */
     PackerMap<std::shared_ptr<Expression>, double> children;
     children[lhs] = 1;
-    lhs = std::make_shared<LinearSum>(lhs->getUniversePtr(), 0, children);
+    lhs = std::make_shared<LinearSum>(lhs->getUniverse(), 0, children);
   }
   if (!rhs_is_ls) {
     /* linearsum + expression */
@@ -108,10 +108,8 @@ static AnyPositive* get_any_positive(ExprPtr expr) {
   return (AnyPositive*)expr.get();
 }
 
-ExprPtr const_expr(
-    double value,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<LinearSum>(std::move(universe), value);
+ExprPtr const_expr(double value, const entities::Universe& universe) {
+  return make_shared<LinearSum>(universe, value);
 }
 
 ExprPtr operator+(ExprPtr lhs, ExprPtr rhs) {
@@ -140,7 +138,7 @@ ExprPtr operator+(ExprPtr lhs, double rhs) {
   if (lhs == nullptr) {
     throw std::runtime_error("lhs must not be null for inplace_add");
   }
-  return lhs + const_expr(rhs, lhs->getUniversePtr());
+  return lhs + const_expr(rhs, lhs->getUniverse());
 }
 
 ExprPtr operator+(double lhs, ExprPtr rhs) {
@@ -154,7 +152,7 @@ void operator+=(ExprPtr& lhs, ExprPtr rhs) {
 void inplace_add(
     ExprPtr& lhs,
     ExprPtr rhs,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     double coef) {
   if (rhs == nullptr) {
     return;
@@ -182,7 +180,7 @@ void operator+=(ExprPtr& lhs, double rhs) {
     /* make left side a linearsum */
     PackerMap<std::shared_ptr<Expression>, double> children;
     children[lhs] = 1;
-    lhs = std::make_shared<LinearSum>(lhs->getUniversePtr(), 0, children);
+    lhs = std::make_shared<LinearSum>(lhs->getUniverse(), 0, children);
   }
   /* LiearSum + const */
   LinearSum* sum = get_linearsum(*lhs);
@@ -220,7 +218,7 @@ ExprPtr operator*(ExprPtr lhs, double rhs) {
     throw std::runtime_error("lhs must not be null for inplace_multiply");
   }
   if (rhs == 0 || lhs == 0) {
-    return const_expr(0, lhs->getUniversePtr());
+    return const_expr(0, lhs->getUniverse());
   }
   if (is_linearsum(*lhs)) {
     /* LinearSum * const */
@@ -231,7 +229,7 @@ ExprPtr operator*(ExprPtr lhs, double rhs) {
     /* other_type * const => linearsum */
     PackerMap<ExprPtr, double> expr_coef;
     expr_coef[lhs] = rhs;
-    return make_shared<LinearSum>(lhs->getUniversePtr(), 0, expr_coef);
+    return make_shared<LinearSum>(lhs->getUniverse(), 0, expr_coef);
   }
 }
 
@@ -245,7 +243,7 @@ void operator*=(ExprPtr& lhs, double rhs) {
   }
   const auto& precision = lhs->getPrecision();
   if (precision.isEqual(rhs, 0)) {
-    lhs = const_expr(0, lhs->getUniversePtr());
+    lhs = const_expr(0, lhs->getUniverse());
     return;
   } else if (precision.isEqual(rhs, 1)) {
     return;
@@ -257,7 +255,7 @@ void operator*=(ExprPtr& lhs, double rhs) {
   } else {
     PackerMap<ExprPtr, double> children;
     children[lhs] = rhs;
-    lhs = std::make_shared<LinearSum>(lhs->getUniversePtr(), 0, children);
+    lhs = std::make_shared<LinearSum>(lhs->getUniverse(), 0, children);
   }
 }
 
@@ -277,44 +275,40 @@ bool operator==(ExprPtr lhs, double rhs) {
   return *sum == rhs;
 }
 
-ExprPtr
-min(ExprPtr A, ExprPtr B, std::shared_ptr<const entities::Universe> universe) {
-  return -1 * max(-1 * std::move(A), -1 * std::move(B), std::move(universe));
+ExprPtr min(ExprPtr A, ExprPtr B, const entities::Universe& universe) {
+  return -1 * max(-1 * std::move(A), -1 * std::move(B), universe);
 }
 
 ExprPtr min(
     const std::vector<ExprPtr>& exprs,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   std::vector<ExprPtr> negated;
   negated.reserve(exprs.size());
   for (auto& expr : exprs) {
     negated.push_back(-1 * expr);
   }
-  return -1 * max(negated, std::move(universe));
+  return -1 * max(negated, universe);
 }
 
 // caller needs to make sure that A and B are binary
 // so indeed this is the optimization they want to apply
-ExprPtr binary_min(
-    ExprPtr A,
-    ExprPtr B,
-    std::shared_ptr<const entities::Universe> universe) {
+ExprPtr binary_min(ExprPtr A, ExprPtr B, const entities::Universe& universe) {
   if (A == 0 || B == 0) {
-    return const_expr(0, std::move(universe));
+    return const_expr(0, universe);
   } else if (A == 1) {
     return B;
   } else if (B == 1) {
     return A;
   }
-  return step(std::move(A) + std::move(B) - 1, std::move(universe));
+  return step(std::move(A) + std::move(B) - 1, universe);
 }
 
 void inplace_binary_max(
     ExprPtr& A,
     ExprPtr B,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   if (A == 1 || B == 1) {
-    A = const_expr(1, std::move(universe));
+    A = const_expr(1, universe);
     return;
   }
   if (A == 0) {
@@ -324,47 +318,38 @@ void inplace_binary_max(
   if (B == 0) {
     return;
   }
-  inplace_max(A, std::move(B), std::move(universe));
+  inplace_max(A, std::move(B), universe);
 }
 
-ExprPtr max(
-    ExprPtr lhs,
-    ExprPtr rhs,
-    std::shared_ptr<const entities::Universe> universe) {
-  return max({std::move(lhs), std::move(rhs)}, std::move(universe));
+ExprPtr max(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe) {
+  return max({std::move(lhs), std::move(rhs)}, universe);
 }
 
-ExprPtr max(
-    ExprPtr lhs,
-    double rhs,
-    std::shared_ptr<const entities::Universe> universe) {
+ExprPtr max(ExprPtr lhs, double rhs, const entities::Universe& universe) {
   auto constRhs = const_expr(rhs, universe);
-  return max({std::move(lhs), std::move(constRhs)}, std::move(universe));
+  return max({std::move(lhs), std::move(constRhs)}, universe);
 }
 
-ExprPtr max(
-    double lhs,
-    ExprPtr rhs,
-    std::shared_ptr<const entities::Universe> universe) {
-  return max(std::move(rhs), lhs, std::move(universe));
+ExprPtr max(double lhs, ExprPtr rhs, const entities::Universe& universe) {
+  return max(std::move(rhs), lhs, universe);
 }
 
 ExprPtr max(
     initializer_list<ExprPtr> exprs,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<Max>(exprs, std::move(universe));
+    const entities::Universe& universe) {
+  return make_shared<Max>(exprs, universe);
 }
 
 ExprPtr max(
     const std::vector<ExprPtr>& exprs,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<Max>(exprs, std::move(universe));
+    const entities::Universe& universe) {
+  return make_shared<Max>(exprs, universe);
 }
 
 void inplace_max(
     ExprPtr& lhs,
     ExprPtr rhs,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   if (rhs == nullptr) {
     return;
   }
@@ -376,42 +361,38 @@ void inplace_max(
     get_max(lhs)->add(rhs);
   } else {
     lhs = make_shared<Max>(
-        initializer_list<ExprPtr>{lhs, std::move(rhs)}, std::move(universe));
+        initializer_list<ExprPtr>{lhs, std::move(rhs)}, universe);
   }
 }
 
 ExprPtr any_positive(
     initializer_list<ExprPtr> exprs,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   auto feasibilityTolerance =
-      universe->getPrecision().getTolerances().absolute().value();
-  return make_shared<AnyPositive>(
-      exprs, std::move(universe), feasibilityTolerance);
+      universe.getPrecision().getTolerances().absolute().value();
+  return make_shared<AnyPositive>(exprs, universe, feasibilityTolerance);
 }
 
 ExprPtr any_positive(
     const std::vector<ExprPtr>& exprs,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   auto feasibilityTolerance =
-      universe->getPrecision().getTolerances().absolute().value();
-  return make_shared<AnyPositive>(
-      exprs, std::move(universe), feasibilityTolerance);
+      universe.getPrecision().getTolerances().absolute().value();
+  return make_shared<AnyPositive>(exprs, universe, feasibilityTolerance);
 }
 
 ExprPtr any_positive(
     initializer_list<ExprPtr> exprs,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const double feasibilityTolerance) {
-  return make_shared<AnyPositive>(
-      exprs, std::move(universe), feasibilityTolerance);
+  return make_shared<AnyPositive>(exprs, universe, feasibilityTolerance);
 }
 
 ExprPtr any_positive(
     const std::vector<ExprPtr>& exprs,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const double feasibilityTolerance) {
-  return make_shared<AnyPositive>(
-      exprs, std::move(universe), feasibilityTolerance);
+  return make_shared<AnyPositive>(exprs, universe, feasibilityTolerance);
 }
 
 void inplace_any_positive(ExprPtr& lhs, ExprPtr rhs) {
@@ -434,73 +415,69 @@ vector<ExprPtr> equals(ExprPtr lhs, ExprPtr rhs) {
   return {lhs - rhs, std::move(rhs) - std::move(lhs)};
 }
 
-vector<ExprPtr> equals(
-    ExprPtr lhs,
-    double rhs,
-    std::shared_ptr<const entities::Universe> universe) {
-  return equals(std::move(lhs), const_expr(rhs, std::move(universe)));
+vector<ExprPtr>
+equals(ExprPtr lhs, double rhs, const entities::Universe& universe) {
+  return equals(std::move(lhs), const_expr(rhs, universe));
 }
 
-vector<ExprPtr> equals(
-    double lhs,
-    ExprPtr rhs,
-    std::shared_ptr<const entities::Universe> universe) {
-  return equals(std::move(rhs), lhs, std::move(universe));
+vector<ExprPtr>
+equals(double lhs, ExprPtr rhs, const entities::Universe& universe) {
+  return equals(std::move(rhs), lhs, universe);
 }
 
 ExprPtr swaps(
     const PackerMap<entities::ObjectId, entities::ContainerId>&
         initial_assignment,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const folly::Optional<PackerSet<entities::ObjectId>>& subset,
     Swaps::SubsetDefinition subsetDefinition) {
   return make_shared<Swaps>(
-      initial_assignment, std::move(universe), subset, subsetDefinition);
+      initial_assignment, universe, subset, subsetDefinition);
 }
 
 ExprPtr bipartite_swaps(
     PackerMap<entities::ObjectId, entities::ContainerId> initial_assignment,
     PackerSet<entities::ContainerId> left_subset,
     PackerSet<entities::ContainerId> right_subset,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   return make_shared<BipartiteSwaps>(
       std::move(initial_assignment),
       std::move(left_subset),
       std::move(right_subset),
-      std::move(universe));
+      universe);
 }
 
 std::shared_ptr<ObjectLookup> object_lookup(
     ExprPtr obj_vec,
     std::shared_ptr<const PackerSet<entities::ContainerId>> containersPtr,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const Assignment& initialAssignment) {
   return make_shared<ObjectLookup>(
       std::move(obj_vec),
       std::move(containersPtr),
-      std::move(universe),
+      universe,
       initialAssignment);
 }
 
 std::shared_ptr<ObjectLookupDynamic> object_lookup_dynamic(
     ExprPtr sumOfObjectLookups,
     const entities::ObjectScalarDimension& dimension,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   return make_shared<ObjectLookupDynamic>(
-      std::move(sumOfObjectLookups), dimension, std::move(universe));
+      std::move(sumOfObjectLookups), dimension, universe);
 }
 
 std::shared_ptr<StableStayed> stable_stayed(
     std::shared_ptr<ObjectVector> initialObjectVector,
     std::shared_ptr<ObjectVector> fullObjectVector,
     std::shared_ptr<const PackerSet<entities::ContainerId>> containersPtr,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const Assignment& initialAssignment) {
   return make_shared<StableStayed>(
       initialObjectVector,
       fullObjectVector,
       containersPtr,
-      std::move(universe),
+      universe,
       initialAssignment);
 }
 
@@ -508,7 +485,7 @@ ExprPtr object_partition(
     entities::PartitionId partitionId,
     entities::DimensionId dimensionId,
     PackerMap<entities::GroupId, double> groupLimits,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     std::optional<PackerSet<entities::ScopeItemId>> scopeItemIds,
     std::optional<PackerSet<entities::GroupId>> filteredGroupIds,
     PackerMap<entities::GroupId, double> groupCoefficients,
@@ -518,7 +495,7 @@ ExprPtr object_partition(
       partitionId,
       dimensionId,
       std::move(groupLimits),
-      std::move(universe),
+      universe,
       std::move(scopeItemIds),
       std::move(filteredGroupIds),
       std::move(groupCoefficients),
@@ -531,7 +508,7 @@ ExprPtr object_partition_lookup(
     std::shared_ptr<const PackerSet<entities::ContainerId>> lookupContainersPtr,
     entities::ScopeId scopeId,
     entities::ScopeItemId scopeItemId,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const Assignment& initialAssignment,
     PackerMap<entities::GroupId, double> groupLimitOverrides,
     PackerSet<entities::ObjectId> initialDuringObjects,
@@ -544,7 +521,7 @@ ExprPtr object_partition_lookup(
       lookupContainersPtr,
       scopeId,
       scopeItemId,
-      std::move(universe),
+      universe,
       initialAssignment,
       std::move(groupLimitOverrides),
       std::move(initialDuringObjects),
@@ -558,70 +535,55 @@ ExprPtr object_partition_lookup(
 
 std::shared_ptr<ObjectVector> object_vector(
     entities::ObjectValues objectValues,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<ObjectVector>(
-      std::move(objectValues), std::move(universe));
+    const entities::Universe& universe) {
+  return make_shared<ObjectVector>(std::move(objectValues), universe);
 }
 
 std::shared_ptr<ObjectVector> object_vector(
     std::shared_ptr<const entities::ObjectIdToDoubleMap>
         objectToNonDefaultValue,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   return object_vector(
-      entities::ObjectValues(std::move(objectToNonDefaultValue)),
-      std::move(universe));
+      entities::ObjectValues(std::move(objectToNonDefaultValue)), universe);
 }
 
-ExprPtr power(
-    ExprPtr base,
-    double exponent,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<Power>(base, exponent, std::move(universe));
+ExprPtr
+power(ExprPtr base, double exponent, const entities::Universe& universe) {
+  return make_shared<Power>(base, exponent, universe);
 }
 
-ExprPtr product(
-    ExprPtr lhs,
-    ExprPtr rhs,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<ProductOperation>(lhs, rhs, std::move(universe));
+ExprPtr product(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe) {
+  return make_shared<ProductOperation>(lhs, rhs, universe);
 }
 
-ExprPtr quotient(
-    ExprPtr lhs,
-    ExprPtr rhs,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<QuotientOperation>(lhs, rhs, std::move(universe));
+ExprPtr quotient(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe) {
+  return make_shared<QuotientOperation>(lhs, rhs, universe);
 }
 
-ExprPtr square(
-    ExprPtr expr,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<Square>(expr, std::move(universe));
+ExprPtr square(ExprPtr expr, const entities::Universe& universe) {
+  return make_shared<Square>(expr, universe);
 }
 
 ExprPtr square(
     ExprPtr expr,
     const ApproximationHint& hint,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<Square>(expr, hint, std::move(universe));
+    const entities::Universe& universe) {
+  return make_shared<Square>(expr, hint, universe);
 }
 
-ExprPtr step(ExprPtr expr, std::shared_ptr<const entities::Universe> universe) {
+ExprPtr step(ExprPtr expr, const entities::Universe& universe) {
   auto transform = dynamic_pointer_cast<Step>(expr);
   if (transform != nullptr) {
     return transform;
   }
-  return make_shared<Step>(expr, std::move(universe));
+  return make_shared<Step>(expr, universe);
 }
 
-ExprPtr ceil(ExprPtr expr, std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<Ceil>(expr, std::move(universe));
+ExprPtr ceil(ExprPtr expr, const entities::Universe& universe) {
+  return make_shared<Ceil>(expr, universe);
 }
 
-ExprPtr step_mod_k(
-    ExprPtr expr,
-    int k,
-    std::shared_ptr<const entities::Universe> universe) {
+ExprPtr step_mod_k(ExprPtr expr, int k, const entities::Universe& universe) {
   if (k == 0) {
     throw std::runtime_error("step_mod_k with k=0 is not supported");
   } else if (k == 1) {
@@ -635,57 +597,55 @@ ExprPtr step_mod_k(
   }
 }
 
-ExprPtr log(ExprPtr expr, std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<Log>(expr, std::move(universe));
+ExprPtr log(ExprPtr expr, const entities::Universe& universe) {
+  return make_shared<Log>(expr, universe);
 }
 
 ExprPtr rectangle(
     ExprPtr expr,
     const double lb,
     const double ub,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<Rectangle>(expr, lb, ub, std::move(universe));
+    const entities::Universe& universe) {
+  return make_shared<Rectangle>(expr, lb, ub, universe);
 }
 
 ExprPtr sum_over_threshold(
     ExprPtr threshold,
     const std::vector<ExprPtr>& values,
     bool square,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<SumOverThreshold>(
-      threshold, values, square, std::move(universe));
+    const entities::Universe& universe) {
+  return make_shared<SumOverThreshold>(threshold, values, square, universe);
 }
 
 ExprPtr variable(
     entities::ObjectId obj,
     entities::ContainerId con,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const Assignment& initialAssignment) {
-  return make_shared<Variable>(
-      obj, con, std::move(universe), initialAssignment);
+  return make_shared<Variable>(obj, con, universe, initialAssignment);
 }
 
 ExprPtr piecewise(
     const std::vector<std::pair<double, double>>& points,
     ExprPtr x,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     bool continuous) {
-  return make_shared<Piecewise>(points, x, std::move(universe), continuous);
+  return make_shared<Piecewise>(points, x, universe, continuous);
 }
 
 ExprPtr nth_largest(
     const std::vector<ExprPtr>& values,
     int n,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<NthLargest>(values, n, false, std::move(universe));
+    const entities::Universe& universe) {
+  return make_shared<NthLargest>(values, n, false, universe);
 }
 
 ExprPtr boundsOverride(
     ExprPtr expr,
     std::optional<double> lb,
     std::optional<double> ub,
-    std::shared_ptr<const entities::Universe> universe) {
-  return make_shared<BoundsOverride>(expr, lb, ub, std::move(universe));
+    const entities::Universe& universe) {
+  return make_shared<BoundsOverride>(expr, lb, ub, universe);
 }
 
 } // namespace facebook::rebalancer

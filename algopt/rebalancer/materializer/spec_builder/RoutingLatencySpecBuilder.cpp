@@ -29,7 +29,7 @@ RoutingLatencySpecBuilder::RoutingLatencySpecBuilder(
 folly::coro::Task<ExprPtr> RoutingLatencySpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 folly::coro::Task<std::vector<ConstraintInfo>>
@@ -61,7 +61,7 @@ RoutingLatencySpecBuilder::constraints(
   }
 
   auto& groupToRoutingRings = routingConfig.getGroupToRoutingRings();
-  const LimitWrapper limits(universe_, *spec_.limit(), scopeId, partitionId);
+  const LimitWrapper limits(*universe_, *spec_.limit(), scopeId, partitionId);
   const GroupFilterWrapper filter(*universe_, *spec_.filter(), partitionId);
 
   std::vector<ConstraintInfo> components;
@@ -98,10 +98,10 @@ RoutingLatencySpecBuilder::constraints(
       auto avgGroupLatency = expressionBuilder.getGroupRoutingLatencyLookup(
           routingConfigId, groupId, std::move(metric));
       auto additiveTerm = product(
-          step(groupConstraint, universe_),
+          step(groupConstraint, *universe_),
           *spec_.includeWeightedAvgLatencyMetricIfLimitViolated() *
               avgGroupLatency,
-          universe_);
+          *universe_);
 
       components.emplace_back(groupConstraint + additiveTerm);
     } else {

@@ -459,8 +459,7 @@ class ExpressionBuilder {
   // vector.
   std::shared_ptr<ObjectLookup> getObjectLookup(
       std::shared_ptr<const PackerSet<entities::ContainerId>> containerIds,
-      std::shared_ptr<ObjectVector> objectVector,
-      std::shared_ptr<const entities::Universe> universe);
+      std::shared_ptr<ObjectVector> objectVector);
 
   // Instantiates an object lookup for containers outside a given scope.
   std::shared_ptr<ObjectLookup> getObjectLookupOutOfScope(
@@ -485,8 +484,7 @@ class ExpressionBuilder {
   std::shared_ptr<StableStayed> getStableStayed(
       std::shared_ptr<const PackerSet<entities::ContainerId>> containerIds,
       std::shared_ptr<ObjectVector> initialObjectVector,
-      std::shared_ptr<ObjectVector> fullObjectVector,
-      std::shared_ptr<const entities::Universe> universe);
+      std::shared_ptr<ObjectVector> fullObjectVector);
 
   std::shared_ptr<StableStayed> getStableStayedOutOfScope(
       entities::ScopeId scopeId,

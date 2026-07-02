@@ -65,7 +65,7 @@ class ObjectLookupDynamic : public Expression {
   explicit ObjectLookupDynamic(
       ExprPtr sumOfObjectLookups,
       const entities::ObjectScalarDimension& dimension,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   const std::string_view& getType() const override;
 

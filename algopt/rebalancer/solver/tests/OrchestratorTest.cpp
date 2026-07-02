@@ -235,8 +235,7 @@ TEST(OrchestratorTest, DynamicChildrenTest) {
   // This test is to verify that if some nodes are affected by objects, the
   // still dynamic children are computed correctly
   Orchestrator orchestrator;
-  const std::shared_ptr<const entities::Universe> universe =
-      std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
 
   // create two lookup expressions
   auto allContainers = std::make_shared<PackerSet<entities::ContainerId>>(
@@ -308,7 +307,7 @@ TEST(OrchestratorTest, MultiRootEvaluate) {
   const Assignment assignment(
       {{container(1), {object(0)}}, {container(2), {}}, {container(0), {}}});
 
-  const auto universe = std::make_shared<entities::Universe>();
+  const entities::Universe universe{};
   const Assignment initialAssignment(
       {{container(0), {}}, {container(1), {object(0)}}, {container(2), {}}});
   auto v0 = variable(object(0), container(0), universe, initialAssignment);

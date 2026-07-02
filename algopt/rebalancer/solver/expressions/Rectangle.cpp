@@ -29,8 +29,8 @@ Rectangle::Rectangle(
     std::shared_ptr<Expression> expr,
     double lowerBound,
     double upperBound,
-    std::shared_ptr<const entities::Universe> universe)
-    : Transform(std::move(expr), std::move(universe)) {
+    const entities::Universe& universe)
+    : Transform(std::move(expr), universe) {
   lowerBound_ = lowerBound;
   upperBound_ = upperBound;
   setInitialValue(perform_transform(getOnlyChildRawPtr()->getInitialValue()));
@@ -63,13 +63,12 @@ algopt::lp::Expression Rectangle::lp(
     auto child = getOnlyChild();
     auto kEps = getUniverse().getPrecision().getTolerances().absolute().value();
 
-    auto atLeastLb = step(child - (lowerBound_ - kEps), getUniversePtr());
+    auto atLeastLb = step(child - (lowerBound_ - kEps), getUniverse());
     auto atMostUb =
-        step((upperBound_ + kEps) - std::move(child), getUniversePtr());
+        step((upperBound_ + kEps) - std::move(child), getUniverse());
 
     // if lowerBound_ <= child <= upperBound_, we want the value to be 1, else 0
-    exprForLp_ =
-        min(std::move(atLeastLb), std::move(atMostUb), getUniversePtr());
+    exprForLp_ = min(std::move(atLeastLb), std::move(atMostUb), getUniverse());
   }
 
   return evaluator.lp(exprForLp_.get(), minimizing, configs);

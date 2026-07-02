@@ -26,8 +26,7 @@
 namespace facebook::rebalancer {
 
 struct MaterializedProblem {
-  explicit MaterializedProblem(
-      std::shared_ptr<const entities::Universe> universe)
+  explicit MaterializedProblem(const entities::Universe& universe)
       : globalObjective(GlobalObjective(universe)) {}
   // Context: depending on constraint policy settings, a user-provided
   // constraint may be broken into a pair of soft and hard constraints,

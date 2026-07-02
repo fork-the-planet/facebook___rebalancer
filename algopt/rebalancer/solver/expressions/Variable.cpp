@@ -32,9 +32,9 @@ namespace facebook::rebalancer {
 Variable::Variable(
     entities::ObjectId obj,
     entities::ContainerId con,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const Assignment& initialAssignment)
-    : Expression(std::move(universe)), object(obj), container(con) {
+    : Expression(universe), object(obj), container(con) {
   set_directly_affected_containers();
   setInitialValue(applyAssignment(initialAssignment));
 }

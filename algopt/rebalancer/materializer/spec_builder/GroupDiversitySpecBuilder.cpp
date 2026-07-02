@@ -37,7 +37,7 @@ GroupDiversitySpecBuilder::GroupDiversitySpecBuilder(
 folly::coro::Task<ExprPtr> GroupDiversitySpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 ExprPtr GroupDiversitySpecBuilder::buildLookup(
@@ -72,7 +72,7 @@ ExprPtr GroupDiversitySpecBuilder::buildLookup(
 folly::coro::Task<std::vector<ConstraintInfo>>
 GroupDiversitySpecBuilder::constraints(
     ExpressionBuilder& expressionBuilder) const {
-  const LimitWrapper limits(universe_, *spec_.limit(), scopeId_);
+  const LimitWrapper limits(*universe_, *spec_.limit(), scopeId_);
   const ScopeItemFilterWrapper filter(*universe_, *spec_.filter(), scopeId_);
 
   std::vector<ConstraintInfo> result;
@@ -176,7 +176,7 @@ folly::coro::Task<ExprPtr> GroupDiversitySpecBuilder::getContinuousPenaltyExpr(
          term(ObjectPartitionLookupPenaltyTransform::SQUARE));
   }
 
-  auto totalPenaltyExpression = const_expr(0, universe_);
+  auto totalPenaltyExpression = const_expr(0, *universe_);
   for (auto groupId : partition.getGroupIds()) {
     auto groupUtil = co_await expressionBuilder.getAbsoluteUtil(
         UtilMetric::AFTER,
@@ -198,7 +198,7 @@ folly::coro::Task<ExprPtr> GroupDiversitySpecBuilder::getContinuousPenaltyExpr(
     // moves), then quadratic factor ensures we move objects of under-utilized
     // groups first.
     totalPenaltyExpression +=
-        normUtil - QUADRATIC_TERM_MULTIPLIER * power(normUtil, 2, universe_);
+        normUtil - QUADRATIC_TERM_MULTIPLIER * power(normUtil, 2, *universe_);
   }
   co_return totalPenaltyExpression;
 }

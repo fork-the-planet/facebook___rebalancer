@@ -35,7 +35,7 @@ LogicalOrSpecBuilder::constraints(ExpressionBuilder& expressionBuilder) const {
   for (auto& spec : *spec_.genericSpecs()) {
     const GenericSpecBuilder builder(universe_, spec);
     constraintExprs.push_back(getAggregatedConstraintViolation(
-        co_await builder.constraints(expressionBuilder), universe_));
+        co_await builder.constraints(expressionBuilder), *universe_));
   }
 
   // The "or" condition means at least one of genericConstraints must be
@@ -43,7 +43,7 @@ LogicalOrSpecBuilder::constraints(ExpressionBuilder& expressionBuilder) const {
   // are broken, this is equivalent to enforcing that the minimum of
   // genericConstraints is non-positive.
   co_return std::vector<ConstraintInfo>{
-      ConstraintInfo(min(constraintExprs, universe_))};
+      ConstraintInfo(min(constraintExprs, *universe_))};
 }
 
 folly::coro::Task<ExprPtr> LogicalOrSpecBuilder::goalCoro(

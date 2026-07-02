@@ -88,17 +88,17 @@ CapacityWithGroupPresenceSpecBuilder::CapacityWithGroupPresenceSpecBuilder(
               : mainPartitionId_),
       aggregationPartition_(universe_->getPartition(aggregationPartitionId_)),
       capacityLimits_(LimitWrapper(
-          universe_,
+          *universe_,
           *spec_.scopeItemToLimit(),
           mainScopeId_,
           mainPartitionId_)),
       groupToPresenceWeight_(LimitWrapper(
-          universe_,
+          *universe_,
           *spec_.groupToPresenceWeight(),
           aggregationScopeId_,
           aggregationPartitionId_)),
       groupToExtraAdditivePenalty_(LimitWrapper(
-          universe_,
+          *universe_,
           *spec_.groupToExtraAdditivePenalty(),
           aggregationScopeId_,
           aggregationPartitionId_)),
@@ -148,7 +148,7 @@ CapacityWithGroupPresenceSpecBuilder::CapacityWithGroupPresenceSpecBuilder(
   if (!spec_.groupUtilMultipliers()->empty()) {
     for (const auto& multiplier : *spec_.groupUtilMultipliers()) {
       auto limitWrapper = LimitWrapper(
-          universe_,
+          *universe_,
           *multiplier.value(),
           aggregationScopeId_,
           aggregationPartitionId_);
@@ -159,7 +159,7 @@ CapacityWithGroupPresenceSpecBuilder::CapacityWithGroupPresenceSpecBuilder(
     for (const auto& multiplier : *spec_.multiplierList()) {
       groupUtilMultiplierMap_[interface::GroupUtilMultiplierTarget::COMMON]
           .emplace_back(LimitWrapper(
-              universe_,
+              *universe_,
               multiplier,
               aggregationScopeId_,
               aggregationPartitionId_));
@@ -170,7 +170,7 @@ CapacityWithGroupPresenceSpecBuilder::CapacityWithGroupPresenceSpecBuilder(
 folly::coro::Task<ExprPtr> CapacityWithGroupPresenceSpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 folly::coro::Task<std::vector<ConstraintInfo>>
@@ -375,7 +375,7 @@ CapacityWithGroupPresenceSpecBuilder::getScopeItemUtil(
     const {
   if (shouldUseOptimizedPath()) {
     if (!aggregationGroupIds.has_value() || aggregationGroupIds->empty()) {
-      co_return const_expr(0, universe_);
+      co_return const_expr(0, *universe_);
     }
     const auto& dimension =
         universe_->getObjects().getDimension(dimensionId_).only();
@@ -393,7 +393,7 @@ CapacityWithGroupPresenceSpecBuilder::getScopeItemUtil(
   }
 
   // Fallback to non-optimized path
-  auto scopeItemUtil = const_expr(0, universe_);
+  auto scopeItemUtil = const_expr(0, *universe_);
   const auto& mainGroupIds = getRelevantMainGroupIds();
   for (auto mainGroupId : mainGroupIds) {
     scopeItemUtil += co_await getGroupUtilInMainScopeItem(
@@ -439,7 +439,7 @@ ExprPtr CapacityWithGroupPresenceSpecBuilder::createGroupUtilExpr(
           .getContainerIdsPtr(aggregationScopeItemId),
       aggregationScopeId_,
       aggregationScopeItemId,
-      universe_,
+      *universe_,
       initialAssignment,
       /*groupLimitOverrides=*/PackerMap<entities::GroupId, double>{},
       /*initialDuringObjects=*/PackerSet<entities::ObjectId>{},
@@ -463,7 +463,7 @@ ExprPtr CapacityWithGroupPresenceSpecBuilder::
         ExpressionBuilder& expressionBuilder,
         bool makeContinuousPenaltyTerm,
         const entities::Set<entities::GroupId>& aggregationGroupIds) const {
-  auto scopeItemUtil = const_expr(0, universe_);
+  auto scopeItemUtil = const_expr(0, *universe_);
   auto objectPartition = expressionBuilder.getObjectPartition(
       /*groupLimits=*/{},
       dimensionId_,
@@ -490,7 +490,7 @@ ExprPtr CapacityWithGroupPresenceSpecBuilder::
         ExpressionBuilder& expressionBuilder,
         bool makeContinuousPenaltyTerm,
         const entities::Set<entities::GroupId>& aggregationGroupIds) const {
-  auto scopeItemUtil = const_expr(0, universe_);
+  auto scopeItemUtil = const_expr(0, *universe_);
 
   for (const auto& aggregationScopeItemId : expressionBuilder.getNestedImage(
            mainScopeId_, aggregationScopeId_, mainScopeItemId)) {
@@ -525,7 +525,7 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilInMainScopeItem(
   const auto& aggregationGroupIds = expressionBuilder.getNestedImage(
       mainPartitionId_, aggregationPartitionId_, mainGroupId);
 
-  auto groupUtil = const_expr(0, universe_);
+  auto groupUtil = const_expr(0, *universe_);
   for (auto aggregationScopeItemId : aggregationScopeItemIds) {
     for (auto aggregationGroupId : aggregationGroupIds) {
       inplace_add(
@@ -535,7 +535,7 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilInMainScopeItem(
               aggregationScopeItemId,
               expressionBuilder,
               makeContinuousPenaltyTerm),
-          universe_);
+          *universe_);
     }
   }
   co_return groupUtil;
@@ -560,7 +560,7 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilContributionToScopeItemUtil(
         aggregationScopeItemId, aggregationGroupId);
     if (!universe_->getPrecision().isEqual(extraAdditivePenalty, 0.0)) {
       unweightedPenalty =
-          max(unweightedPenalty + extraAdditivePenalty, 0.0, universe_);
+          max(unweightedPenalty + extraAdditivePenalty, 0.0, *universe_);
     }
     co_return getWeightedExpr(
         unweightedPenalty,
@@ -573,7 +573,7 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilContributionToScopeItemUtil(
 
   auto minContributionToUtil = groupToPresenceWeight_.getLimit(
                                    aggregationScopeItemId, aggregationGroupId) *
-      step(actualGroupUtilInScopeItem, universe_);
+      step(actualGroupUtilInScopeItem, *universe_);
 
   // Apply multipliers which targets to presence weight.
   minContributionToUtil = getWeightedExpr(
@@ -592,7 +592,7 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilContributionToScopeItemUtil(
        interface::GroupUtilMultiplierTarget::COMMON},
       *spec_.roundUpGroupUtilOnScopeItem());
 
-  co_return max(minContributionToUtil, actualGroupUtilInScopeItem, universe_);
+  co_return max(minContributionToUtil, actualGroupUtilInScopeItem, *universe_);
 }
 
 ExprPtr CapacityWithGroupPresenceSpecBuilder::getWeightedExpr(
@@ -602,7 +602,7 @@ ExprPtr CapacityWithGroupPresenceSpecBuilder::getWeightedExpr(
     const std::vector<interface::GroupUtilMultiplierTarget>& targets,
     bool applyCeilAfterEach) const {
   if (applyCeilAfterEach) {
-    expr = ceil(expr, universe_);
+    expr = ceil(expr, *universe_);
   }
   auto weightedExpr = 1 * expr;
   for (const auto& target : targets) {
@@ -611,12 +611,12 @@ ExprPtr CapacityWithGroupPresenceSpecBuilder::getWeightedExpr(
       auto weight =
           multiplier.getLimit(aggregationScopeItemId, aggregationGroupId);
       if (universe_->getPrecision().isEqual(weight, 0)) {
-        return const_expr(0, universe_);
+        return const_expr(0, *universe_);
       }
 
       weightedExpr *= weight;
       if (applyCeilAfterEach) {
-        weightedExpr = ceil(weightedExpr, universe_);
+        weightedExpr = ceil(weightedExpr, *universe_);
       }
     }
   }

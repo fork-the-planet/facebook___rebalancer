@@ -95,14 +95,14 @@ class ColocateGroupsMoveTypeTest : public MoveTestBase {
       bool negateValues = false) {
     const auto objectToLoad = buildObjectToLoad();
     if (!negateValues) {
-      return makeObjectVector(objectToLoad, getUniversePtr());
+      return makeObjectVector(objectToLoad, getUniverse());
     }
     // negate the values
     entities::Map<entities::ObjectId, double> negativeObjectToLoad;
     for (const auto& [object, load] : objectToLoad) {
       negativeObjectToLoad[object] = -load;
     }
-    return makeObjectVector(negativeObjectToLoad, getUniversePtr());
+    return makeObjectVector(negativeObjectToLoad, getUniverse());
   }
 
   std::shared_ptr<PackerSet<entities::ContainerId>> getContainerSet() {
@@ -148,9 +148,9 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, VerifyMoveSetsBasic) {
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniversePtr(),
+          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
-      const_expr(0, getUniversePtr()));
+      const_expr(0, getUniverse()));
 
   auto bestResult = colocateMoveType.findBestMove(
       getMovesEvaluator(),
@@ -199,9 +199,9 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, VerifyMoveSetsWithSampling) {
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniversePtr(),
+          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
-      const_expr(0, getUniversePtr()));
+      const_expr(0, getUniverse()));
 
   auto bestResult = colocateMoveType.findBestMove(
       getMovesEvaluator(),
@@ -246,9 +246,9 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, VerifyMoveSetsWithGroupToContainers) {
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniversePtr(),
+          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
-      const_expr(0, getUniversePtr()));
+      const_expr(0, getUniverse()));
 
   auto bestResult = colocateMoveType.findBestMove(
       getMovesEvaluator(),
@@ -303,9 +303,9 @@ CO_TEST_F(
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniversePtr(),
+          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
-      const_expr(0, getUniversePtr()));
+      const_expr(0, getUniverse()));
 
   auto bestResult = colocateMoveType.findBestMove(
       getMovesEvaluator(),
@@ -363,9 +363,9 @@ CO_TEST_F(
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniversePtr(),
+          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
-      const_expr(0, getUniversePtr()));
+      const_expr(0, getUniverse()));
 
   auto bestResult = colocateMoveType.findBestMove(
       getMovesEvaluator(),
@@ -422,9 +422,9 @@ CO_TEST_F(
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniversePtr(),
+          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
-      const_expr(0, getUniversePtr()));
+      const_expr(0, getUniverse()));
 
   auto bestResult = colocateMoveType.findBestMove(
       getMovesEvaluator(),
@@ -471,9 +471,9 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, VerifyMoveSetsBasicNoBetterMove) {
   auto objective = object_lookup(
       makeLoadObjectVector(),
       allContainers,
-      getUniversePtr(),
+      getUniverse(),
       Assignment(getUniverse().getContainers().getInitialAssignment()));
-  createProblem({objective}, const_expr(0, getUniversePtr()));
+  createProblem({objective}, const_expr(0, getUniverse()));
 
   const auto& precision = getUniverse().getPrecision();
 
@@ -544,11 +544,11 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, FindBestMoveStopsAtTimeLimit) {
   }
   createProblem(
       {object_lookup(
-          makeObjectVector(objectToLoad, getUniversePtr()),
+          makeObjectVector(objectToLoad, getUniverse()),
           containerSet,
-          getUniversePtr(),
+          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
-      const_expr(0, getUniversePtr()));
+      const_expr(0, getUniverse()));
 
   interface::ColocateGroupsMoveTypeSpec spec;
   spec.partitionName() = "tenant";

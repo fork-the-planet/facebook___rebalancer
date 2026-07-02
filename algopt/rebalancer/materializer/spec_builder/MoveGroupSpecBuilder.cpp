@@ -71,7 +71,7 @@ MoveGroupSpecBuilder::constraints(ExpressionBuilder& expressionBuilder) const {
       // The scope item must contain either none of the objects in this group,
       // or all of them. If util falls within [1, groupSize - 1], then the
       // constraint is violated.
-      auto expr = rectangle(util, 0.5, groupSize - 0.5, universe_);
+      auto expr = rectangle(util, 0.5, groupSize - 0.5, *universe_);
       result.emplace_back(expr);
     }
   }

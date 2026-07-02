@@ -26,7 +26,7 @@ class EquivalenceSets;
 class LinearSum : public Expression {
  public:
   explicit LinearSum(
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       double constant,
       const PackerMap<std::shared_ptr<Expression>, double>& coef = {});
 

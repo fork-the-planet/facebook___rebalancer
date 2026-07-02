@@ -76,11 +76,11 @@ TEST_F(MetricsTest, UtilCollection) {
 
   // add some util metrics
   const auto universe = buildUniverse();
-  auto lookupLoadHost0 = const_expr(10, universe);
+  auto lookupLoadHost0 = const_expr(10, *universe);
   lookupLoadHost0->description = "load util of host0";
-  auto lookupLoadHost1 = const_expr(20, universe);
+  auto lookupLoadHost1 = const_expr(20, *universe);
   lookupLoadHost1->description = "load util of host1";
-  auto lookupMem = const_expr(55, universe);
+  auto lookupMem = const_expr(55, *universe);
   lookupMem->description = "memory util of region0";
 
   addToUtilMetricCollection(
@@ -175,11 +175,11 @@ TEST_F(MetricsTest, GroupLatencyAndTrafficCollection) {
   auto p90Metric = thriftUtils::makeRoutingLatencyMetric(
       interface::RoutingLatencyMetric::PERCENTILE, 90);
   metricsBuilder_.addToGroupRoutingLatencyCollection(
-      const_expr(13, universe), routingConfig1Id, p99Metric, tenant1Id);
+      const_expr(13, *universe), routingConfig1Id, p99Metric, tenant1Id);
   metricsBuilder_.addToGroupRoutingLatencyCollection(
-      const_expr(13, universe), routingConfig1Id, p90Metric, tenant1Id);
+      const_expr(13, *universe), routingConfig1Id, p90Metric, tenant1Id);
   metricsBuilder_.addToGroupRoutingLatencyCollection(
-      const_expr(5, universe), routingConfig1Id, p100Metric, tenant2Id);
+      const_expr(5, *universe), routingConfig1Id, p100Metric, tenant2Id);
 
   // get metrics summary
   auto metrics = metricsBuilder_.build(universe);

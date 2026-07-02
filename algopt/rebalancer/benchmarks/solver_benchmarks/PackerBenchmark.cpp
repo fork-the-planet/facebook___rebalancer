@@ -47,8 +47,7 @@ BENCHMARK(MaxNode, iters) {
 }
 
 int main(int argc, char** argv) {
-  std::shared_ptr<const entities::Universe> universe =
-      std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
   const folly::Init init(&argc, &argv);
 
   Assignment assignment;
@@ -67,7 +66,7 @@ int main(int argc, char** argv) {
                             : const_expr(0, universe)));
   }
 
-  maxexp = max(exprs, std::move(universe));
+  maxexp = max(exprs, universe);
   orchestrator.init({maxexp.get()}, AffectedByChangeDecisionData(1, 1));
   Context context;
 

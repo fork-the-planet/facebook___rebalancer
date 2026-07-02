@@ -228,30 +228,28 @@ class GroupMoveWithHintStrategiesTest : public MoveTestBase {
   ExprPtr getLookupExprOn(
       const PackerSet<entities::ContainerId>& containers,
       int numObjects = 24) {
-    const auto universe = getUniversePtr();
     auto objectValues = PackerMap<entities::ObjectId, double>();
     for (const auto id : folly::irange(numObjects)) {
       objectValues.emplace(object(id), id);
     }
-    auto objectVector = makeObjectVector(objectValues, universe);
+    auto objectVector = makeObjectVector(objectValues, getUniverse());
     const Assignment assignment(
         getUniverse().getContainers().getInitialAssignment());
     return std::make_shared<ObjectLookup>(
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(containers),
-        universe,
+        getUniverse(),
         assignment);
   }
 
   std::shared_ptr<ObjectVector> makeAllUnequalObjectVectorLocal(
       int objectCount) {
-    const auto universe = getUniversePtr();
     PackerMap<entities::ObjectId, double> objectToValue;
     for (const auto i : folly::irange(objectCount)) {
       objectToValue[object(i)] = i;
     }
     return makeObjectVector(
-        objectToValue, /*defaultValue=*/0, objectCount, universe);
+        objectToValue, /*defaultValue=*/0, objectCount, getUniverse());
   }
 
   void validateMoveToAndFromUnassignedContainer(
@@ -278,8 +276,8 @@ class GroupMoveWithHintStrategiesTest : public MoveTestBase {
 CO_TEST_F(GroupMoveWithHintStrategiesTest, TestRandomSamplingWithReplacement) {
   const auto universe = co_await setUpUniverse();
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
-      /*constraint=*/const_expr(0, universe));
+      /*objectiveTuple=*/{const_expr(0, *universe)},
+      /*constraint=*/const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -355,8 +353,8 @@ CO_TEST_F(
     TestRandomSamplingWithoutReplacement) {
   const auto universe =
       co_await setUpUniverse(/*numObjects=*/12, /*numContainers=*/8);
-  createProblem(/*objectiveTuple=*/{const_expr(0, universe)},
-                /*constraint=*/const_expr(0, universe));
+  createProblem(/*objectiveTuple=*/{const_expr(0, *universe)},
+                /*constraint=*/const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -432,7 +430,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     RandomSamplingWithReplacementGeneratesEmptyWhenObjectsGreaterThanContainers) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -488,7 +486,7 @@ CO_TEST_F(
 CO_TEST_F(GroupMoveWithHintStrategiesTest, TestMove) {
   const auto universe = co_await setUpUniverse();
   createProblem(/*objectiveTuple=*/{getLookupExprOn({container("dummyRank")})},
-                /*constraint=*/const_expr(0, universe));
+                /*constraint=*/const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -551,7 +549,7 @@ CO_TEST_F(GroupMoveWithHintStrategiesTest, TestSwapMove) {
       /*numTables=*/4,
       /*swap=*/true);
   createProblem(/*objectiveTuple=*/{getLookupExprOn({container("dummyRank")})},
-                /*constraint=*/const_expr(0, universe));
+                /*constraint=*/const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -606,7 +604,7 @@ CO_TEST_F(GroupMoveWithHintStrategiesTest, TestSwapMove) {
 
 CO_TEST_F(GroupMoveWithHintStrategiesTest, getPrimaryGroupToExplore) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -658,8 +656,8 @@ CO_TEST_F(GroupMoveWithHintStrategiesTest, getPrimaryGroupToExplore) {
 CO_TEST_F(GroupMoveWithHintStrategiesTest, generateAllMoveSetsNoValidMoveSets) {
   const auto universe =
       co_await setUpUniverse(/*numObjects=*/64, /*numContainers=*/8);
-  createProblem(/*objectiveTuple=*/{const_expr(0, universe)},
-                /*constraint=*/const_expr(0, universe));
+  createProblem(/*objectiveTuple=*/{const_expr(0, *universe)},
+                /*constraint=*/const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -704,7 +702,7 @@ CO_TEST_F(GroupMoveWithHintStrategiesTest, generateAllMoveSetsNoValidMoveSets) {
 CO_TEST_F(GroupMoveWithHintStrategiesTest, generateAllMoveSetsSingularMoveSet) {
   const auto universe =
       co_await setUpUniverse(/*numObjects=*/3, /*numContainers=*/8);
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -745,8 +743,8 @@ CO_TEST_F(GroupMoveWithHintStrategiesTest, generateAllMoveSetsSingularMoveSet) {
 
 CO_TEST_F(GroupMoveWithHintStrategiesTest, tertiaryMoveSetsOnly) {
   const auto universe = co_await setUpUniverse();
-  createProblem(/*objectiveTuple=*/{const_expr(0, universe)},
-                /*constraint=*/const_expr(0, universe));
+  createProblem(/*objectiveTuple=*/{const_expr(0, *universe)},
+                /*constraint=*/const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -795,12 +793,12 @@ CO_TEST_F(GroupMoveWithHintStrategiesTest, EnsureAllTablesExplored) {
   const int numObjects = 24;
   const auto universe = co_await setUpUniverse(numObjects);
   createProblem(
-      {const_expr(0, universe)},
+      {const_expr(0, *universe)},
       object_lookup(
           makeAllUnequalObjectVectorLocal(numObjects),
           std::make_shared<PackerSet<entities::ContainerId>>(
               PackerSet<entities::ContainerId>{container("dummyRank")}),
-          universe,
+          *universe,
           Assignment(universe->getContainers().getInitialAssignment())));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
@@ -853,12 +851,12 @@ CO_TEST_F(
   const int numObjects = 24;
   const auto universe = co_await setUpUniverse(numObjects);
   createProblem(
-      {const_expr(0, universe)},
+      {const_expr(0, *universe)},
       object_lookup(
           makeAllUnequalObjectVectorLocal(numObjects),
           std::make_shared<PackerSet<entities::ContainerId>>(
               PackerSet<entities::ContainerId>{container("dummyRank")}),
-          universe,
+          *universe,
           Assignment(universe->getContainers().getInitialAssignment())));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
@@ -916,7 +914,7 @@ CO_TEST_F(GroupMoveWithHintStrategiesTest, GroupToExplore) {
   const auto universe = co_await setUpUniverse(
       /*numObjects=*/32, /*numContainers=*/8, /*numTables=*/4, /*swap=*/true);
   createProblem(
-      {getLookupExprOn({container("dummyRank")})}, const_expr(0, universe));
+      {getLookupExprOn({container("dummyRank")})}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -977,7 +975,7 @@ CO_TEST_F(GroupMoveWithHintStrategiesTest, GroupToExploreNoMoves) {
   const auto universe = co_await setUpUniverse(
       /*numObjects=*/32, /*numContainers=*/8, /*numTables=*/4, /*swap=*/true);
   createProblem(
-      {getLookupExprOn({container("dummyRank")})}, const_expr(0, universe));
+      {getLookupExprOn({container("dummyRank")})}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1034,7 +1032,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     findAllocatedSecondaryGroupNoUnassignedContainer) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1060,7 +1058,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     findAllocatedSecondaryGroupAllObjectsUnassigned) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1089,7 +1087,7 @@ CO_TEST_F(
     findAllocatedSecondaryGroupReturnsAllocatedGroup) {
   const auto universe = co_await setUpUniverse(
       /*numObjects=*/32, /*numContainers=*/8, /*numTables=*/4, /*swap=*/true);
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1127,7 +1125,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreTertiaryPartitionMovesGeneratesMoveSets) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1176,7 +1174,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreTertiaryPartitionMovesZeroExploreIterations) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1213,7 +1211,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreTertiaryPartitionMovesSingleGroup) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1257,7 +1255,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreTertiaryPartitionMovesInsufficientContainersWithoutReplacement) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1298,7 +1296,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreTertiaryPartitionMovesWithReplacementStrategy) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1342,7 +1340,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreScopeItemMovesGeneratesMoveSets) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1390,7 +1388,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreScopeItemMovesWithReplacementStrategy) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1431,7 +1429,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreScopeItemMovesInsufficientContainers) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1470,7 +1468,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreScopeItemMovesExtraContainersGeneratesMultiple) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1513,7 +1511,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreScopeItemMovesSkipsScopeItemsWithInsufficientContainers) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1559,7 +1557,7 @@ CO_TEST_F(
     GetAllToUnassignedCreatesCorrectMoves) {
   const auto universe = co_await setUpUniverse(
       /*numObjects=*/32, /*numContainers=*/8, /*numTables=*/4, /*swap=*/true);
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   // shard0 and shard4 are on rank0 (swap=true assigns i%4==0 to rank0)
   const std::vector<entities::ObjectId> objects = {object(0), object(4)};
@@ -1586,7 +1584,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     GetAllToUnassignedSkipsSameContainerMoves) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   // All objects are on dummyRank, so moving them to dummyRank produces
   // moves where source == destination (the method still creates them)
@@ -1609,7 +1607,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     findAllocatedSecondaryGroupEmptyMap) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   const entities::Map<entities::GroupId, std::vector<entities::ObjectId>>
       emptyMap;
@@ -1626,7 +1624,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreScopeItemMovesEmptyAcceptingContainers) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1655,7 +1653,7 @@ CO_TEST_F(
     GroupMoveWithHintStrategiesTest,
     ExploreScopeItemMovesSingleObjectSingleScopeItem) {
   const auto universe = co_await setUpUniverse();
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";
@@ -1698,7 +1696,7 @@ CO_TEST_F(
     generateAllMoveSetsWithTertiaryAndSwap) {
   const auto universe = co_await setUpUniverse(
       /*numObjects=*/32, /*numContainers=*/8, /*numTables=*/4, /*swap=*/true);
-  createProblem({const_expr(0, universe)}, const_expr(0, universe));
+  createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
   moveTypeSpec.primaryPartition() = "tables";

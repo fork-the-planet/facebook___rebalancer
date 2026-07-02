@@ -40,7 +40,8 @@ CO_TEST_F(ObjectPartitionTest, ThrowsWhenGroupLimitsContainFilteredOutGroup) {
       kPartitionName,
       {{"group1", {"object1", "object2"}}, {"group2", {"object3"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto partition1Id = partitionId(kPartitionName);
   const auto objectCountDimId = dimensionId("object_count");
 
@@ -71,7 +72,8 @@ CO_TEST_F(
       kPartitionName,
       {{"group1", {"object1", "object2"}}, {"group2", {"object3"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto partition1Id = partitionId(kPartitionName);
   const auto objectCountDimId = dimensionId("object_count");
 
@@ -105,7 +107,8 @@ CO_TEST_F(ObjectPartitionTest, FilteredGroupIdsGetGroupLimitAndCoefficient) {
        {"group2", {"object3"}},
        {"group3", {"object4"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto partition1Id = partitionId(kPartitionName);
   const auto objectCountDimId = dimensionId("object_count");
 
@@ -154,7 +157,8 @@ CO_TEST_F(ObjectPartitionTest, FilteredGroupIdsObjectGroups) {
        {"group2", {"object2", "object3", "object4"}},
        {"group3", {"object4", "object5"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto partition1Id = partitionId(kPartitionName);
   const auto objectCountDimId = dimensionId("object_count");
 
@@ -192,7 +196,8 @@ CO_TEST_F(ObjectPartitionTest, EmptyFilteredGroupIds) {
       kPartitionName,
       {{"group1", {"object1", "object2"}}, {"group2", {"object3"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto partition1Id = partitionId(kPartitionName);
   const auto objectCountDimId = dimensionId("object_count");
 
@@ -222,7 +227,8 @@ CO_TEST_F(ObjectPartitionTest, FilteredGroupIdsWithDefaultLimits) {
        {"group2", {"object2"}},
        {"group3", {"object3"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto partition1Id = partitionId(kPartitionName);
   const auto objectCountDimId = dimensionId("object_count");
 

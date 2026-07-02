@@ -84,7 +84,7 @@ class SpecBuilder {
 
   static ExprPtr getAggregatedConstraintViolation(
       const std::vector<ConstraintInfo>& constraints,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   static ExprPtr getConstraintViolation(const ConstraintInfo& constraint);
 

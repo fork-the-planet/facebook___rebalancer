@@ -35,7 +35,7 @@ LogicalAndSpecBuilder::constraints(ExpressionBuilder& expressionBuilder) const {
   for (auto& spec : *spec_.genericSpecs()) {
     const GenericSpecBuilder builder(universe_, spec);
     constraints.push_back(getAggregatedConstraintViolation(
-        co_await builder.constraints(expressionBuilder), universe_));
+        co_await builder.constraints(expressionBuilder), *universe_));
   }
 
   // The "and" condition means all of genericConstraints must be
@@ -43,7 +43,7 @@ LogicalAndSpecBuilder::constraints(ExpressionBuilder& expressionBuilder) const {
   // are broken, this is equivalent to enforcing that the maximum of
   // genericConstraints is non-positive.
   co_return std::vector<ConstraintInfo>{
-      ConstraintInfo(max(constraints, universe_))};
+      ConstraintInfo(max(constraints, *universe_))};
 }
 
 folly::coro::Task<ExprPtr> LogicalAndSpecBuilder::goalCoro(

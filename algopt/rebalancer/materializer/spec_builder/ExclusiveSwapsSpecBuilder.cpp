@@ -87,7 +87,7 @@ ExclusiveSwapsSpecBuilder::constraints(
 
   if (!spec_.subsetObjects()) {
     co_return toConstraintInfos(
-        equals(swaps(initialObjectIdToContainerId, universe_), 1, universe_));
+        equals(swaps(initialObjectIdToContainerId, *universe_), 1, *universe_));
   }
 
   auto& subsetObjectNames = *spec_.subsetObjects();
@@ -102,11 +102,11 @@ ExclusiveSwapsSpecBuilder::constraints(
   co_return toConstraintInfos(equals(
       swaps(
           initialObjectIdToContainerId,
-          universe_,
+          *universe_,
           subsetObjectIds,
           subsetDefinition),
       1,
-      universe_));
+      *universe_));
 }
 
 std::string ExclusiveSwapsSpecBuilder::description() const {

@@ -68,14 +68,12 @@ class UniqueAffectedContainersInSubgraph : public ContainerSetWithHash {};
 
 class Expression {
  public:
-  Expression(
-      std::shared_ptr<const entities::Universe> universe,
-      double initialValue);
+  Expression(const entities::Universe& universe, double initialValue);
 
   // For subclasses whose initial value depends on members set after the base
   // ctor runs. The subclass MUST call `setInitialValue(...)` in its ctor
   // body; otherwise `partialApply()` throws at first use.
-  explicit Expression(std::shared_ptr<const entities::Universe> universe);
+  explicit Expression(const entities::Universe& universe);
 
   // Called after children are initialized
   void add_child(std::shared_ptr<Expression> expr);
@@ -332,7 +330,6 @@ class Expression {
   bool isFixed() const;
 
   const entities::Universe& getUniverse() const;
-  const std::shared_ptr<const entities::Universe>& getUniversePtr() const;
   const Precision& getPrecision() const;
 
  protected:
@@ -358,7 +355,8 @@ class Expression {
   std::optional<std::string> associatedSpecName = std::nullopt;
 
   mutable folly::Synchronized<std::optional<Bounds>> unconstrainedBounds;
-  std::shared_ptr<const entities::Universe> universe_;
+
+  const entities::Universe* universe_;
 
  private:
   std::string digestImpl(

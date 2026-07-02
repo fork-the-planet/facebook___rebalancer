@@ -34,7 +34,7 @@ class NthLargest : public Expression {
       const std::vector<std::shared_ptr<Expression>>& values,
       int n,
       bool unique,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
   virtual void updateEquivalenceSets(
       EquivalenceSets& equivalenceSets) const override;
 

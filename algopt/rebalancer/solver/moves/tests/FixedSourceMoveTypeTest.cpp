@@ -97,14 +97,14 @@ class FixedSourceMoveTypeTest : public MoveTestBase {
 
     // initial objective = 1 + 2 ... 100
     // best move is object99 to container1, will reduce objective by 100
-    ExprPtr objective = const_expr(0, universe);
+    ExprPtr objective = const_expr(0, *universe);
     for (const auto i : folly::irange(100)) {
       objective = objective +
-          variable(object(i), container(0), universe, initialAssignment) *
+          variable(object(i), container(0), *universe, initialAssignment) *
               (i + 1);
     }
 
-    const ExprPtr dummyConstraint = const_expr(0, universe);
+    const ExprPtr dummyConstraint = const_expr(0, *universe);
     createProblem({objective}, dummyConstraint);
     co_return;
   }
@@ -139,8 +139,8 @@ class FixedSourceMoveTypeTest : public MoveTestBase {
 CO_TEST_F(FixedSourceMoveTypeTest, MissingMoveSpec) {
   const auto universe = co_await setUpUniverse(
       /*numObjects=*/4);
-  createProblem(/*objectiveTuple=*/{const_expr(0, universe)},
-                /*constraint=*/const_expr(0, universe));
+  createProblem(/*objectiveTuple=*/{const_expr(0, *universe)},
+                /*constraint=*/const_expr(0, *universe));
 
   auto singleFixedSourceMoveType =
       FixedSourceMoveType(interface::LocalSearchSolverSpec());
@@ -157,8 +157,8 @@ CO_TEST_F(FixedSourceMoveTypeTest, MissingMoveSpec) {
 CO_TEST_F(FixedSourceMoveTypeTest, MissingScopeItemsInMoveSpec) {
   const auto universe = co_await setUpUniverse(/*numObjects=*/4);
 
-  createProblem(/*objectiveTuple=*/{const_expr(0, universe)},
-                /*constraint=*/const_expr(0, universe));
+  createProblem(/*objectiveTuple=*/{const_expr(0, *universe)},
+                /*constraint=*/const_expr(0, *universe));
 
   auto singleFixedSourceMoveTypeSpec =
       interface::SingleFixedSourceMoveTypeSpec();
@@ -188,8 +188,8 @@ CO_TEST_F(FixedSourceMoveTypeTest, VerifyMoveSetWithSpecialContainer) {
   const auto universe = co_await setUpUniverse(/*numObjects=*/4);
 
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
-      /*constraint=*/const_expr(0, universe));
+      /*objectiveTuple=*/{const_expr(0, *universe)},
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = singleFixedSourceMoveType.findBestMove(
       getMovesEvaluator(),
@@ -223,8 +223,8 @@ CO_TEST_F(FixedSourceMoveTypeTest, VerifyMoveSetWithScopeItems) {
   const auto universe = co_await setUpUniverse(/*numObjects=*/4);
 
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
-      /*constraint=*/const_expr(0, universe));
+      /*objectiveTuple=*/{const_expr(0, *universe)},
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = singleFixedSourceMoveType.findBestMove(
       getMovesEvaluator(),
@@ -258,8 +258,8 @@ CO_TEST_F(FixedSourceMoveTypeTest, VerifyMoveSetWithScopeItemsAndEquivSets) {
   const auto universe = co_await setUpUniverse(/*numObjects=*/4);
 
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
-      /*constraint=*/const_expr(0, universe));
+      /*objectiveTuple=*/{const_expr(0, *universe)},
+      /*constraint=*/const_expr(0, *universe));
 
   EquivalenceSets equivalenceSets(*universe);
   equivalenceSets.mappingMerge(
@@ -370,8 +370,8 @@ CO_TEST_F(FixedSourceMoveTypeTest, VerifyBundleMoveSetWithScopeItems) {
       PartitionSpec{.name = "partition", .numGroups = numGroups});
 
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
-      /*constraint=*/const_expr(0, universe));
+      /*objectiveTuple=*/{const_expr(0, *universe)},
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = moveType.findBestMove(
       getMovesEvaluator(),
@@ -398,8 +398,8 @@ CO_TEST_F(FixedSourceMoveTypeTest, VerifyBundleMoveSetWithSpecialContainer) {
       PartitionSpec{.name = "partition", .numGroups = numGroups});
 
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
-      /*constraint=*/const_expr(0, universe));
+      /*objectiveTuple=*/{const_expr(0, *universe)},
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = moveType.findBestMove(
       getMovesEvaluator(),
@@ -426,8 +426,8 @@ CO_TEST_F(FixedSourceMoveTypeTest, VerifyBundleMoveSetWithBundleSizeOverride) {
       PartitionSpec{.name = "partition", .numGroups = numGroups});
 
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
-      /*constraint=*/const_expr(0, universe));
+      /*objectiveTuple=*/{const_expr(0, *universe)},
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = moveType.findBestMove(
       getMovesEvaluator(),
@@ -460,8 +460,8 @@ CO_TEST_F(FixedSourceMoveTypeTest, NotSampledBundleMoves) {
       PartitionSpec{.name = "partition", .numGroups = numGroups});
 
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
-      /*constraint=*/const_expr(0, universe));
+      /*objectiveTuple=*/{const_expr(0, *universe)},
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = moveType.findBestMove(
       getMovesEvaluator(),
@@ -490,8 +490,8 @@ CO_TEST_F(FixedSourceMoveTypeTest, SampledBundleMoves) {
       PartitionSpec{.name = "partition", .numGroups = 20});
 
   createProblem(
-      /*objectiveTuple=*/{const_expr(0, universe)},
-      /*constraint=*/const_expr(0, universe));
+      /*objectiveTuple=*/{const_expr(0, *universe)},
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = moveType.findBestMove(
       getMovesEvaluator(),

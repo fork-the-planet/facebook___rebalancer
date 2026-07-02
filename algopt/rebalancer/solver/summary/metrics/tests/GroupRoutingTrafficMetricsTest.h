@@ -111,7 +111,7 @@ class GroupRoutingTrafficMetricsTest : public MetricsTestBase {
     const Assignment assignment(
         universe->getContainers().getInitialAssignment());
     return std::make_shared<GroupRoutingRing>(
-        routingConfigId, groupId, universe, assignment);
+        routingConfigId, groupId, *universe, assignment);
   }
 
   GroupRoutingTrafficMetrics metrics;

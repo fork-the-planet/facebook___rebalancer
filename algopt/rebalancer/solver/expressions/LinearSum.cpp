@@ -41,10 +41,10 @@ using entities::EquivalenceSetId;
 using entities::ObjectId;
 
 LinearSum::LinearSum(
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     double constant,
     const PackerMap<std::shared_ptr<Expression>, double>& coef)
-    : Expression(std::move(universe)), constant_(constant) {
+    : Expression(universe), constant_(constant) {
   for (auto [child, weight] : coef) {
     if (weight == 0) {
       continue;
@@ -259,7 +259,7 @@ LinearSum LinearSum::operator+(double other) const {
     double coefficient = getChildCoefficient(child.get());
     terms.emplace(child, coefficient);
   }
-  return LinearSum(getUniversePtr(), constant, terms);
+  return LinearSum(getUniverse(), constant, terms);
 }
 
 LinearSum LinearSum::operator+(const LinearSum& other) const {
@@ -274,7 +274,7 @@ LinearSum LinearSum::operator+(const LinearSum& other) const {
     coef[child] += other.getChildCoefficient(child.get());
   }
 
-  return LinearSum(getUniversePtr(), constant, coef);
+  return LinearSum(getUniverse(), constant, coef);
 }
 
 void LinearSum::combine(const LinearSum& other, double scale) {
@@ -321,7 +321,7 @@ LinearSum LinearSum::operator*(double other) const {
     coef[child] = coefficient * other;
   }
 
-  return LinearSum(getUniversePtr(), constant, coef);
+  return LinearSum(getUniverse(), constant, coef);
 }
 
 void LinearSum::operator*=(double other) {

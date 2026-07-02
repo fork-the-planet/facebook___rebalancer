@@ -44,7 +44,7 @@ GroupMoveLimitSpecBuilder::GroupMoveLimitSpecBuilder(
       spec_(std::move(spec)),
       groupToMoveLimits_(
           LimitWrapper::getAllGroupLimits(
-              universe_,
+              *universe_,
               universe_->getPartitionId(*spec_.partitionName()),
               *spec_.limit())),
       dimensionId_(

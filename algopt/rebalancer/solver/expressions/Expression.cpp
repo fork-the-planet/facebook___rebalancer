@@ -140,13 +140,11 @@ bool higherPotentialFirst(
 
 std::atomic<int64_t> next_id(0);
 
-Expression::Expression(std::shared_ptr<const entities::Universe> universe)
-    : universe_(std::move(universe)), id(next_id++) {}
+Expression::Expression(const entities::Universe& universe)
+    : universe_(&universe), id(next_id++) {}
 
-Expression::Expression(
-    std::shared_ptr<const entities::Universe> universe,
-    double initialValue)
-    : Expression(std::move(universe)) {
+Expression::Expression(const entities::Universe& universe, double initialValue)
+    : Expression(universe) {
   setInitialValue(initialValue);
 }
 
@@ -775,11 +773,6 @@ bool Expression::isFixed() const {
 
 const entities::Universe& Expression::getUniverse() const {
   return *universe_;
-}
-
-const std::shared_ptr<const entities::Universe>& Expression::getUniversePtr()
-    const {
-  return universe_;
 }
 
 const Precision& Expression::getPrecision() const {

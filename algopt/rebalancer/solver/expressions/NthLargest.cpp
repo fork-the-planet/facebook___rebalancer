@@ -29,8 +29,8 @@ NthLargest::NthLargest(
     const std::vector<std::shared_ptr<Expression>>& values,
     int n,
     bool unique,
-    std::shared_ptr<const entities::Universe> universe)
-    : Expression(std::move(universe)), n_(n), unique_(unique) {
+    const entities::Universe& universe)
+    : Expression(universe), n_(n), unique_(unique) {
   for (const auto& value : values) {
     add_child(value);
   }

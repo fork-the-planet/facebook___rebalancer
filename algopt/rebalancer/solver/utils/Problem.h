@@ -15,7 +15,6 @@
 #pragma once
 
 #include "algopt/lp/generic/Variable.h"
-#include "algopt/rebalancer/common/log/StreamLog.h"
 #include "algopt/rebalancer/entities/Identifiers.h"
 #include "algopt/rebalancer/entities/Universe.h"
 #include "algopt/rebalancer/solver/expressions/Expression.h"
@@ -54,9 +53,13 @@ class ObjectsToExploreGenerator;
 class OptimalSolver;
 class LocalSearchSolver;
 class Problem {
+  // Declared first so it is destroyed last, after orchestrator_/objective,
+  // which hold non-owning pointers to the Universe.
+  const std::shared_ptr<const rebalancer::entities::Universe> universe_;
+
  public:
   explicit Problem(
-      const std::shared_ptr<const entities::Universe> universe,
+      std::shared_ptr<const entities::Universe> universe,
       const std::shared_ptr<const MaterializedProblem> materializedProblem,
       const ProblemConfigs& configs = ProblemConfigs(),
       std::shared_ptr<RebalancerLog> logger =
@@ -245,8 +248,6 @@ class Problem {
   // thread-safe
   materializer::Cache<std::string, PackerSet<entities::ContainerId>>
       scopeNameToOutOfScopeContainerIds_;
-
-  const std::shared_ptr<const rebalancer::entities::Universe> universe_;
 
   const std::shared_ptr<const MaterializedProblem> materializedProblem_;
   const InvalidMoveFilter* invalidMoveFilter_{nullptr};

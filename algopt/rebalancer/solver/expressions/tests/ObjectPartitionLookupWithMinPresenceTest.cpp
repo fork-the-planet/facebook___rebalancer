@@ -115,14 +115,14 @@ class ObjectPartitionLookupWithMinPresenceTest : public ExpressionTestsBase {
   }
 
   materializer::LimitWrapper makeLimitWrapper(
-      const std::shared_ptr<const entities::Universe>& universe,
+      const entities::Universe& universe,
       const interface::Limit& limit) const {
     return materializer::LimitWrapper(universe, limit, region(), partition());
   }
 
   std::shared_ptr<ObjectPartitionLookupWithMinPresence>
   makeObjectPartitionLookupWithMinPresence(
-      const std::shared_ptr<const entities::Universe>& universe,
+      const entities::Universe& universe,
       const entities::ScopeItemId aggregationScopeItemId,
       const PackerSet<entities::GroupId>& groupIds,
       const folly::small_vector<materializer::LimitWrapper, 2>& multiplierList =
@@ -144,13 +144,13 @@ class ObjectPartitionLookupWithMinPresenceTest : public ExpressionTestsBase {
     groupToExtraAdditivePenalty.groupLimits() = {{"group2", 1.5}};
 
     const Assignment assignment(
-        universe->getContainers().getInitialAssignment());
+        universe.getContainers().getInitialAssignment());
 
     auto objectPartitionLookupWithMinPresence =
         std::make_shared<ObjectPartitionLookupWithMinPresence>(
             ObjectPartitionLookupWithMinPresence(
                 objectPartition,
-                universe->getScope(region()).getContainerIdsPtr(
+                universe.getScope(region()).getContainerIdsPtr(
                     aggregationScopeItemId),
                 region(),
                 aggregationScopeItemId,
@@ -179,8 +179,9 @@ class ObjectPartitionLookupWithMinPresenceTest : public ExpressionTestsBase {
 CO_TEST_F(
     ObjectPartitionLookupWithMinPresenceTest,
     UtilWithNoRoundUpOrMultipliers) {
-  const auto universe = co_await setUpUniverse();
-  auto assignment = getInitialAssignment(*universe);
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = getInitialAssignment(universe);
 
   auto objectPartitionLookup = makeObjectPartitionLookupWithMinPresence(
       universe,
@@ -257,8 +258,9 @@ CO_TEST_F(
 CO_TEST_F(
     ObjectPartitionLookupWithMinPresenceTest,
     UtilWithRoundUpAndMultipliers) {
-  const auto universe = co_await setUpUniverse();
-  auto assignment = getInitialAssignment(*universe);
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = getInitialAssignment(universe);
 
   folly::small_vector<materializer::LimitWrapper, 2> multiplierList;
   auto multiplier1 = makeLimit(1.1);
@@ -358,8 +360,9 @@ CO_TEST_F(
 }
 
 CO_TEST_F(ObjectPartitionLookupWithMinPresenceTest, PenaltyWithNoMultipliers) {
-  const auto universe = co_await setUpUniverse();
-  auto assignment = getInitialAssignment(*universe);
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = getInitialAssignment(universe);
 
   auto objectPartitionLookup = makeObjectPartitionLookupWithMinPresence(
       universe,
@@ -434,8 +437,9 @@ CO_TEST_F(ObjectPartitionLookupWithMinPresenceTest, PenaltyWithNoMultipliers) {
 }
 
 CO_TEST_F(ObjectPartitionLookupWithMinPresenceTest, PenaltyWithMultipliers) {
-  const auto universe = co_await setUpUniverse();
-  auto assignment = getInitialAssignment(*universe);
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = getInitialAssignment(universe);
 
   folly::small_vector<materializer::LimitWrapper, 2> multiplierList;
   auto multiplier1 = makeLimit(1.1);
@@ -529,8 +533,9 @@ CO_TEST_F(ObjectPartitionLookupWithMinPresenceTest, PenaltyWithMultipliers) {
 }
 
 CO_TEST_F(ObjectPartitionLookupWithMinPresenceTest, EmptyGroupList) {
-  const auto universe = co_await setUpUniverse();
-  const auto assignment = getInitialAssignment(*universe);
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
+  const auto assignment = getInitialAssignment(universe);
 
   auto objectPartitionLookup =
       makeObjectPartitionLookupWithMinPresence(universe, region(1), {}, {});
@@ -547,7 +552,8 @@ CO_TEST_F(ObjectPartitionLookupWithMinPresenceTest, EmptyGroupList) {
 }
 
 CO_TEST_F(ObjectPartitionLookupWithMinPresenceTest, GetType) {
-  const auto universe = co_await setUpUniverse();
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
 
   auto objectPartitionLookup =
       makeObjectPartitionLookupWithMinPresence(universe, region(1), {}, {});
@@ -556,7 +562,8 @@ CO_TEST_F(ObjectPartitionLookupWithMinPresenceTest, GetType) {
 }
 
 CO_TEST_F(ObjectPartitionLookupWithMinPresenceTest, HasNoLpIntent) {
-  const auto universe = co_await setUpUniverse();
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
 
   auto objectPartitionLookup =
       makeObjectPartitionLookupWithMinPresence(universe, region(1), {}, {});
@@ -571,8 +578,9 @@ CO_TEST_F(
   // - UTILIZATION multipliers apply only to actual utilization
   // - PRESENCE_WEIGHT multipliers apply only to presence weight
   // - COMMON multipliers apply to both
-  const auto universe = co_await setUpUniverse();
-  auto assignment = getInitialAssignment(*universe);
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = getInitialAssignment(universe);
 
   const entities::ScopeItemId aggregationScopeItemId = region(1);
   const PackerSet<entities::GroupId> groupIds = {group(1), group(2)};
@@ -616,7 +624,7 @@ CO_TEST_F(
       std::make_shared<ObjectPartitionLookupWithMinPresence>(
           ObjectPartitionLookupWithMinPresence(
               objectPartition,
-              universe->getScope(region()).getContainerIdsPtr(
+              universe.getScope(region()).getContainerIdsPtr(
                   aggregationScopeItemId),
               region(),
               aggregationScopeItemId,
@@ -684,8 +692,9 @@ CO_TEST_F(
     ObjectPartitionLookupWithMinPresenceTest,
     UtilWithDifferentMultiplierTargetsAndRoundUp) {
   // Same as above but with roundUpGroupUtilOnScopeItem = true
-  const auto universe = co_await setUpUniverse();
-  auto assignment = getInitialAssignment(*universe);
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = getInitialAssignment(universe);
 
   const entities::ScopeItemId aggregationScopeItemId = region(1);
   const PackerSet<entities::GroupId> groupIds = {group(1), group(2)};
@@ -724,7 +733,7 @@ CO_TEST_F(
       std::make_shared<ObjectPartitionLookupWithMinPresence>(
           ObjectPartitionLookupWithMinPresence(
               objectPartition,
-              universe->getScope(region()).getContainerIdsPtr(
+              universe.getScope(region()).getContainerIdsPtr(
                   aggregationScopeItemId),
               region(),
               aggregationScopeItemId,

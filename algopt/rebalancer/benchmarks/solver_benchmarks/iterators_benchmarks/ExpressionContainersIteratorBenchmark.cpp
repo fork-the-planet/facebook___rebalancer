@@ -28,8 +28,7 @@
 namespace facebook::rebalancer::packer::tests {
 
 BENCHMARK(AllChildrenYieldSameAffectedContainers) {
-  const std::shared_ptr<const entities::Universe> universe =
-      std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
   // when all child nodes affect the same set of containers, we do not expand
   // the parent but just add all affected containers of the parent to the
   // incremental priority queue. This Benchmark checks that indeed happens, for
@@ -76,8 +75,7 @@ BENCHMARK(AllChildrenYieldSameAffectedContainers) {
 
 BENCHMARK(UpdateChildPotentialsOnlyIfRequired) {
   folly::BenchmarkSuspender suspend;
-  const std::shared_ptr<const entities::Universe> universe =
-      std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
   // This benchmark shows the usefulness of updating the child potentials only
   // if required (after a fullApply/partialApply), as opposed to recomputing
   // them always
@@ -165,8 +163,7 @@ BENCHMARK(UpdateChildPotentialsOnlyIfRequired) {
 
 BENCHMARK(RefreshPotentialsFewChildChanges) {
   folly::BenchmarkSuspender suspend;
-  const std::shared_ptr<const entities::Universe> universe =
-      std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
   // Flat LinearSum with `childCount` single-container children. Each move
   // changes two children's values. Only time to refresh child potentials
   // refresh is timed
@@ -227,8 +224,7 @@ BENCHMARK(RefreshPotentialsFewChildChanges) {
 }
 
 BENCHMARK(PruneOptimalSubgraph) {
-  const std::shared_ptr<const entities::Universe> universe =
-      std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
   // This benchmark shows the usefulness of pruning away optimal subgraphs when
   // doing preorder traversal
   folly::BenchmarkSuspender suspend;

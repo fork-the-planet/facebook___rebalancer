@@ -28,7 +28,7 @@ class Variable : public Expression {
   Variable(
       entities::ObjectId obj,
       entities::ContainerId con,
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       const Assignment& initialAssignment);
 
   void updateEquivalenceSets(EquivalenceSets& equivSets) const override;

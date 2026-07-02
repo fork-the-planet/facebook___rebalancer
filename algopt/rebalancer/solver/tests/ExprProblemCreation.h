@@ -47,12 +47,12 @@ inline GlobalLabeledObjectives makeGlobalLabeledObjectives(
 
 inline GlobalObjective makeGlobalObjective(
     const std::vector<ExprPtr>& objectiveTuple,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   GlobalObjective::Builder builder;
   for (const auto i : folly::irange(objectiveTuple.size())) {
     builder.addToObjective((int)i, objectiveTuple[i], universe);
   }
-  return builder.build(std::move(universe));
+  return builder.build(universe);
 }
 
 inline std::unique_ptr<Problem> createTestProblem(
@@ -64,9 +64,9 @@ inline std::unique_ptr<Problem> createTestProblem(
     bool performInitialFullApply = true,
     bool enableParallelizedBoundsComputing = false,
     std::unique_ptr<InvalidMoveFilter> invalidMoveFilter = nullptr) {
-  auto materializedProblem = std::make_shared<MaterializedProblem>(universe);
+  auto materializedProblem = std::make_shared<MaterializedProblem>(*universe);
   materializedProblem->globalObjective =
-      makeGlobalObjective(objectiveTuple, universe);
+      makeGlobalObjective(objectiveTuple, *universe);
   materializedProblem->labeledObjectives =
       makeGlobalLabeledObjectives(materializedProblem->globalObjective);
   materializedProblem->finalConstraint = std::move(constraint);

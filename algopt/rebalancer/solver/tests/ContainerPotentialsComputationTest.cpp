@@ -86,13 +86,13 @@ ExprPtr ContainerPotentialsComputationTest::getDefaultObjective() {
   // dimensionValue of object
   const Assignment initialAssignment(
       universe_->getContainers().getInitialAssignment());
-  ExprPtr objective = const_expr(0, universe_);
+  ExprPtr objective = const_expr(0, *universe_);
   for (const auto objectId : folly::irange(nObjects)) {
     for (const auto containerId : folly::irange(nContainers)) {
       objective += variable(
                        object(objectId),
                        container(containerId),
-                       universe_,
+                       *universe_,
                        initialAssignment) *
           objectId;
     }
@@ -107,7 +107,7 @@ TEST_F(ContainerPotentialsComputationTest, BasicComputeAllPotentials) {
   {
     // create a problem and movesEvaluator
     auto objective = getDefaultObjective();
-    auto dummyConstraint = const_expr(0, universe_);
+    auto dummyConstraint = const_expr(0, *universe_);
     createProblem(objective, dummyConstraint);
     createMovesEvaluator();
   }
@@ -166,7 +166,7 @@ TEST_F(ContainerPotentialsComputationTest, BasicUpdatePotentials) {
   {
     // create a problem and moves evaluator
     auto objective = getDefaultObjective();
-    auto dummyConstraint = const_expr(0, universe_);
+    auto dummyConstraint = const_expr(0, *universe_);
 
     // modify the objective by adding an extra term 20 * variable(4, 3), which
     // penalizes moving object4 from container0 to container3
@@ -175,7 +175,7 @@ TEST_F(ContainerPotentialsComputationTest, BasicUpdatePotentials) {
             variable(
                 object(4),
                 container(3),
-                universe_,
+                *universe_,
                 Assignment(universe_->getContainers().getInitialAssignment()));
     createProblem(modifiedObjective, dummyConstraint);
     createMovesEvaluator();

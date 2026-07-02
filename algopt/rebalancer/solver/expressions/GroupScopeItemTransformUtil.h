@@ -89,7 +89,7 @@ class GroupScopeItemTransformUtil : public Expression {
   };
 
   explicit GroupScopeItemTransformUtil(
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       entities::PartitionId partitionId,
       entities::GroupId groupId,
       entities::DimensionId dimensionId,
@@ -171,7 +171,6 @@ class GroupScopeItemTransformUtil : public Expression {
   void validateTransformFunctionData() const;
 
  private:
-  const std::shared_ptr<const entities::Universe> universe_;
   const entities::ScopeId scopeId_;
   const entities::Scope& scope_;
   const entities::PartitionId partitionId_;

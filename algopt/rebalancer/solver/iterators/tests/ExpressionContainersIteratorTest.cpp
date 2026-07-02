@@ -52,15 +52,16 @@ TEST_F(ExpressionContainersIteratorTest, ExpressionContainersTraversal) {
   const auto universe = buildUniverse();
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
-  auto a = 4 * variable(object(1), container(1), universe, assignment); // 4
-  auto b = 2 * variable(object(2), container(2), universe, assignment); // 2
-  auto c = 8 * variable(object(3), container(3), universe, assignment); // 8
-  auto d = rebalancer::max({a, b}, universe); // 4
+  auto a = 4 * variable(object(1), container(1), *universe, assignment); // 4
+  auto b = 2 * variable(object(2), container(2), *universe, assignment); // 2
+  auto c = 8 * variable(object(3), container(3), *universe, assignment); // 8
+  auto d = rebalancer::max({a, b}, *universe); // 4
   auto e = c + d; // 12
   Context context;
 
-  auto objective =
-      GlobalObjective::Builder{}.addToObjective(0, e, universe).build(universe);
+  auto objective = GlobalObjective::Builder{}
+                       .addToObjective(0, e, *universe)
+                       .build(*universe);
   auto objectiveExpr = objective.getOnlyObjective();
   objectiveExpr->fullApply(TopToBottomEvaluator(context), assignment);
   objectiveExpr->init_unconstrained_bounds(context);
@@ -105,7 +106,7 @@ CO_TEST_F(ExpressionContainersIteratorTest, ContainerTies) {
   const auto scopeItemId =
       ExpressionTestsBase::scopeItemId(scopeId, "scopeItem");
 
-  auto op = object_partition(partitionId, dimensionId, {}, universe);
+  auto op = object_partition(partitionId, dimensionId, {}, *universe);
   auto lookup1 = object_partition_lookup(
       op,
       std::make_shared<PackerSet<entities::ContainerId>>(
@@ -113,7 +114,7 @@ CO_TEST_F(ExpressionContainersIteratorTest, ContainerTies) {
               container(1), container(2), container(3)}),
       scopeId,
       scopeItemId,
-      universe,
+      *universe,
       assignment);
   auto lookup2 = object_partition_lookup(
       op,
@@ -122,14 +123,14 @@ CO_TEST_F(ExpressionContainersIteratorTest, ContainerTies) {
               container(4), container(5), container(2)}),
       scopeId,
       scopeItemId,
-      universe,
+      *universe,
       assignment);
   auto root = lookup1 + lookup2;
 
   Context context;
   auto objective = GlobalObjective::Builder{}
-                       .addToObjective(0, root, universe)
-                       .build(universe);
+                       .addToObjective(0, root, *universe)
+                       .build(*universe);
   auto objectiveExpr = objective.getOnlyObjective();
   objectiveExpr->fullApply(TopToBottomEvaluator(context), assignment);
   objectiveExpr->init_unconstrained_bounds(context);
@@ -224,7 +225,7 @@ CO_TEST_F(ExpressionContainersIteratorTest, ContainerTiesObjectiveTuple) {
   const auto scopeItemId =
       ExpressionTestsBase::scopeItemId(scopeId, "scopeItem");
 
-  auto op = object_partition(partitionId, dimensionId, {}, universe);
+  auto op = object_partition(partitionId, dimensionId, {}, *universe);
   auto lookup1 = object_partition_lookup(
       op,
       std::make_shared<PackerSet<entities::ContainerId>>(
@@ -232,7 +233,7 @@ CO_TEST_F(ExpressionContainersIteratorTest, ContainerTiesObjectiveTuple) {
               container(1), container(2), container(3)}),
       scopeId,
       scopeItemId,
-      universe,
+      *universe,
       assignment); // value = 3, lb = 0, potential = 3
   lookup1->description = "lookup1";
   auto lookup2 = object_partition_lookup(
@@ -242,31 +243,31 @@ CO_TEST_F(ExpressionContainersIteratorTest, ContainerTiesObjectiveTuple) {
               container(4), container(5), container(2)}),
       scopeId,
       scopeItemId,
-      universe,
+      *universe,
       assignment); // value = 0, lb = 0, potential = 0
   lookup2->description = "lookup2";
-  auto ls1 = variable(object(1), container(1), universe, assignment) +
-      2 * variable(object(2), container(3), universe, assignment) -
-      variable(object(3), container(5), universe, assignment);
+  auto ls1 = variable(object(1), container(1), *universe, assignment) +
+      2 * variable(object(2), container(3), *universe, assignment) -
+      variable(object(3), container(5), *universe, assignment);
   // lb = -1, potential = 4
   ls1->description = "ls1";
 
   auto ls2 =
-      variable(object(1), container(6), universe, assignment) -
+      variable(object(1), container(6), *universe, assignment) -
       variable(
-          object(2), container(3), universe, assignment); // value = -1, lb =
-                                                          // -1, potential = 0
+          object(2), container(3), *universe, assignment); // value = -1, lb =
+                                                           // -1, potential = 0
   ls2->description = "ls2";
 
   auto objective = GlobalObjective::Builder{}
-                       .addToObjective(0, lookup1, universe)
-                       .addToObjective(1, lookup2, universe)
-                       .addToObjective(2, ls1, universe)
+                       .addToObjective(0, lookup1, *universe)
+                       .addToObjective(1, lookup2, *universe)
+                       .addToObjective(2, ls1, *universe)
                        // to check that everything is de-duped and
                        // all containers are in global seen
-                       .addToObjective(3, ls1, universe)
-                       .addToObjective(4, ls2, universe)
-                       .build(universe);
+                       .addToObjective(3, ls1, *universe)
+                       .addToObjective(4, ls2, *universe)
+                       .build(*universe);
 
   Context context;
   objective.fullApply(TopToBottomEvaluator(context), assignment);
@@ -320,25 +321,26 @@ TEST_F(
           container(1), container(2), container(3)});
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   auto lookup1 = object_lookup(
-      makeObjectVector(PackerMap<entities::ObjectId, double>{}, 1, 3, universe),
+      makeObjectVector(
+          PackerMap<entities::ObjectId, double>{}, 1, 3, *universe),
       allContainers,
-      universe,
+      *universe,
       assignment);
   auto lookup2 = object_lookup(
       makeObjectVector(
-          PackerMap<entities::ObjectId, double>{}, 10, 3, universe),
+          PackerMap<entities::ObjectId, double>{}, 10, 3, *universe),
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{
               container(3), container(1), container(2)}),
-      universe,
+      *universe,
       assignment);
 
   auto obj = lookup1 + lookup2;
 
   Context context;
   auto objective = GlobalObjective::Builder{}
-                       .addToObjective(0, obj, universe)
-                       .build(universe);
+                       .addToObjective(0, obj, *universe)
+                       .build(*universe);
   auto objectiveExpr = objective.getOnlyObjective();
   objectiveExpr->fullApply(TopToBottomEvaluator(context), assignment);
   objectiveExpr->init_unconstrained_bounds(context);
@@ -376,48 +378,50 @@ TEST_F(
   auto allContainers = std::make_shared<PackerSet<entities::ContainerId>>(
       PackerSet<entities::ContainerId>{
           container(1), container(2), container(3), container(4)});
-  auto sum1 = const_expr(0, universe);
+  auto sum1 = const_expr(0, *universe);
   inplace_add(
       sum1,
       object_lookup(
           makeObjectVector(
-              PackerMap<entities::ObjectId, double>{}, 5, 4, universe),
+              PackerMap<entities::ObjectId, double>{}, 5, 4, *universe),
           allContainers,
-          universe,
+          *universe,
           assignment),
-      universe); // 20 (0 + 5 * 4))
+      *universe); // 20 (0 + 5 * 4))
 
-  auto sum2 = 4 * variable(object(3), container(3), universe, assignment);
-  inplace_add(sum2, const_expr(0, universe), universe); // 4 (4 + 0)
+  auto sum2 = 4 * variable(object(3), container(3), *universe, assignment);
+  inplace_add(sum2, const_expr(0, *universe), *universe); // 4 (4 + 0)
 
-  auto sum3 = const_expr(10, universe) + const_expr(3, universe) +
+  auto sum3 = const_expr(10, *universe) + const_expr(3, *universe) +
       object_lookup(
                   makeObjectVector(
-                      PackerMap<entities::ObjectId, double>{}, 5, 4, universe),
+                      PackerMap<entities::ObjectId, double>{}, 5, 4, *universe),
                   std::make_shared<PackerSet<entities::ContainerId>>(),
-                  universe,
+                  *universe,
                   assignment); // sum constants and empty
                                // lookup; 13 (10 + 3)
 
   auto lookup2 = object_lookup(
-      makeObjectVector(PackerMap<entities::ObjectId, double>{}, 3, 4, universe),
+      makeObjectVector(
+          PackerMap<entities::ObjectId, double>{}, 3, 4, *universe),
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(4)}),
-      universe,
+      *universe,
       assignment); // 3 (1 * 3; since container 4 has one object in it)
 
   auto lookup3 = object_lookup(
-      makeObjectVector(PackerMap<entities::ObjectId, double>{}, 2, 4, universe),
+      makeObjectVector(
+          PackerMap<entities::ObjectId, double>{}, 2, 4, *universe),
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(2)}),
-      universe,
+      *universe,
       assignment); // 2 (1 * 2)
 
   auto obj = (sum1 + sum2 + sum3) + (lookup2 + lookup3);
 
   auto objective = GlobalObjective::Builder{}
-                       .addToObjective(0, obj, universe)
-                       .build(universe);
+                       .addToObjective(0, obj, *universe)
+                       .build(*universe);
   Context context;
   auto objectiveExpr = objective.getOnlyObjective();
   objectiveExpr->fullApply(TopToBottomEvaluator(context), assignment);
@@ -474,7 +478,7 @@ CO_TEST_F(
   const auto scopeItemId =
       ExpressionTestsBase::scopeItemId(scopeId, "scopeItem");
 
-  const auto op = object_partition(partitionId, dimensionId, {}, universe);
+  const auto op = object_partition(partitionId, dimensionId, {}, *universe);
   const auto lookup1 = object_partition_lookup(
       op,
       std::make_shared<PackerSet<entities::ContainerId>>(
@@ -482,7 +486,7 @@ CO_TEST_F(
               container(1), container(2), container(3)}),
       scopeId,
       scopeItemId,
-      universe,
+      *universe,
       assignment); // value = 3, lb = 0, potential = 3
   lookup1->description = "lookup1";
   const auto lookup2 = object_partition_lookup(
@@ -492,32 +496,32 @@ CO_TEST_F(
               container(4), container(5), container(2)}),
       scopeId,
       scopeItemId,
-      universe,
+      *universe,
       assignment); // value = 0, lb = 0, potential = 0
   lookup2->description = "lookup2";
-  const auto ls1 = variable(object(1), container(1), universe, assignment) +
-      2 * variable(object(2), container(3), universe, assignment) -
+  const auto ls1 = variable(object(1), container(1), *universe, assignment) +
+      2 * variable(object(2), container(3), *universe, assignment) -
       2 *
           variable(
               object(3),
               container(5),
-              universe,
+              *universe,
               assignment); // value =  3 ( 1 + 2 - 0), lb = -2, potential = 5
   ls1->description = "ls1";
 
   const auto ls2 =
-      variable(object(1), container(6), universe, assignment) -
+      variable(object(1), container(6), *universe, assignment) -
       variable(
-          object(2), container(3), universe, assignment); // value = -1, lb =
-                                                          // -1, potential = 0
+          object(2), container(3), *universe, assignment); // value = -1, lb =
+                                                           // -1, potential = 0
   ls2->description = "ls2";
 
   auto objective = GlobalObjective::Builder{}
-                       .addToObjective(0, lookup1, universe)
-                       .addToObjective(1, lookup2, universe)
-                       .addToObjective(2, ls1, universe)
-                       .addToObjective(3, ls2, universe)
-                       .build(universe);
+                       .addToObjective(0, lookup1, *universe)
+                       .addToObjective(1, lookup2, *universe)
+                       .addToObjective(2, ls1, *universe)
+                       .addToObjective(3, ls2, *universe)
+                       .build(*universe);
 
   Context context;
   objective.fullApply(TopToBottomEvaluator(context), assignment);

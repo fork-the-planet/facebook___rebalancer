@@ -23,10 +23,10 @@ class Square : public Transform {
   Square(
       std::shared_ptr<Expression> expr,
       const ApproximationHint& hint,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
   explicit Square(
       std::shared_ptr<Expression> expr,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   virtual bool inner_is_integer(Context& context) override;
 

@@ -35,7 +35,8 @@ class CeilTest : public ExpressionTestsBase {
 };
 
 TEST_F(CeilTest, Constants) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   {
     auto expr = ceil(const_expr(-1.01, universe), universe);
     EXPECT_EQ(-1.0, apply(expr, {}));
@@ -83,14 +84,15 @@ TEST_F(CeilTest, Constants) {
 }
 
 TEST_F(CeilTest, IsInteger) {
-  const auto universe = buildUniverse();
+  buildUniverse();
   Context context;
-  auto expr = ceil(const_expr(1.5, universe), universe);
+  auto expr = ceil(const_expr(1.5, getUniverse()), getUniverse());
   EXPECT_TRUE(expr->is_integer(context));
 }
 
 TEST_F(CeilTest, NonConstant) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment assignment({
       {container(0), {}},
       {container(1), {object(1)}},

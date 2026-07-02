@@ -34,7 +34,7 @@ folly::coro::Task<ExprPtr> MovesInProgressSpecBuilder::goalCoro(
 folly::coro::Task<std::vector<ConstraintInfo>>
 MovesInProgressSpecBuilder::constraints(
     ExpressionBuilder& expressionBuilder) const {
-  ExprPtr validMoves = const_expr(0, universe_);
+  ExprPtr validMoves = const_expr(0, *universe_);
   auto scopeId = universe_->getScopeId(universe_->getContainerTypeName());
   for (const auto& move : *spec_.moves()) {
     auto objectId = universe_->getObjectId(*move.objName());

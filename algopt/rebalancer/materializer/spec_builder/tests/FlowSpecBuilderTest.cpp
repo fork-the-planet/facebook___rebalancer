@@ -101,7 +101,7 @@ CO_TEST_F(FlowSpecBuilderTest, Constraint) {
 
   EXPECT_EQ(1, constraint.size());
 
-  auto normalized = max(0, constraint.at(0).constraintExpr, universe);
+  auto normalized = max(0, constraint.at(0).constraintExpr, *universe);
 
   EXPECT_NEAR(0, evaluate(normalized, deltaFromInitial({})), 1e-8);
   EXPECT_NEAR(

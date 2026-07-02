@@ -84,7 +84,7 @@ NestedScopeLimitSpecBuilder::constraints(
 
   auto innerToOuterScope =
       getInnerToOuterScopeMapping(outerScopeId, innerScopeId);
-  const LimitWrapper limit(universe_, *spec_.limit(), innerScopeId);
+  const LimitWrapper limit(*universe_, *spec_.limit(), innerScopeId);
   for (auto& innerScopeItemId : innerScopeFilter.getScopeItemIds()) {
     auto innerUtil = co_await expressionBuilder.getAbsoluteUtil(
         UtilMetric::AFTER, dimensionId, innerScopeId, innerScopeItemId);

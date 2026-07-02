@@ -40,7 +40,8 @@ class LinearSumTest : public ExpressionTestsBase {
 
 TEST_F(LinearSumTest, Caching) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment assignment(
       {{container(1), {object(0)}}, {container(2), {}}, {container(0), {}}});
 
@@ -106,7 +107,8 @@ TEST_F(LinearSumTest, Caching) {
 // run, so the resulting order must match what a full re-sort would produce.
 TEST_F(LinearSumTest, RefreshMergesPartialChildChanges) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment assignment(
       {{container(0), {object(0)}},
        {container(1), {object(1)}},
@@ -141,9 +143,10 @@ TEST_F(LinearSumTest, RefreshMergesPartialChildChanges) {
 
 TEST_F(LinearSumTest, EquivalenceSetsLinearSum) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto o1c1 = variable(object(1), container(1), universe, initialAssignment);
   auto o1c2 = variable(object(1), container(2), universe, initialAssignment);
   auto o2c1 = variable(object(2), container(1), universe, initialAssignment);
@@ -152,7 +155,7 @@ TEST_F(LinearSumTest, EquivalenceSetsLinearSum) {
   auto o3c2 = variable(object(3), container(2), universe, initialAssignment);
   auto sum = o1c1 + 2 * o1c2 + o2c1 + 2 * o2c2 + o3c1 + o3c2;
 
-  EquivalenceSets equivalenceSets(*universe);
+  EquivalenceSets equivalenceSets(universe);
   updateEquivalenceSets(equivalenceSets, *sum);
 
   EXPECT_EQ(equivalenceSets.size(), 2);
@@ -163,9 +166,10 @@ TEST_F(LinearSumTest, EquivalenceSetsLinearSum) {
 
 TEST_F(LinearSumTest, LinearSumIsBinary) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto t1 = variable(object(0), container(1), universe, initialAssignment);
   auto t2 = variable(object(0), container(0), universe, initialAssignment);
   auto linearsum = 20 + 4 * t1 - 2 * t2 + 4 * t1;
@@ -187,9 +191,10 @@ TEST_F(LinearSumTest, LinearSumIsBinary) {
 
 TEST_F(LinearSumTest, LinearSumEqual) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto t1 = variable(object(0), container(1), universe, initialAssignment);
   auto t2 = const_expr(0, universe);
   auto t3 = const_expr(1, universe);
@@ -202,9 +207,10 @@ TEST_F(LinearSumTest, LinearSumEqual) {
 
 TEST_F(LinearSumTest, ZeroOptimization) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto t1 = variable(object(0), container(1), universe, initialAssignment);
   auto t2 = const_expr(0, universe);
   auto t3 = const_expr(1, universe);
@@ -216,9 +222,10 @@ TEST_F(LinearSumTest, ZeroOptimization) {
 
 TEST_F(LinearSumTest, LinearSumBoundsTests) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto t1 = variable(object(0), container(1), universe, initialAssignment);
   auto t2 = variable(object(0), container(0), universe, initialAssignment);
   auto linearsum = 20 + 4 * t1 - 2 * t2 + 4 * t1;
@@ -255,9 +262,10 @@ TEST_F(LinearSumTest, AmplifiedSubToleranceChildChangesPropagate) {
   //  - evaluate scores a strictly worsening move as neutral or better (better
   //    if `obj` is a higher-priority objective).
   //  - apply leaves obj->value stale.
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
 
   constexpr int kN = 10;
   constexpr double kSmallFactor = 5e-11; // below 1e-10 tolerance
@@ -326,29 +334,29 @@ TEST_F(LinearSumTest, ContainerOrder) {
   // false placement
   const Assignment initialAssignment(
       universe->getContainers().getInitialAssignment());
-  auto v1 = variable(object(1), container(3), universe, initialAssignment);
+  auto v1 = variable(object(1), container(3), *universe, initialAssignment);
   // true placement
-  auto v2 = variable(object(0), container(3), universe, initialAssignment);
+  auto v2 = variable(object(0), container(3), *universe, initialAssignment);
   // true placement
-  auto v3 = variable(object(1), container(1), universe, initialAssignment);
+  auto v3 = variable(object(1), container(1), *universe, initialAssignment);
   // false placement
-  auto v4 = variable(object(1), container(2), universe, initialAssignment);
+  auto v4 = variable(object(1), container(2), *universe, initialAssignment);
 
   Assignment assignment(
       {{container(1), {object(1)}}, {container(3), {object(0)}}});
 
-  auto child1 = rebalancer::max(v2, v3, universe);
-  auto child2 = rebalancer::max(v1, v4, universe);
-  auto child3 = rebalancer::max({v1}, universe);
+  auto child1 = rebalancer::max(v2, v3, *universe);
+  auto child2 = rebalancer::max(v1, v4, *universe);
+  auto child3 = rebalancer::max({v1}, *universe);
   auto linearsum = std::make_shared<LinearSum>(
-      universe,
+      *universe,
       0,
       PackerMap<std::shared_ptr<Expression>, double>{
           {child1, 8.0}, {child2, -10.0}, {child3, 5.0}});
 
   auto objective = GlobalObjective::Builder{}
-                       .addToObjective(0, linearsum, universe)
-                       .build(universe);
+                       .addToObjective(0, linearsum, *universe)
+                       .build(*universe);
 
   Context context;
   auto objExpr = objective.getOnlyObjective();
@@ -430,8 +438,9 @@ TEST_F(LinearSumTest, ContainerOrder) {
 
 TEST_F(LinearSumTest, InitialValueAfterScalarMutatorsAndSnap) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
-  const Assignment a(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment a(universe.getContainers().getInitialAssignment());
   auto t1 = variable(object(0), container(0), universe, a); // value 1
   auto t2 = variable(object(1), container(1), universe, a); // value 1
 
@@ -455,8 +464,9 @@ TEST_F(LinearSumTest, InitialValueAfterScalarMutatorsAndSnap) {
 
 TEST_F(LinearSumTest, InplaceAddInitialValue) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   // v0=1 (object0 in container0), v1=1, v0_other=0 (object0 not in container1)
   auto v0 = variable(object(0), container(0), universe, assignment);

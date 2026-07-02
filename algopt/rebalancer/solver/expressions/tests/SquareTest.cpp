@@ -27,7 +27,8 @@ TEST_F(SquareTest, BoundsTests) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const PackerMap<entities::ObjectId, double> input = {
       {object(0), 4}, {object(1), 3}};
   auto vector = makeObjectVector(input, universe);
@@ -44,8 +45,9 @@ TEST_F(SquareTest, VariableBoundsTests) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto var = variable(object(0), container(0), universe, assignment);
 
   auto sum = var * 3 + 8;
@@ -76,15 +78,16 @@ TEST_F(SquareTest, EquivalenceSets) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container1", {"object1", "object2", "object3", "object4"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto allObjectIds = std::vector<entities::ObjectId>{
       object(1), object(2), object(3), object(4)};
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto var = variable(object(1), container(1), universe, assignment);
   auto sum = 10 * var + 5;
   auto b = square(sum, universe);
 
-  EquivalenceSets equivalenceSets(*universe);
+  EquivalenceSets equivalenceSets(universe);
   equivalenceSets.combine(allObjectIds);
 
   updateEquivalenceSetsRecursive(

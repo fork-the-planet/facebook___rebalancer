@@ -75,7 +75,8 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartition) {
        {"group2", {"object4"}},
        {"group3", {"object5"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   const ObjectPartition objectPartitionExpr(
       partitionId("partition1"), dimensionId("object_count"), {}, universe);
@@ -106,9 +107,9 @@ CO_TEST_F(ObjectPartitionLookupTest, NegativeLimitsObjectPartitionLookup) {
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -202,9 +203,9 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookup) {
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -340,9 +341,9 @@ CO_TEST_F(
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -381,10 +382,10 @@ CO_TEST_F(
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto weightDim = dimensionId("object_weight");
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"), weightDim, {{group(1), -15}}, universe);
@@ -421,10 +422,10 @@ CO_TEST_F(
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto weightDim = dimensionId("object_weight");
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"), weightDim, {{group(1), -15}}, universe);
@@ -464,10 +465,10 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupNegativeLimits) {
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto weightDim = dimensionId("object_weight");
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -516,9 +517,9 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupWithSquares) {
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -651,9 +652,9 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupWithStep) {
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   // g1 has limit 1 (= its count), so STEP=0 despite being present. g0 and g2
   // default to limit 0, so any object in them yields STEP=1.
@@ -721,9 +722,9 @@ CO_TEST_F(
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -815,9 +816,10 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupGroupsLimit) {
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto assignment1 =
-      Assignment(universe->getContainers().getInitialAssignment());
+      Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -877,9 +879,9 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookup2) {
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -946,10 +948,10 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupCustomDimension) {
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto weightDim = dimensionId("object_weight");
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto partitionExpr = object_partition(
       partitionId("partition1"), weightDim, {} /*limits*/, universe);
@@ -993,9 +995,9 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupMinBound) {
 
   co_await addScope("scope", {{"scopeItem", {"container1"}}});
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -1079,10 +1081,10 @@ CO_TEST_F(ObjectPartitionLookupTest, DynamicDimensionWithDifferentScope) {
        {"host1", {{"object2", 3.0}, {"object4", 4.0}}}},
       2.0);
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto weightDim = dimensionId("dynamicWeight");
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -1181,10 +1183,10 @@ CO_TEST_F(
        {"host2", {{"object3", 30.0}}}},
       5.0);
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto weightDim = dimensionId("dynamicWeight");
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -1265,10 +1267,10 @@ CO_TEST_F(
        {"host2", {{"object3", 1.0}}}},
       1.0);
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto weightDim = dimensionId("dynamicWeight");
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -1354,8 +1356,9 @@ CO_TEST_F(
   co_await addDynamicObjectDimension(
       "dynamicWeight", host(), {{"host0", {{"object1", 1.0}}}}, 1.0);
 
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   const auto weightDim = dimensionId("dynamicWeight");
 
   auto objectPartition = object_partition(
@@ -1411,10 +1414,10 @@ CO_TEST_F(
        {"host1", {{"object2", 4.0}, {"object4", 5.0}}}},
       1.0);
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto weightDim = dimensionId("dynamicWeight");
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),
@@ -1478,9 +1481,9 @@ CO_TEST_F(ObjectPartitionLookupTest, GetterMethods) {
 
   co_await addScope("scope", {{"scopeItem", {"container1", "container2"}}});
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = ObjectPartition(
       partitionId("partition1"),
@@ -1537,9 +1540,9 @@ CO_TEST_F(ObjectPartitionLookupTest, FilteredGroupIdsObjectCount) {
 
   co_await addScope("scope", {{"scopeItem", {"container1", "container2"}}});
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   const std::optional<PackerSet<entities::GroupId>> filteredGroupIds =
       PackerSet<entities::GroupId>{group(1), group(2)};
@@ -1596,8 +1599,9 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupInitialValue) {
       {{"group0", {"object0", "object1"}}, {"group1", {"object2"}}});
   co_await addScope("scope", {{"scopeItem", {"container0"}}});
 
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto objPart = object_partition(
       partitionId("partition1"),
@@ -1636,9 +1640,9 @@ CO_TEST_F(
        {"host1", {{"object1", 100.0}, {"object2", 1000.0}}}},
       0.0);
 
-  const auto universe = buildUniverse();
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   auto objectPartition = object_partition(
       partitionId("partition1"),

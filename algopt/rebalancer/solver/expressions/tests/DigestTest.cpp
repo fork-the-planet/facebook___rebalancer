@@ -107,13 +107,14 @@ TEST_F(DigestTest, Variable) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto eVariable =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
-  auto problem =
-      createTestProblem(universe, {eVariable}, eVariable, {}, {}, false);
+  auto problem = createTestProblem(
+      getUniversePtr(), {eVariable}, eVariable, {}, {}, false);
   auto digest = eVariable->digest(*problem);
   EXPECT_EQ(digest, "Variable [1 → 1] object:object0, container:container0\n");
 }
@@ -122,8 +123,9 @@ TEST_F(DigestTest, Max) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   std::vector<std::shared_ptr<Expression>> expressions;
   expressions.push_back(
@@ -133,7 +135,8 @@ TEST_F(DigestTest, Max) {
       std::make_shared<Variable>(
           object(1), container(0), universe, assignment));
   auto eMax = std::make_shared<Max>(expressions, universe);
-  auto problem = createTestProblem(universe, {eMax}, eMax, {}, {}, false);
+  auto problem =
+      createTestProblem(getUniversePtr(), {eMax}, eMax, {}, {}, false);
   auto digest = eMax->digest(*problem);
   EXPECT_EQ(
       sortDigestLines(digest),
@@ -147,8 +150,9 @@ TEST_F(DigestTest, NthLargest) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1", "object3"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   std::vector<std::shared_ptr<Expression>> expressions;
   expressions.push_back(
@@ -162,8 +166,8 @@ TEST_F(DigestTest, NthLargest) {
           object(3), container(0), universe, assignment));
   auto eNthLargest =
       std::make_shared<NthLargest>(expressions, 2, false, universe);
-  auto problem =
-      createTestProblem(universe, {eNthLargest}, eNthLargest, {}, {}, false);
+  auto problem = createTestProblem(
+      getUniversePtr(), {eNthLargest}, eNthLargest, {}, {}, false);
   auto digest = eNthLargest->digest(*problem);
   EXPECT_EQ(
       sortDigestLines(digest),
@@ -178,8 +182,9 @@ TEST_F(DigestTest, AnyPositive) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1", "object2"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   std::vector<std::shared_ptr<Expression>> expressions;
   expressions.push_back(
@@ -193,8 +198,8 @@ TEST_F(DigestTest, AnyPositive) {
           object(2), container(0), universe, assignment));
   auto eAnyPositive =
       std::make_shared<AnyPositive>(expressions, universe, 0.01);
-  auto problem =
-      createTestProblem(universe, {eAnyPositive}, eAnyPositive, {}, {}, false);
+  auto problem = createTestProblem(
+      getUniversePtr(), {eAnyPositive}, eAnyPositive, {}, {}, false);
   auto digest = eAnyPositive->digest(*problem);
   EXPECT_EQ(
       sortDigestLines(digest),
@@ -209,8 +214,9 @@ TEST_F(DigestTest, ProductOperation) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   const ExprPtr e0 =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
@@ -218,7 +224,7 @@ TEST_F(DigestTest, ProductOperation) {
       std::make_shared<Variable>(object(1), container(0), universe, assignment);
   auto eProductOperation = std::make_shared<ProductOperation>(e0, e1, universe);
   auto problem = createTestProblem(
-      universe, {eProductOperation}, eProductOperation, {}, {}, false);
+      getUniversePtr(), {eProductOperation}, eProductOperation, {}, {}, false);
   auto digest = eProductOperation->digest(*problem);
   EXPECT_EQ(
       sortDigestLines(digest),
@@ -232,8 +238,9 @@ TEST_F(DigestTest, QuotientOperation) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   const ExprPtr e0 =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
@@ -242,7 +249,12 @@ TEST_F(DigestTest, QuotientOperation) {
   auto eQuotientOperation =
       std::make_shared<QuotientOperation>(e0, e1, universe);
   auto problem = createTestProblem(
-      universe, {eQuotientOperation}, eQuotientOperation, {}, {}, false);
+      getUniversePtr(),
+      {eQuotientOperation},
+      eQuotientOperation,
+      {},
+      {},
+      false);
   auto digest = eQuotientOperation->digest(*problem);
   EXPECT_EQ(
       sortDigestLines(digest),
@@ -256,11 +268,12 @@ TEST_F(DigestTest, LinearSum) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   auto eLinearSum = std::make_shared<LinearSum>(universe, 3.1415);
-  auto problem =
-      createTestProblem(universe, {eLinearSum}, eLinearSum, {}, {}, false);
+  auto problem = createTestProblem(
+      getUniversePtr(), {eLinearSum}, eLinearSum, {}, {}, false);
   auto digest = eLinearSum->digest(*problem);
   EXPECT_EQ(digest, "LinearSum [3.1415 → 3.1415] = 3.1415\n");
 }
@@ -272,8 +285,9 @@ TEST_F(DigestTest, SumOverThreshold) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   const ExprPtr threshold =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
@@ -287,7 +301,7 @@ TEST_F(DigestTest, SumOverThreshold) {
   auto eSumOverThreshold =
       std::make_shared<SumOverThreshold>(threshold, values, true, universe);
   auto problem = createTestProblem(
-      universe, {eSumOverThreshold}, eSumOverThreshold, {}, {}, false);
+      getUniversePtr(), {eSumOverThreshold}, eSumOverThreshold, {}, {}, false);
   auto digest = eSumOverThreshold->digest(*problem);
   EXPECT_EQ(
       sortDigestLines(digest),
@@ -302,8 +316,9 @@ TEST_F(DigestTest, Piecewise) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
@@ -311,8 +326,8 @@ TEST_F(DigestTest, Piecewise) {
   points.emplace_back(1.0, 9.0);
   points.emplace_back(2.0, 5.0);
   auto ePiecewise = std::make_shared<Piecewise>(points, expr, universe);
-  auto problem =
-      createTestProblem(universe, {ePiecewise}, ePiecewise, {}, {}, false);
+  auto problem = createTestProblem(
+      getUniversePtr(), {ePiecewise}, ePiecewise, {}, {}, false);
   auto digest = ePiecewise->digest(*problem);
   EXPECT_EQ(
       digest,
@@ -323,13 +338,15 @@ TEST_F(DigestTest, Piecewise) {
 TEST_F(DigestTest, Swaps) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{{"bar", {"foo"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   PackerMap<entities::ObjectId, entities::ContainerId> ia;
-  ia.emplace(universe->getObjectId("foo"), universe->getContainerId("bar"));
+  ia.emplace(universe.getObjectId("foo"), universe.getContainerId("bar"));
 
   auto eSwaps = std::make_shared<Swaps>(ia, universe);
-  auto problem = createTestProblem(universe, {eSwaps}, eSwaps, {}, {}, false);
+  auto problem =
+      createTestProblem(getUniversePtr(), {eSwaps}, eSwaps, {}, {}, false);
   auto digest = eSwaps->digest(*problem);
   EXPECT_EQ(digest, "Swaps [1 → 1]\n");
 }
@@ -342,7 +359,8 @@ TEST_F(DigestTest, BipartiteSwaps) {
         fmt::format("object{}", j)};
   }
   setInitialAssignment(initialAssignment);
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   PackerMap<entities::ObjectId, entities::ContainerId> ia;
   PackerSet<entities::ContainerId> l;
@@ -358,7 +376,7 @@ TEST_F(DigestTest, BipartiteSwaps) {
 
   auto eBipartiteSwaps = std::make_shared<BipartiteSwaps>(ia, l, r, universe);
   auto problem = createTestProblem(
-      universe, {eBipartiteSwaps}, eBipartiteSwaps, {}, {}, false);
+      getUniversePtr(), {eBipartiteSwaps}, eBipartiteSwaps, {}, {}, false);
   auto digest = eBipartiteSwaps->digest(*problem);
   EXPECT_EQ(digest, "BipartiteSwaps [1 → 1]\n");
 }
@@ -371,7 +389,8 @@ TEST_F(DigestTest, ObjectVector) {
     initialAssignment["container0"].push_back(fmt::format("object{}", j));
   }
   setInitialAssignment(initialAssignment);
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   entities::Map<entities::ObjectId, double> values;
   for (const auto j : folly::irange(kObjectCount)) {
@@ -386,13 +405,15 @@ TEST_F(DigestTest, Log) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
   auto eLog = std::make_shared<Log>(expr, universe);
-  auto problem = createTestProblem(universe, {eLog}, eLog, {}, {}, false);
+  auto problem =
+      createTestProblem(getUniversePtr(), {eLog}, eLog, {}, {}, false);
   auto digest = eLog->digest(*problem);
   EXPECT_EQ(
       digest,
@@ -404,13 +425,15 @@ TEST_F(DigestTest, Ceil) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
   auto eCeil = std::make_shared<Ceil>(expr, universe);
-  auto problem = createTestProblem(universe, {eCeil}, eCeil, {}, {}, false);
+  auto problem =
+      createTestProblem(getUniversePtr(), {eCeil}, eCeil, {}, {}, false);
   auto digest = eCeil->digest(*problem);
   EXPECT_EQ(
       digest,
@@ -422,13 +445,15 @@ TEST_F(DigestTest, Step) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
   auto eStep = std::make_shared<Step>(expr, universe);
-  auto problem = createTestProblem(universe, {eStep}, eStep, {}, {}, false);
+  auto problem =
+      createTestProblem(getUniversePtr(), {eStep}, eStep, {}, {}, false);
   auto digest = eStep->digest(*problem);
   EXPECT_EQ(
       digest,
@@ -440,8 +465,9 @@ TEST_F(DigestTest, Square) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
@@ -449,7 +475,8 @@ TEST_F(DigestTest, Square) {
   struct ApproximationHint const hint{
       .valid = true, .upper_bound = 1.0, .lower_bound = 2.0, .piece_count = 11};
   auto eSquare = std::make_shared<Square>(expr, hint, universe);
-  auto problem = createTestProblem(universe, {eSquare}, eSquare, {}, {}, false);
+  auto problem =
+      createTestProblem(getUniversePtr(), {eSquare}, eSquare, {}, {}, false);
   auto digest = eSquare->digest(*problem);
   EXPECT_EQ(
       digest,
@@ -461,13 +488,15 @@ TEST_F(DigestTest, Power) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
   auto ePower = std::make_shared<Power>(expr, 2.5, universe);
-  auto problem = createTestProblem(universe, {ePower}, ePower, {}, {}, false);
+  auto problem =
+      createTestProblem(getUniversePtr(), {ePower}, ePower, {}, {}, false);
   auto digest = ePower->digest(*problem);
   EXPECT_EQ(
       digest,
@@ -479,14 +508,15 @@ TEST_F(DigestTest, Rectangle) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
   auto eRectangle = std::make_shared<Rectangle>(expr, 1.3, 2.5, universe);
-  auto problem =
-      createTestProblem(universe, {eRectangle}, eRectangle, {}, {}, false);
+  auto problem = createTestProblem(
+      getUniversePtr(), {eRectangle}, eRectangle, {}, {}, false);
   auto digest = eRectangle->digest(*problem);
   EXPECT_EQ(
       digest,
@@ -501,23 +531,24 @@ TEST_F(DigestTest, ObjectLookup) {
     initialAssignment[fmt::format("container{}", j)] = {};
   }
   setInitialAssignment(initialAssignment);
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   auto containers = std::make_shared<PackerSet<entities::ContainerId>>();
   for (const auto j : folly::irange(kContainerCount)) {
     containers->insert(container(j));
   }
-  const auto numTotalObjects = universe->getNumObjects();
+  const auto numTotalObjects = universe.getNumObjects();
   auto objVector = makeObjectVector(
       entities::Map<entities::ObjectId, double>(),
       1,
       numTotalObjects,
       universe);
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto eObjectLookup = std::make_shared<ObjectLookup>(
       objVector, containers, universe, assignment);
   auto problem = createTestProblem(
-      universe, {eObjectLookup}, eObjectLookup, {}, {}, false);
+      getUniversePtr(), {eObjectLookup}, eObjectLookup, {}, {}, false);
   auto digest = eObjectLookup->digest(*problem);
   EXPECT_EQ(
       "ObjectLookup [0 → 0] on Containers: container0, container1, container2\n",
@@ -581,7 +612,8 @@ CO_TEST_F(DigestTest, ObjectPartitionLookup) {
       entities::Map<std::string, std::vector<std::string>>{
           {"scopeItem0", {"container1"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   const auto partition1Id = partitionId("partition1");
   const auto objectWeightDimensionId = dimensionId("object_weight");
@@ -599,7 +631,7 @@ CO_TEST_F(DigestTest, ObjectPartitionLookup) {
   auto objectPartition = std::make_shared<ObjectPartition>(
       partition1Id, objectWeightDimensionId, groupLimits, universe);
 
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto ePartitionLookup = std::make_shared<ObjectPartitionLookupDefault>(
       objectPartition,
       std::make_shared<PackerSet<entities::ContainerId>>(
@@ -613,7 +645,7 @@ CO_TEST_F(DigestTest, ObjectPartitionLookup) {
       PackerSet<entities::ObjectId>(
           {object(1), object(5), object(7), object(9)}));
   auto problem = createTestProblem(
-      universe, {ePartitionLookup}, ePartitionLookup, {}, {}, false);
+      getUniversePtr(), {ePartitionLookup}, ePartitionLookup, {}, {}, false);
   auto digest = ePartitionLookup->digest(*problem);
   EXPECT_EQ(
       digest,
@@ -627,14 +659,15 @@ TEST_F(DigestTest, VariableWithProblem) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}, {"container1", {}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto eVariable =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
 
-  auto problem =
-      createTestProblem(universe, {eVariable}, eVariable, {}, {}, false);
+  auto problem = createTestProblem(
+      getUniversePtr(), {eVariable}, eVariable, {}, {}, false);
   problem->assignment =
       Assignment({{container(0), {}}, {container(1), {object(0)}}});
 
@@ -651,8 +684,9 @@ TEST_F(DigestTest, ProblemMixedChanges) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}, {"container1", {}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   std::vector<std::shared_ptr<Expression>> expressions;
   expressions.push_back(
@@ -663,7 +697,8 @@ TEST_F(DigestTest, ProblemMixedChanges) {
           object(1), container(0), universe, assignment));
   auto eMax = std::make_shared<Max>(expressions, universe);
 
-  auto problem = createTestProblem(universe, {eMax}, eMax, {}, {}, false);
+  auto problem =
+      createTestProblem(getUniversePtr(), {eMax}, eMax, {}, {}, false);
   problem->assignment =
       Assignment({{container(0), {object(1)}}, {container(1), {object(0)}}});
 
@@ -680,14 +715,15 @@ TEST_F(DigestTest, ProblemReverseDirection) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {}}, {"container1", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto eVariable =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
 
-  auto problem =
-      createTestProblem(universe, {eVariable}, eVariable, {}, {}, false);
+  auto problem = createTestProblem(
+      getUniversePtr(), {eVariable}, eVariable, {}, {}, false);
   problem->assignment =
       Assignment({{container(0), {object(0)}}, {container(1), {}}});
 

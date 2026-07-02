@@ -26,7 +26,7 @@ namespace facebook::rebalancer {
 GlobalObjective::Builder& GlobalObjective::Builder::addToObjective(
     int pos,
     ExprPtr expr,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   if (pos < 0) {
     throw std::runtime_error(fmt::format("pos: {} must be >= 0 ", pos));
   }
@@ -63,7 +63,7 @@ GlobalObjective::Builder& GlobalObjective::Builder::setObjective(
 }
 
 GlobalObjective GlobalObjective::Builder::build(
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   if (built_) {
     throw std::runtime_error("global objective already built!");
   }
@@ -81,7 +81,7 @@ GlobalObjective GlobalObjective::Builder::build(
     }
   }
   built_ = true;
-  return GlobalObjective(std::move(objectives_), std::move(universe));
+  return GlobalObjective(std::move(objectives_), universe);
 }
 
 GlobalObjective::View::View(
@@ -189,7 +189,7 @@ GlobalObjective GlobalObjective::getRange(int start, int end) const {
   for (int pos = start; pos < end; ++pos) {
     builder.setObjective(pos - start, objectives_.at(pos));
   }
-  return builder.build(universe_);
+  return builder.build(*universe_);
 }
 
 double GlobalObjective::evaluateObjectiveAt(

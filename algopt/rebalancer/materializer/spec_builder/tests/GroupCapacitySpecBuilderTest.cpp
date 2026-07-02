@@ -114,7 +114,7 @@ CO_TEST_P(GroupCapacitySpecBuilderTest, constraintMaxAfter) {
   auto constraints = co_await specBuilder.constraints(expressionBuilder());
   // one constraint per group
   EXPECT_EQ(3, constraints.size());
-  auto sumOfConstraints = const_expr(0, universe);
+  auto sumOfConstraints = const_expr(0, *universe);
   for (const auto& expr : constraints) {
     sumOfConstraints += expr.constraintExpr;
   }
@@ -188,7 +188,7 @@ CO_TEST_P(GroupCapacitySpecBuilderTest, constraintMinDuring) {
   auto constraints = co_await specBuilder.constraints(expressionBuilder());
   // one constraint per group
   EXPECT_EQ(3, constraints.size());
-  auto sumOfConstraints = const_expr(0, universe);
+  auto sumOfConstraints = const_expr(0, *universe);
   for (const auto& expr : constraints) {
     sumOfConstraints += expr.constraintExpr;
   }
@@ -271,7 +271,7 @@ CO_TEST_P(GroupCapacitySpecBuilderTest, constraintExactDuringAndAfter) {
   auto constraints = co_await specBuilder.constraints(expressionBuilder());
   // one constraint per group * 2 (EXACT = MAX + MIN) * 2 (DURING + AFTER)
   EXPECT_EQ(12, constraints.size());
-  auto sumOfConstraints = const_expr(0, universe);
+  auto sumOfConstraints = const_expr(0, *universe);
   for (const auto& expr : constraints) {
     sumOfConstraints += expr.constraintExpr;
   }

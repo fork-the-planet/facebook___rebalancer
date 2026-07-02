@@ -23,13 +23,20 @@
 
 namespace facebook::rebalancer {
 
+namespace {
+const entities::Universe& dummyUniverse() {
+  static const auto u = std::make_shared<const entities::Universe>();
+  return *u;
+}
+} // namespace
+
 // MockExpression is only used to test functionality of Orchestrator
 // if initialValue not equals to newValue, the node changed value
 MockExpression::MockExpression(
     double initialValue,
     double newValue,
     std::shared_ptr<TestContext> testContext)
-    : Expression(std::make_shared<entities::Universe>(), initialValue),
+    : Expression(dummyUniverse(), initialValue),
       testContext_(std::move(testContext)) {
   testContext_->newValue[(Expression*)this] = newValue;
 }

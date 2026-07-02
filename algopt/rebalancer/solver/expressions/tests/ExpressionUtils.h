@@ -22,7 +22,6 @@
 #include <fmt/format.h>
 
 #include <cstddef>
-#include <memory>
 #include <stdexcept>
 #include <utility>
 
@@ -32,7 +31,7 @@ inline std::shared_ptr<ObjectVector> makeObjectVector(
     const PackerMap<entities::ObjectId, double>& objectValues,
     double defaultValue,
     size_t totalObjects,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   if (totalObjects < objectValues.size()) {
     throw std::runtime_error(
         fmt::format(
@@ -45,27 +44,27 @@ inline std::shared_ptr<ObjectVector> makeObjectVector(
   for (const auto& [objectId, value] : objectValues) {
     nonDefaultValues->emplace(objectId, value);
   }
-  return object_vector(std::move(nonDefaultValues), std::move(universe));
+  return object_vector(std::move(nonDefaultValues), universe);
 }
 
 inline std::shared_ptr<ObjectVector> makeObjectVector(
     const PackerMap<entities::ObjectId, double>& objectValues,
-    std::shared_ptr<const entities::Universe> universe) {
-  const auto totalObjects = universe->getNumObjects();
+    const entities::Universe& universe) {
+  const auto totalObjects = universe.getNumObjects();
   return makeObjectVector(
       objectValues,
       /*defaultValue=*/0,
       totalObjects,
-      std::move(universe));
+      universe);
 }
 
 inline std::shared_ptr<ObjectVector> makeObjectVector(
     entities::ObjectIdToDoubleMap objectValues,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   return object_vector(
       std::make_shared<const entities::ObjectIdToDoubleMap>(
           std::move(objectValues)),
-      std::move(universe));
+      universe);
 }
 
 } // namespace facebook::rebalancer

@@ -129,7 +129,7 @@ folly::coro::Task<ExprPtr> ToFreeSpecBuilder::getObjectiveExpr(
     ExpressionBuilder& expressionBuilder) const {
   if (spec_.containers()->empty()) {
     // If there are no containers to free, return 0
-    co_return const_expr(0, universe_);
+    co_return const_expr(0, *universe_);
   }
 
   switch (*spec_.formula()) {
@@ -147,14 +147,14 @@ folly::coro::Task<ExprPtr> ToFreeSpecBuilder::getObjectiveExpr(
 
 folly::coro::Task<ExprPtr> ToFreeSpecBuilder::getMinimizeTotalUtilFormulaExpr(
     ExpressionBuilder& expressionBuilder) const {
-  ExprPtr objective = const_expr(0, universe_);
+  ExprPtr objective = const_expr(0, *universe_);
   for (auto& containerName : *spec_.containers()) {
     auto scopeItemId = universe_->getScopeItemId(scopeId_, containerName);
     inplace_add(
         objective,
         co_await expressionBuilder.getAbsoluteUtil(
             UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId),
-        universe_);
+        *universe_);
   }
 
   co_return objective;
@@ -167,7 +167,7 @@ ToFreeSpecBuilder::getMinimizeOccupiedContainersContinuousFormulaExpr(
   auto [objectDimensionSum, minPositiveDimensionValue] =
       getObjectDimensionSumAndMinPositiveValue(objectDimension);
   if (universe_->getPrecision().compare(objectDimensionSum, 0) == 0) {
-    co_return const_expr(0, universe_);
+    co_return const_expr(0, *universe_);
   }
 
   /*
@@ -198,7 +198,7 @@ ToFreeSpecBuilder::getMinimizeOccupiedContainersContinuousFormulaExpr(
     has absoluteUtil(c) closest to zero; this is because -(absoluteUtil(c))^2)
   expression associated with such a container c will have the largest potential
   */
-  ExprPtr sumOverUtilSquared = const_expr(0, universe_);
+  ExprPtr sumOverUtilSquared = const_expr(0, *universe_);
   std::vector<entities::ScopeItemId> scopeItemIdsToFree;
   for (auto& containerName : *spec_.containers()) {
     auto scopeItemId = universe_->getScopeItemId(scopeId_, containerName);
@@ -206,7 +206,7 @@ ToFreeSpecBuilder::getMinimizeOccupiedContainersContinuousFormulaExpr(
     auto absoluteUtil = co_await expressionBuilder.getAbsoluteUtil(
         UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId);
     inplace_add(
-        sumOverUtilSquared, power(absoluteUtil, 2, universe_), universe_);
+        sumOverUtilSquared, power(absoluteUtil, 2, *universe_), *universe_);
   }
 
   // create a single lookup expr over all scopeItemIdsToFree
@@ -223,7 +223,7 @@ ToFreeSpecBuilder::getMinimizeOccupiedContainersDiscreteFormulaExpr(
     ExpressionBuilder& expressionBuilder) const {
   // When continuous expressions are not required, we can directly minimize the
   // number of occupied containers
-  ExprPtr objective = const_expr(0, universe_);
+  ExprPtr objective = const_expr(0, *universe_);
   for (auto& containerName : *spec_.containers()) {
     auto scopeItemId = universe_->getScopeItemId(scopeId_, containerName);
     inplace_add(
@@ -231,8 +231,8 @@ ToFreeSpecBuilder::getMinimizeOccupiedContainersDiscreteFormulaExpr(
         step(
             co_await expressionBuilder.getAbsoluteUtil(
                 UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId),
-            universe_),
-        universe_);
+            *universe_),
+        *universe_);
   }
 
   co_return objective;

@@ -46,7 +46,7 @@ class GroupScopeItemTransformUtilTest
 
   std::shared_ptr<GroupScopeItemTransformUtil> makeGroupUtilExpr(
       const ExprParams& params,
-      const std::shared_ptr<const entities::Universe>& universe);
+      const entities::Universe& universe);
 
   // transforms the raw scope utilization as per the transformType
   double getExpectedValue(
@@ -106,13 +106,13 @@ class GroupScopeItemTransformUtilTest
 std::shared_ptr<GroupScopeItemTransformUtil>
 GroupScopeItemTransformUtilTest::makeGroupUtilExpr(
     const ExprParams& params,
-    const std::shared_ptr<const entities::Universe>& universe) {
+    const entities::Universe& universe) {
   const auto partitionId = ExpressionTestsBase::partitionId("partition");
   const auto scopeId = ExpressionTestsBase::scopeId("scope");
   auto containersPtr = std::make_shared<entities::Set<entities::ContainerId>>();
   for (const auto& allowedScopeItem : params.allowedScopeItems) {
     const auto& scopeItemContainers =
-        universe->getScope(scopeId).getContainerIds(allowedScopeItem);
+        universe.getScope(scopeId).getContainerIds(allowedScopeItem);
     containersPtr->insert(
         scopeItemContainers.begin(), scopeItemContainers.end());
   }
@@ -126,7 +126,7 @@ GroupScopeItemTransformUtilTest::makeGroupUtilExpr(
     normalizationConstant = 1;
   }
 
-  Assignment assignment(universe->getContainers().getInitialAssignment());
+  Assignment assignment(universe.getContainers().getInitialAssignment());
   return std::make_shared<GroupScopeItemTransformUtil>(
       universe,
       partitionId,
@@ -269,13 +269,13 @@ GroupScopeItemTransformUtilTest::setUpUniverse() {
       {.groupId = group(0),
        .dimensionId = dimensionId,
        .allowedScopeItems = defaultAllowedScopeItems},
-      universe);
+      *universe);
 
   group1ScopeItemUtil_ = makeGroupUtilExpr(
       {.groupId = group(1),
        .dimensionId = dimensionId,
        .allowedScopeItems = defaultAllowedScopeItems},
-      universe);
+      *universe);
 
   group0ScopeItemUtilWeighted_ = makeGroupUtilExpr(
       {.groupId = group(0),
@@ -284,14 +284,14 @@ GroupScopeItemTransformUtilTest::setUpUniverse() {
        .scopeItemWeights =
            folly::F14FastMap<entities::ScopeItemId, double>{
                {scopeItem(0), 2}, {scopeItem(1), 1}}},
-      universe);
+      *universe);
 
   group0ScopeItemUtilNormalized_ = makeGroupUtilExpr(
       {.groupId = group(0),
        .dimensionId = dimensionId,
        .allowedScopeItems = defaultAllowedScopeItems,
        .normalizationConstant = nonDefaultNormalizationConst},
-      universe);
+      *universe);
 
   rootExpr_ = group0ScopeItemUtil_ + group1ScopeItemUtil_ +
       group0ScopeItemUtilWeighted_ + group0ScopeItemUtilNormalized_;
@@ -890,14 +890,14 @@ CO_TEST_P(GroupScopeItemTransformUtilTest, testEvaluateWithDynamicDimensions) {
 }
 
 CO_TEST_P(GroupScopeItemTransformUtilTest, testStaticEquivalenceSets) {
-  const auto universe = co_await setUpUniverse();
+  co_await setUpUniverse();
   if (isDynamicDimensionTest ||
       transformFunctionTypeParam !=
           GroupScopeItemTransformUtil::TransformFunctionType::IDENTITY) {
     co_return;
   }
 
-  EquivalenceSets equivalenceSets(*universe);
+  EquivalenceSets equivalenceSets(getUniverse());
   group0ScopeItemUtil_->updateEquivalenceSets(equivalenceSets);
   // 2 equivalence sets
   // object(0) and object(2) in one set as they have the same dimension value
@@ -909,14 +909,14 @@ CO_TEST_P(GroupScopeItemTransformUtilTest, testStaticEquivalenceSets) {
 }
 
 CO_TEST_P(GroupScopeItemTransformUtilTest, testDynamicEquivalenceSets) {
-  const auto universe = co_await setUpUniverse();
+  co_await setUpUniverse();
   if (!isDynamicDimensionTest ||
       transformFunctionTypeParam !=
           GroupScopeItemTransformUtil::TransformFunctionType::IDENTITY) {
     co_return;
   }
 
-  EquivalenceSets equivalenceSets(*universe);
+  EquivalenceSets equivalenceSets(getUniverse());
   group0ScopeItemUtil_->updateEquivalenceSets(equivalenceSets);
   // 3 equivalence sets
   // object(0) and object(2) have the same dimension value in scopeItem0, but
@@ -1058,14 +1058,15 @@ CO_TEST_P(
     GroupScopeItemTransformUtilTest,
     testBoundsWithEmptyBoundConstraintsMoreScopeItemsThanObjects) {
   // group2 has only 1 object
-  const auto universe = co_await setUpUniverse();
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
   const auto scopeId = ExpressionTestsBase::scopeId("scope");
   const auto dimensionId = ExpressionTestsBase::dimensionId("dimension");
   Context context;
   auto group2ScopeItemUtil = makeGroupUtilExpr(
       {.groupId = group(2),
        .dimensionId = dimensionId,
-       .allowedScopeItems = universe->getScope(scopeId).getScopeItemIds()},
+       .allowedScopeItems = universe.getScope(scopeId).getScopeItemIds()},
       universe);
   auto bounds1 = group2ScopeItemUtil->lowerAndUpperBounds(context);
 
@@ -1121,7 +1122,8 @@ CO_TEST_P(
 CO_TEST_P(
     GroupScopeItemTransformUtilTest,
     testConstructionWithEmptyAllowedScopeItems) {
-  const auto universe = co_await setUpUniverse();
+  co_await setUpUniverse();
+  const auto& universe = getUniverse();
   const auto dimensionId = ExpressionTestsBase::dimensionId("dimension");
 
   auto expr = makeGroupUtilExpr(
@@ -1132,8 +1134,7 @@ CO_TEST_P(
 
   Context context;
   const TopToBottomEvaluator evaluator(context);
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
   expr->fullApply(evaluator, assignment);
   EXPECT_EQ(expr->value, 0.0);
 }

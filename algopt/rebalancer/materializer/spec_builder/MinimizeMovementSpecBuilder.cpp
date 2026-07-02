@@ -32,7 +32,7 @@ MinimizeMovementSpecBuilder::MinimizeMovementSpecBuilder(
 folly::coro::Task<std::vector<ConstraintInfo>>
 MinimizeMovementSpecBuilder::constraints(
     ExpressionBuilder& expressionBuilder) const {
-  ExprPtr result = const_expr(0, universe_);
+  ExprPtr result = const_expr(0, *universe_);
   auto scopeId = universe_->getScopeId(
       spec_.scope()->empty() ? universe_->getContainerTypeName()
                              : *spec_.scope());
@@ -61,7 +61,7 @@ MinimizeMovementSpecBuilder::constraints(
 
     if (*spec_.allowance() != 0) {
       result = max(
-          {const_expr(0, universe_), result - *spec_.allowance()}, universe_);
+          {const_expr(0, *universe_), result - *spec_.allowance()}, *universe_);
     }
   } else {
     if (!scopeItemIds.empty()) {

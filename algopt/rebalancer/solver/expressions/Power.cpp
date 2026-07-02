@@ -28,8 +28,8 @@ namespace facebook::rebalancer {
 Power::Power(
     std::shared_ptr<Expression> expr,
     double exponent,
-    std::shared_ptr<const entities::Universe> universe)
-    : Transform(std::move(expr), std::move(universe)) {
+    const entities::Universe& universe)
+    : Transform(std::move(expr), universe) {
   exponent_ = exponent;
   setInitialValue(perform_transform(getOnlyChildRawPtr()->getInitialValue()));
 }

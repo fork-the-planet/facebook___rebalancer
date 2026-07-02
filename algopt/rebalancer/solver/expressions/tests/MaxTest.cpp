@@ -36,9 +36,10 @@ class MaxTest : public ExpressionTestsBase {
 };
 
 TEST_F(MaxTest, MaxIsBinary) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto var = variable(object(0), container(0), universe, initialAssignment);
   auto sum = var * 3.5 + 8;
   auto expr = rebalancer::max(
@@ -58,9 +59,10 @@ TEST_F(MaxTest, MaxIsBinary) {
 }
 
 TEST_F(MaxTest, BinaryMinIsBinary) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto var0 = variable(object(0), container(0), universe, initialAssignment);
   auto var1 = variable(object(1), container(0), universe, initialAssignment);
   auto sum1 = 1 - var0;
@@ -78,9 +80,10 @@ TEST_F(MaxTest, BinaryMinIsBinary) {
 }
 
 TEST_F(MaxTest, MaxBoundsTests) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto var = variable(object(0), container(0), universe, initialAssignment);
   auto sum2 = var * 3.5 + 8;
   auto expr = rebalancer::max(
@@ -96,16 +99,17 @@ TEST_F(MaxTest, MaxBoundsTests) {
 }
 
 TEST_F(MaxTest, EquivalenceSetsMax) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto o1c1 = variable(object(1), container(1), universe, initialAssignment);
   auto o1c2 = variable(object(1), container(2), universe, initialAssignment);
   auto o2c2 = variable(object(2), container(2), universe, initialAssignment);
   auto o3c2 = variable(object(3), container(2), universe, initialAssignment);
   auto expr = rebalancer::max({o1c1, o1c2, o2c2, o3c2}, universe);
 
-  EquivalenceSets equivalenceSets(*universe);
+  EquivalenceSets equivalenceSets(universe);
   equivalenceSets.combine(
       std::vector<entities::ObjectId>{object(1), object(2), object(3)});
 
@@ -133,9 +137,10 @@ TEST_F(MaxTest, EquivalenceSetsMax) {
 }
 
 TEST_F(MaxTest, Min) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto A = variable(object(1), container(0), universe, initialAssignment);
   auto B = variable(object(2), container(0), universe, initialAssignment);
   auto minAB = rebalancer::min({A, B}, universe);
@@ -160,8 +165,9 @@ TEST_F(MaxTest, Min) {
 }
 
 TEST_F(MaxTest, MaxInitialValue) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto v0c0 = variable(object(0), container(0), universe, assignment);
   auto v1c0 = variable(object(1), container(0), universe, assignment);
@@ -170,8 +176,9 @@ TEST_F(MaxTest, MaxInitialValue) {
 }
 
 TEST_F(MaxTest, MaxAddClearsSortedValues) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto v0c0 = variable(object(0), container(0), universe, assignment);
   auto v1c0 = variable(object(1), container(0), universe, assignment);
@@ -191,8 +198,9 @@ TEST_F(MaxTest, MaxAddClearsSortedValues) {
 }
 
 TEST_F(MaxTest, MaxAddStaleSortedValuesBreaksEvaluate) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   // v0c0=1 (obj0 is in c0), v1c1=1 (obj1 is in c1)
   auto v0c0 = variable(object(0), container(0), universe, assignment);
@@ -219,8 +227,9 @@ TEST_F(MaxTest, MaxAddStaleSortedValuesBreaksEvaluate) {
 // unchanged children with value 1 — otherwise evaluate()'s early-break
 // optimization returns the wrong result.
 TEST_F(MaxTest, MaxEvaluateAfterAddRequiresSortedOrder) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   // v0c0=1 (obj0 in c0), v1c1=1 (obj1 in c1), v2c0=0 (obj2 NOT in c0)
   auto v0c0 = variable(object(0), container(0), universe, assignment);

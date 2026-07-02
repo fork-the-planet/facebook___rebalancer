@@ -24,7 +24,7 @@ class Power : public Transform {
   Power(
       std::shared_ptr<Expression> expr,
       double exponent,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   virtual bool inner_is_integer(Context& context) override;
 

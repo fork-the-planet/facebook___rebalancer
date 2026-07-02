@@ -80,7 +80,7 @@ folly::coro::Task<ExprPtr> LargeShardSpecBuilder::goalCoro(
     XLOG(WARN) << fmt::format(
         "Not adding LargeShardSpec goal w.r.t. dimension '{}' since no candidate large shard found",
         *spec_.dimension());
-    co_return const_expr(0, universe_);
+    co_return const_expr(0, *universe_);
   }
   auto [candidateLargeShardId, candidateLargeShardSize] =
       candidateLargeShardOpt.value();
@@ -101,7 +101,7 @@ folly::coro::Task<ExprPtr> LargeShardSpecBuilder::goalCoro(
     XLOG(WARN) << fmt::format(
         "For LargeShardSpec goal w.r.t. dimension '{}', adding constant goal expr since no candidate scopeItem found to drain",
         *spec_.dimension());
-    co_return const_expr(candidateLargeShardSize, universe_);
+    co_return const_expr(candidateLargeShardSize, *universe_);
   }
 
   /*
@@ -117,9 +117,9 @@ folly::coro::Task<ExprPtr> LargeShardSpecBuilder::goalCoro(
   auto candidateScopeItemUtil = co_await expressionBuilder.getAbsoluteUtil(
       UtilMetric::AFTER, dimensionId_, scopeId_, candidateScopeItemId);
   auto currAvailableCapacity =
-      max({const_expr(0, universe_),
+      max({const_expr(0, *universe_),
            candidateScopeItemCapacity - candidateScopeItemUtil},
-          universe_);
+          *universe_);
 
   // we only require extra space in the candidateScopeItem if the
   // candidateLargeShard remains in the unassignedScopeItem
@@ -129,9 +129,9 @@ folly::coro::Task<ExprPtr> LargeShardSpecBuilder::goalCoro(
       isCandidateLargeShardUnassigned * candidateLargeShardSize;
 
   co_return max(
-      {const_expr(0, universe_),
+      {const_expr(0, *universe_),
        spaceForCandidateLargeShard - currAvailableCapacity},
-      universe_);
+      *universe_);
 }
 
 folly::coro::Task<std::optional<ScopeItemId>>

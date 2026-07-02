@@ -23,8 +23,7 @@ using namespace facebook::rebalancer;
 
 class GlobalObjectiveTest : public ::testing::Test {
  public:
-  std::shared_ptr<const entities::Universe> universe =
-      std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
 };
 
 TEST_F(GlobalObjectiveTest, NullPtrIsZero) {

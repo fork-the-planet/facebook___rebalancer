@@ -132,7 +132,7 @@ BalanceSpecBuilder::getTotalAbsoluteOrRelativeUtil(
         initialSumUtil += util->getInitialValue();
       }
     }
-    co_return {const_expr(initialSumUtil, universe_), scopeItemIdsSet.size()};
+    co_return {const_expr(initialSumUtil, *universe_), scopeItemIdsSet.size()};
   }
   co_return {sumUtil, scopeItemIds.size()};
 }
@@ -140,8 +140,8 @@ BalanceSpecBuilder::getTotalAbsoluteOrRelativeUtil(
 ExprPtr BalanceSpecBuilder::computeMaxPenalty(
     const std::vector<ExprPtr>& allUtils,
     const ExprPtr& thresholdExpr) const {
-  auto excess = max(allUtils, universe_) - thresholdExpr;
-  return max({std::move(excess), const_expr(0, universe_)}, universe_);
+  auto excess = max(allUtils, *universe_) - thresholdExpr;
+  return max({std::move(excess), const_expr(0, *universe_)}, *universe_);
 }
 
 ExprPtr BalanceSpecBuilder::computeLinearOrSquaresPenalty(
@@ -150,7 +150,7 @@ ExprPtr BalanceSpecBuilder::computeLinearOrSquaresPenalty(
     BalanceSpecFormula formula) const {
   const auto n = allUtils.size();
   const auto transform = [&formula, this](const ExprPtr& expr) {
-    return formula == BalanceSpecFormula::SQUARES ? power(expr, 1.1, universe_)
+    return formula == BalanceSpecFormula::SQUARES ? power(expr, 1.1, *universe_)
                                                   : expr;
   };
 
@@ -160,7 +160,7 @@ ExprPtr BalanceSpecBuilder::computeLinearOrSquaresPenalty(
     transformedUtils.push_back(transform(util));
   }
   return sum_over_threshold(
-             transform(thresholdExpr), transformedUtils, false, universe_) /
+             transform(thresholdExpr), transformedUtils, false, *universe_) /
       n;
 }
 
@@ -171,16 +171,16 @@ ExprPtr BalanceSpecBuilder::computeIdealPenalty(
     double upperBound,
     bool applyBound) const {
   const auto n = allUtils.size();
-  auto result = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
   for (const auto i : folly::irange(n)) {
     // We want to model: penalty = (absUtil ^ 2) / (capacity * avgCapacity)
     // = power(absUtil/capacity, 2) * (capacity/avgCapacity)
     // = power(relUtil, 2) * adjustment
-    auto penalty = power(allUtils[i], 2, universe_) * adjustments[i];
+    auto penalty = power(allUtils[i], 2, *universe_) * adjustments[i];
     if (applyBound) {
       const auto adjustedBoundSquared =
-          power(boundExpr(upperBound), 2, universe_) * adjustments[i];
-      penalty = max(0, penalty - adjustedBoundSquared, universe_);
+          power(boundExpr(upperBound), 2, *universe_) * adjustments[i];
+      penalty = max(0, penalty - adjustedBoundSquared, *universe_);
     }
     result += penalty;
   }
@@ -195,11 +195,11 @@ ExprPtr BalanceSpecBuilder::computeVariancePenalty(
   ExprPtr sumVal;
   ExprPtr sumValSquared;
   for (const auto i : folly::irange(n)) {
-    const auto val = max(0, allUtils[i] - boundExpr(upperBound), universe_);
+    const auto val = max(0, allUtils[i] - boundExpr(upperBound), *universe_);
     sumVal += val;
-    sumValSquared += square(val, universe_);
+    sumValSquared += square(val, *universe_);
   }
-  return std::move(sumValSquared) - square(std::move(sumVal), universe_) / n;
+  return std::move(sumValSquared) - square(std::move(sumVal), *universe_) / n;
 }
 
 ExprPtr BalanceSpecBuilder::computeLegacyPenalty(
@@ -208,16 +208,16 @@ ExprPtr BalanceSpecBuilder::computeLegacyPenalty(
     double sumCapacity,
     double upperBound) const {
   const auto n = allUtils.size();
-  auto result = const_expr(0, universe_);
-  auto maxImbalance = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
+  auto maxImbalance = const_expr(0, *universe_);
   const double coefficient = 0.001 / n;
   const double balancedUtil = initialUtil / sumCapacity;
   for (const auto i : folly::irange(n)) {
     const auto imbalance = allUtils[i] / balancedUtil - upperBound;
-    inplace_max(maxImbalance, imbalance, universe_);
-    const auto positiveImbalance = max(0, imbalance, universe_);
+    inplace_max(maxImbalance, imbalance, *universe_);
+    const auto positiveImbalance = max(0, imbalance, *universe_);
     result += coefficient *
-        (continuousExpressions_ ? square(positiveImbalance, universe_)
+        (continuousExpressions_ ? square(positiveImbalance, *universe_)
                                 : positiveImbalance);
   }
   result += std::move(maxImbalance);
@@ -283,7 +283,7 @@ folly::coro::Task<ExprPtr> BalanceSpecBuilder::goalCoro(
   }
 
   if (scopeItemIds.empty()) {
-    co_return const_expr(0, universe_);
+    co_return const_expr(0, *universe_);
   }
 
   const auto n = scopeItemIds.size();
@@ -305,7 +305,7 @@ folly::coro::Task<ExprPtr> BalanceSpecBuilder::goalCoro(
         auto numObjects = co_await expressionBuilder.getAbsoluteUtil(
             metric, objectCountDimensionId, scopeId_, scopeItemId);
         auto capPerItem =
-            quotient(absUtil, max(1, numObjects, universe_), universe_);
+            quotient(absUtil, max(1, numObjects, *universe_), *universe_);
         allUtils.push_back(std::move(capPerItem));
         sumCapacity += scopeDimension.getValue(scopeItemId);
       }
@@ -362,15 +362,15 @@ folly::coro::Task<ExprPtr> BalanceSpecBuilder::goalCoro(
       case BalanceSpecBoundType::RELATIVE:
         return bound * avgUtil;
       case BalanceSpecBoundType::RELATIVE_UTIL:
-        return const_expr(bound, universe_);
+        return const_expr(bound, *universe_);
       default:
         throw std::runtime_error("Unhandled BalanceSpecBoundType");
     }
   };
 
-  auto result = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
   auto thresholdExpr = spec_.softUpperBound()
-      ? max(*spec_.softUpperBound(), boundExpr(upperBound), universe_)
+      ? max(*spec_.softUpperBound(), boundExpr(upperBound), *universe_)
       : boundExpr(upperBound);
 
   if (formula == BalanceSpecFormula::MAX) {
@@ -397,7 +397,7 @@ folly::coro::Task<ExprPtr> BalanceSpecBuilder::goalCoro(
         metric, scopeItemIds, expressionBuilder, /*computeRelativeUtil=*/false);
     auto initialUtil = totalUtil->getInitialValue();
     if (universe_->getPrecision().compare(initialUtil, 0.0) == 0) {
-      co_return const_expr(-upperBound, universe_);
+      co_return const_expr(-upperBound, *universe_);
     }
     result =
         computeLegacyPenalty(allUtils, initialUtil, sumCapacity, upperBound);

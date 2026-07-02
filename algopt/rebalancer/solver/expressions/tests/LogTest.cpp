@@ -28,8 +28,9 @@ TEST_F(LogTest, InitialValue) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto v = variable(object(0), container(0), universe, assignment);
   // v=1, log(1) = 0

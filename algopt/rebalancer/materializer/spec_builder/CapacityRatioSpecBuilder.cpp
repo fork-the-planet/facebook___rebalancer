@@ -29,7 +29,7 @@ CapacityRatioSpecBuilder::CapacityRatioSpecBuilder(
 folly::coro::Task<ExprPtr> CapacityRatioSpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 folly::coro::Task<std::vector<ConstraintInfo>>

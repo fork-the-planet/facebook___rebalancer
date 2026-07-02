@@ -42,7 +42,7 @@ folly::coro::Task<ExprPtr> ItemsAffinitySpecBuilder::goalCoro(
   auto& scopeItems2 = *spec_.scopeItemsOfType2();
   if (scopeItems1.empty() || scopeItems2.empty()) {
     // only one set of items exist, no affinity to build
-    co_return const_expr(0, universe_);
+    co_return const_expr(0, *universe_);
   }
   // Let x_g1 = # of parts of server group g assigned to items1
   // Let x_g2 = # of parts of server group g assigned to items2
@@ -52,10 +52,10 @@ folly::coro::Task<ExprPtr> ItemsAffinitySpecBuilder::goalCoro(
   //  min \sum_{g \in all groups}  max(x_g1, x_g2)
   // essentially, for each group g, we try to minimize the imbalance between
   // x_g1 and x_g2
-  ExprPtr objective = const_expr(0, universe_);
+  ExprPtr objective = const_expr(0, *universe_);
   for (auto groupId : universe_->getPartition(partitionId).getGroupIds()) {
-    auto util1 = const_expr(0, universe_);
-    auto util2 = const_expr(0, universe_);
+    auto util1 = const_expr(0, *universe_);
+    auto util2 = const_expr(0, *universe_);
     for (const auto& scopeItem : scopeItems1) {
       util1 += co_await expressionBuilder.getAbsoluteUtil(
           UtilMetric::AFTER,
@@ -74,7 +74,7 @@ folly::coro::Task<ExprPtr> ItemsAffinitySpecBuilder::goalCoro(
           partitionId,
           groupId);
     }
-    inplace_add(objective, max({util1, util2}, universe_), universe_);
+    inplace_add(objective, max({util1, util2}, *universe_), *universe_);
   }
   co_return objective;
 }

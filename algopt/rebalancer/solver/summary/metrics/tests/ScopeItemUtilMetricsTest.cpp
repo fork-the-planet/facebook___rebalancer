@@ -40,11 +40,11 @@ CO_TEST_F(ScopeItemUtilMetricsTest, AddAndGetSummary) {
 
   // add some util metrics
   const auto universe = buildUniverse();
-  auto lookupLoadHost0 = const_expr(10, universe);
+  auto lookupLoadHost0 = const_expr(10, *universe);
   lookupLoadHost0->description = "load util of host0";
-  auto lookupLoadHost1 = const_expr(20, universe);
+  auto lookupLoadHost1 = const_expr(20, *universe);
   lookupLoadHost1->description = "load util of host1";
-  auto lookupMem = const_expr(55, universe);
+  auto lookupMem = const_expr(55, *universe);
   lookupMem->description = "memory util of region0";
 
   addToScopeItemUtilCollection(
@@ -149,7 +149,7 @@ CO_TEST_F(ScopeItemUtilMetricsTest, AddAndGetSummaryWithPartitionAndGroup) {
 
   // Add a util metric with partition and group
   const auto universe = buildUniverse();
-  auto host0Partition1Group0 = const_expr(15, universe);
+  auto host0Partition1Group0 = const_expr(15, *universe);
   addToScopeItemUtilCollection(
       host0Partition1Group0,
       UtilMetric::AFTER,
@@ -159,7 +159,7 @@ CO_TEST_F(ScopeItemUtilMetricsTest, AddAndGetSummaryWithPartitionAndGroup) {
       partition1Id,
       partition1Group0Id);
 
-  auto host0Partition1Group1 = const_expr(10, universe);
+  auto host0Partition1Group1 = const_expr(10, *universe);
   addToScopeItemUtilCollection(
       host0Partition1Group1,
       UtilMetric::AFTER,
@@ -169,7 +169,7 @@ CO_TEST_F(ScopeItemUtilMetricsTest, AddAndGetSummaryWithPartitionAndGroup) {
       partition1Id,
       partition1Group1Id);
 
-  auto host0Partition2Group0 = const_expr(5, universe);
+  auto host0Partition2Group0 = const_expr(5, *universe);
   addToScopeItemUtilCollection(
       host0Partition2Group0,
       UtilMetric::AFTER,
@@ -180,7 +180,7 @@ CO_TEST_F(ScopeItemUtilMetricsTest, AddAndGetSummaryWithPartitionAndGroup) {
       partition2Group0Id);
 
   // also add a host0 load metric without partition and group
-  auto host0Load = const_expr(500, universe);
+  auto host0Load = const_expr(500, *universe);
   addToScopeItemUtilCollection(
       host0Load, UtilMetric::AFTER, load, hostScopeId, host0ScopeItemId);
 
@@ -253,7 +253,7 @@ CO_TEST_F(ScopeItemUtilMetricsTest, FailPartitionAndGroupNotSetTogether) {
 
   // expect to throw if only one of partitionId and groupId are set
   const auto universe = buildUniverse();
-  auto expr1 = const_expr(10, universe);
+  auto expr1 = const_expr(10, *universe);
   REBALANCER_EXPECT_RUNTIME_ERROR(
       addToScopeItemUtilCollection(
           expr1,
@@ -265,7 +265,7 @@ CO_TEST_F(ScopeItemUtilMetricsTest, FailPartitionAndGroupNotSetTogether) {
           group0Id),
       "partitionId and groupId are expected to be set together");
 
-  auto expr2 = const_expr(10, universe);
+  auto expr2 = const_expr(10, *universe);
   REBALANCER_EXPECT_RUNTIME_ERROR(
       addToScopeItemUtilCollection(
           expr2,
@@ -322,7 +322,7 @@ CO_TEST_F(
 
   // Create object partition with tight group limits to create violations
   auto objectPartition =
-      object_partition(partition1Id, objCountDimId, {}, universe);
+      object_partition(partition1Id, objCountDimId, {}, *universe);
 
   auto host = [&](int i) {
     return universe->getContainerId(fmt::format("host{}", i));
@@ -339,7 +339,7 @@ CO_TEST_F(
               PackerSet<entities::ContainerId>{host(1)}),
           hostScopeId,
           host1ScopeItemId,
-          universe,
+          *universe,
           assignment,
           {},
           {},
@@ -355,7 +355,7 @@ CO_TEST_F(
               PackerSet<entities::ContainerId>{host(1)}),
           hostScopeId,
           host1ScopeItemId,
-          universe,
+          *universe,
           assignment,
           {},
           {},

@@ -33,8 +33,8 @@ namespace facebook::rebalancer {
 ProductOperation::ProductOperation(
     std::shared_ptr<Expression> expr1,
     std::shared_ptr<Expression> expr2,
-    std::shared_ptr<const entities::Universe> universe)
-    : BinaryOperation(std::move(expr1), std::move(expr2), std::move(universe)) {
+    const entities::Universe& universe)
+    : BinaryOperation(std::move(expr1), std::move(expr2), universe) {
   setInitialValue(child1st->getInitialValue() * child2nd->getInitialValue());
 }
 

@@ -28,7 +28,7 @@ static void run() {
       std::make_shared<facebook::rebalancer::entities::Universe>();
 
   for ([[maybe_unused]] const auto _ : folly::irange(1'000'000'000)) {
-    facebook::rebalancer::const_expr(0, universe);
+    facebook::rebalancer::const_expr(0, *universe);
   }
 }
 

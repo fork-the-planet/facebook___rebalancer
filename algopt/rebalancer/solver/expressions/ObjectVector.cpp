@@ -35,8 +35,8 @@ using entities::ObjectId;
 
 ObjectVector::ObjectVector(
     entities::ObjectValues objectValues,
-    std::shared_ptr<const entities::Universe> universe)
-    : Expression(std::move(universe)), objectValues_(std::move(objectValues)) {
+    const entities::Universe& universe)
+    : Expression(universe), objectValues_(std::move(objectValues)) {
   defaultValue_ = objectValues_.defaultValue();
   totalObjects_ = objectValues_.totalObjectCount();
 

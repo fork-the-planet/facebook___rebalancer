@@ -58,7 +58,7 @@ class ObjectPartitionLookup : public Expression {
           lookupContainersPtr,
       entities::ScopeId scopeId,
       entities::ScopeItemId scopeItemId,
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       const Assignment& initialAssignment,
       PackerMap<entities::GroupId, double> groupLimitOverrides = {},
       PackerSet<entities::ObjectId> initialDuringObjects = {},

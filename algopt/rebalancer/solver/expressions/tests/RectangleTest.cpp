@@ -35,7 +35,8 @@ class RectangleTest : public ExpressionTestsBase {
 };
 
 TEST_F(RectangleTest, Constants) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   {
     auto expr = rectangle(const_expr(-1.01, universe), 0, 1, universe);
     EXPECT_EQ(0, apply(expr, {}));
@@ -67,9 +68,10 @@ TEST_F(RectangleTest, Constants) {
 }
 
 TEST_F(RectangleTest, NonConstant) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto expr =
       2 * variable(object(1), container(0), universe, initialAssignment) - 1.5;
   const Assignment assignment({

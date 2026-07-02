@@ -46,12 +46,12 @@ StableStayed::StableStayed(
     std::shared_ptr<ObjectVector> initialObjectVector,
     std::shared_ptr<ObjectVector> fullObjectVector,
     std::shared_ptr<const PackerSet<entities::ContainerId>> containersPtr,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const Assignment& initialAssignment)
     : ObjectLookup(
           std::move(initialObjectVector),
           std::move(containersPtr),
-          std::move(universe),
+          universe,
           initialAssignment),
       fullObjectVector_(std::move(fullObjectVector)) {}
 

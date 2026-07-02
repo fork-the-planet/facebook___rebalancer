@@ -43,7 +43,7 @@ CO_TEST_F(ExpressionIteratorTest, GetSortedChildren) {
   const auto scopeItemId =
       ExpressionTestsBase::scopeItemId(scopeId, "scopeItem");
 
-  auto op = object_partition(partition1Id, objectCountDimId, {}, universe);
+  auto op = object_partition(partition1Id, objectCountDimId, {}, *universe);
 
   // val = 1, bound = 0 => potential = 1
   auto a = object_partition_lookup(
@@ -52,11 +52,11 @@ CO_TEST_F(ExpressionIteratorTest, GetSortedChildren) {
           PackerSet<entities::ContainerId>{container(1)}),
       scopeId,
       scopeItemId,
-      universe,
+      *universe,
       assignment);
   // val = 2, bound = 2 => potential = 0
-  auto b = const_expr(2, universe);
-  auto c = rebalancer::max({a, b}, universe);
+  auto b = const_expr(2, *universe);
+  auto c = rebalancer::max({a, b}, *universe);
 
   Context context;
   c->fullApply(
@@ -102,7 +102,7 @@ CO_TEST_F(ExpressionIteratorTest, PreOrderExpressionTraversal) {
       ExpressionTestsBase::scopeItemId(scopeId, "scopeItem");
 
   const auto op =
-      object_partition(partition1Id, objectCountDimId, {}, universe);
+      object_partition(partition1Id, objectCountDimId, {}, *universe);
 
   auto a = object_partition_lookup(
       op,
@@ -110,7 +110,7 @@ CO_TEST_F(ExpressionIteratorTest, PreOrderExpressionTraversal) {
           PackerSet<entities::ContainerId>{container(1), container(2)}),
       scopeId,
       scopeItemId,
-      universe,
+      *universe,
       assignment); // 1
   auto b = object_partition_lookup(
       op,
@@ -118,10 +118,10 @@ CO_TEST_F(ExpressionIteratorTest, PreOrderExpressionTraversal) {
           PackerSet<entities::ContainerId>{container(1), container(3)}),
       scopeId,
       scopeItemId,
-      universe,
+      *universe,
       assignment);
-  auto c = rebalancer::max({a, b}, universe); // 2
-  auto d = square(b, universe); // 4
+  auto c = rebalancer::max({a, b}, *universe); // 2
+  auto d = square(b, *universe); // 4
   auto e = c + d; // 6
   Context context;
   e->fullApply(

@@ -153,14 +153,14 @@ DisasterRecoveryCapacitySpecBuilder::getObjectsInDisasterGroupExprs(
             /*expectedNonDefaultSize=*/1);
         objectMap->emplace(objectId, 1.0);
         objectIdToObjectVector.emplace(
-            objectId, object_vector(std::move(objectMap), universe_));
+            objectId, object_vector(std::move(objectMap), *universe_));
       }
       objectsInDisasterGroup.emplace(
           objectId,
           object_lookup(
               objectIdToObjectVector.at(objectId),
               disasterGroupContainers,
-              universe_,
+              *universe_,
               expressionBuilder.getInitialAssignment()));
     }
     objectsInDisasterGroupsExprs.push_back(std::move(objectsInDisasterGroup));
@@ -229,15 +229,15 @@ DisasterRecoveryCapacitySpecBuilder::getExcessLoadAtScopeItems(
     if (sharedDisasterGroups_.at(disasterGroupIndex).contains(scopeItemId)) {
       // if scopeItem is part of disasterGroup, then there is no
       // excess load on it
-      scopeItemToExcessLoad[scopeItemId] = const_expr(0, universe_);
+      scopeItemToExcessLoad[scopeItemId] = const_expr(0, *universe_);
       continue;
     }
 
-    ExprPtr excessLoad = const_expr(0, universe_);
+    ExprPtr excessLoad = const_expr(0, *universe_);
     for (auto& [primaryObject, secondaryObjects] :
          primaryToSetOfSecondaryObjects) {
       auto primaryObjectId = universe_->getObjectId(primaryObject);
-      auto excessLoadDueToPrimaryObject = const_expr(0, universe_);
+      auto excessLoadDueToPrimaryObject = const_expr(0, *universe_);
 
       /*
       A primaryObject, P, contributes to the excessLoad of a
@@ -330,7 +330,7 @@ DisasterRecoveryCapacitySpecBuilder::getMaxDisasterUsageAtScopeItems(
       },
       [&maxDisasterUsage, this](auto&& coroResult, auto /*unused*/) {
         for (const auto& [scopeItem, excessLoad] : coroResult) {
-          inplace_max(maxDisasterUsage[scopeItem], excessLoad, universe_);
+          inplace_max(maxDisasterUsage[scopeItem], excessLoad, *universe_);
         }
       });
 
@@ -386,7 +386,8 @@ DisasterRecoveryCapacitySpecBuilder::constraints(
       },
       [&totalUsage, this](auto&& coroResult, auto /*unused*/) {
         for (const auto& [scopeItem, usageForDimensionIndex] : coroResult) {
-          inplace_max(totalUsage[scopeItem], usageForDimensionIndex, universe_);
+          inplace_max(
+              totalUsage[scopeItem], usageForDimensionIndex, *universe_);
         }
       });
 
@@ -416,7 +417,7 @@ DisasterRecoveryCapacitySpecBuilder::constraints(
 folly::coro::Task<ExprPtr> DisasterRecoveryCapacitySpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 /*

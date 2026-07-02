@@ -36,7 +36,7 @@ DiversifyWithinScopeItemSpec::DiversifyWithinScopeItemSpec(
       partition_(universe_->getPartition(partitionId_)),
       scopeDimension_(scope_.getDimension(dimensionId_)),
       groupToLimit_(LimitWrapper(
-          universe_,
+          *universe_,
           *spec_.groupToLimit(),
           scopeId_,
           partitionId_)) {
@@ -71,13 +71,13 @@ folly::coro::Task<ExprPtr> DiversifyWithinScopeItemSpec::goalCoro(
   // throw if any scopeItem or if any container in it has zero dimension value
   throwIfZeroScopeDimensionValuesExist(filteredScopeItemIds);
 
-  auto objective = const_expr(0, universe_);
+  auto objective = const_expr(0, *universe_);
   for (auto groupId : partition_.getGroupIds()) {
     inplace_add(
         objective,
         co_await getObjectiveExpr(
             expressionBuilder, groupId, filteredScopeItemIds),
-        universe_);
+        *universe_);
   }
 
   co_return objective;
@@ -87,13 +87,13 @@ folly::coro::Task<ExprPtr> DiversifyWithinScopeItemSpec::getObjectiveExpr(
     ExpressionBuilder& expressionBuilder,
     entities::GroupId groupId,
     const std::vector<entities::ScopeItemId>& scopeItemsIds) const {
-  auto groupObjExpr = const_expr(0, universe_);
+  auto groupObjExpr = const_expr(0, *universe_);
   for (auto scopeItemId : scopeItemsIds) {
     inplace_add(
         groupObjExpr,
         co_await getDiversificationExpr(
             expressionBuilder, groupId, scopeItemId),
-        universe_);
+        *universe_);
   }
 
   co_return groupObjExpr;
@@ -117,16 +117,16 @@ folly::coro::Task<ExprPtr> DiversifyWithinScopeItemSpec::getDiversificationExpr(
       groupId);
 
   co_return product(
-      step(relativeUtil - limit, universe_),
+      step(relativeUtil - limit, *universe_),
       co_await getSpreadingFormula(expressionBuilder, groupId, scopeItemId),
-      universe_);
+      *universe_);
 }
 
 folly::coro::Task<ExprPtr> DiversifyWithinScopeItemSpec::getSpreadingFormula(
     ExpressionBuilder& expressionBuilder,
     entities::GroupId groupId,
     entities::ScopeItemId scopeItemId) const {
-  auto spreadingFormula = const_expr(0, universe_);
+  auto spreadingFormula = const_expr(0, *universe_);
   for (auto containerId : scope_.getContainerIds(scopeItemId)) {
     auto poweredRelativeUtil = power(
         co_await expressionBuilder.getRelativeUtil(
@@ -137,8 +137,8 @@ folly::coro::Task<ExprPtr> DiversifyWithinScopeItemSpec::getSpreadingFormula(
             partitionId_,
             groupId),
         1.1,
-        universe_);
-    inplace_add(spreadingFormula, poweredRelativeUtil, universe_);
+        *universe_);
+    inplace_add(spreadingFormula, poweredRelativeUtil, *universe_);
   }
 
   co_return spreadingFormula;

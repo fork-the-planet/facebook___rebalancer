@@ -21,7 +21,6 @@
 #include "algopt/rebalancer/entities/tests/UniverseBuilderTestUtils.h"
 #include "algopt/rebalancer/interface/thrift/gen-cpp2/SolverSpecs_types.h"
 #include "algopt/rebalancer/solver/expressions/Operators.h"
-#include "algopt/rebalancer/solver/expressions/Orchestrator.h"
 #include "algopt/rebalancer/solver/solvers/OptimalSolver.h"
 #include "algopt/rebalancer/solver/tests/ExprProblemCreation.h"
 #include "algopt/rebalancer/solver/utils/Assignment.h"
@@ -59,15 +58,15 @@ struct BenchmarkUniverse : public entities::tests::UniverseBuilderTestUtils {
 
 // Returns sum of assignment vars for the first nObjects objects in container k.
 ExprPtr containerLoad(
-    const std::shared_ptr<const entities::Universe>& uni,
+    const entities::Universe& uni,
     const Assignment& assignment,
     int containerIdx,
     int nObjects) {
   auto load = const_expr(0, uni);
   const auto contId =
-      uni->getContainerId(fmt::format("container{}", containerIdx));
+      uni.getContainerId(fmt::format("container{}", containerIdx));
   for (const auto i : folly::irange(nObjects)) {
-    const auto objId = uni->getObjectId(fmt::format("object{}", i));
+    const auto objId = uni.getObjectId(fmt::format("object{}", i));
     load += variable(objId, contId, uni, assignment);
   }
   return load;
@@ -119,8 +118,8 @@ BENCHMARK(SquareLpSolve_baseline) {
     algopt::useXpressNativeQuadratic() = false;
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
-    auto obj = square(containerLoad(uni, assignment, 0, kN), uni);
-    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+    auto obj = square(containerLoad(*uni, assignment, 0, kN), *uni);
+    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   gSquareBaseline() = buildAndSolve(*pPtr);
 }
@@ -131,8 +130,8 @@ BENCHMARK(SquareLpSolve_native) {
     algopt::useXpressNativeQuadratic() = true;
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
-    auto obj = square(containerLoad(uni, assignment, 0, kN), uni);
-    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+    auto obj = square(containerLoad(*uni, assignment, 0, kN), *uni);
+    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   SCOPE_EXIT {
     algopt::useXpressNativeQuadratic() = false;
@@ -168,9 +167,9 @@ BENCHMARK(PiecewiseLpSolve_baseline) {
     algopt::useXpressNativePwl() = false;
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
-    auto obj =
-        piecewise(makePwlPoints(), containerLoad(uni, assignment, 0, kN), uni);
-    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+    auto obj = piecewise(
+        makePwlPoints(), containerLoad(*uni, assignment, 0, kN), *uni);
+    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   gPwlBaseline() = buildAndSolve(*pPtr);
 }
@@ -181,9 +180,9 @@ BENCHMARK(PiecewiseLpSolve_native) {
     algopt::useXpressNativePwl() = true;
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
-    auto obj =
-        piecewise(makePwlPoints(), containerLoad(uni, assignment, 0, kN), uni);
-    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+    auto obj = piecewise(
+        makePwlPoints(), containerLoad(*uni, assignment, 0, kN), *uni);
+    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   SCOPE_EXIT {
     algopt::useXpressNativePwl() = false;
@@ -209,10 +208,10 @@ BENCHMARK(MaxLpSolve_baseline) {
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
     auto obj =
-        max(containerLoad(uni, assignment, 0, kN),
-            containerLoad(uni, assignment, 1, kN),
-            uni);
-    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+        max(containerLoad(*uni, assignment, 0, kN),
+            containerLoad(*uni, assignment, 1, kN),
+            *uni);
+    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   gMaxBaseline() = buildAndSolve(*pPtr);
 }
@@ -224,10 +223,10 @@ BENCHMARK(MaxLpSolve_native) {
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
     auto obj =
-        max(containerLoad(uni, assignment, 0, kN),
-            containerLoad(uni, assignment, 1, kN),
-            uni);
-    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+        max(containerLoad(*uni, assignment, 0, kN),
+            containerLoad(*uni, assignment, 1, kN),
+            *uni);
+    pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   SCOPE_EXIT {
     algopt::useXpressNativeMax() = false;
@@ -262,16 +261,16 @@ static constexpr int kStepCap =
 std::unique_ptr<Problem> makeStepProblem(
     const std::shared_ptr<const entities::Universe>& uni,
     const Assignment& assignment) {
-  auto obj = const_expr(0, uni);
+  auto obj = const_expr(0, *uni);
   std::vector<ExprPtr> excesses;
   for (const auto k : folly::irange(kStepK)) {
-    auto load = containerLoad(uni, assignment, k, kStepN);
-    obj = obj + step(load, uni);
+    auto load = containerLoad(*uni, assignment, k, kStepN);
+    obj = obj + step(load, *uni);
     excesses.push_back(load - kStepCap);
   }
   // Hard constraint: every container load ≤ kStepCap, expressed as
   // max(load_k - kStepCap) ≤ 0.
-  auto constraint = max(excesses, uni);
+  auto constraint = max(excesses, *uni);
   return packer::tests::createTestProblem(uni, {obj}, constraint);
 }
 

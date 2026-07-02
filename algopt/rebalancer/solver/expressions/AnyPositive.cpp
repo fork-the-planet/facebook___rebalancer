@@ -36,10 +36,9 @@ namespace facebook::rebalancer {
 
 AnyPositive::AnyPositive(
     const vector<ExprPtr>& exprs,
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     const double feasibilityTolerance)
-    : Expression(std::move(universe)),
-      feasibilityTolerance(feasibilityTolerance) {
+    : Expression(universe), feasibilityTolerance(feasibilityTolerance) {
   for (const auto& expr : exprs) {
     add_child(expr);
     if (isViolating(expr->getInitialValue())) {
@@ -170,7 +169,7 @@ string AnyPositive::innerDigest(size_t maxChildren) const {
 
 static ExprPtr getEquivStepExpr(
     const PackerSet<ExprPtr>& children,
-    const std::shared_ptr<const entities::Universe>& universe) {
+    const entities::Universe& universe) {
   std::vector<ExprPtr> exprs;
   exprs.reserve(children.size());
   for (auto& child : children) {
@@ -181,7 +180,7 @@ static ExprPtr getEquivStepExpr(
 
 void AnyPositive::lpIntent(const LpEvaluator& evaluator, bool minimizing) {
   if (!lpProvider_) {
-    lpProvider_ = getEquivStepExpr(children(), getUniversePtr());
+    lpProvider_ = getEquivStepExpr(children(), getUniverse());
   }
   return evaluator.computeLpIntent(lpProvider_, minimizing);
 }
@@ -197,7 +196,7 @@ algopt::lp::Expression AnyPositive::lp(
   }
 
   if (!lpProvider_) {
-    lpProvider_ = getEquivStepExpr(children(), getUniversePtr());
+    lpProvider_ = getEquivStepExpr(children(), getUniverse());
   }
   return evaluator.lp(lpProvider_.get(), minimizing, configs);
 }

@@ -36,9 +36,11 @@ void MoveTestBaseT<T>::createProblem(
     const std::optional<algopt::common::thrift::HigherPriorityObjectivesConfig>&
         higherPriorityObjConfig,
     const PackerSet<entities::ContainerId>& nonAcceptingContainers) {
-  const auto universe = getUniversePtr();
   problem_ = createTestProblem(
-      universe, objectiveTuple, std::move(constraint), nonAcceptingContainers);
+      getUniversePtr(),
+      objectiveTuple,
+      std::move(constraint),
+      nonAcceptingContainers);
   auto objSize = problem_->objective.size();
   movesEvaluator_.emplace(
       *problem_,
@@ -89,12 +91,12 @@ void MoveTestBaseT<T>::verifyMovesAreAsExpected(
     std::string fileName,
     const std::vector<Move>& expectedMoveSet,
     const MoveSet& actualMoveSet) const {
-  const auto universe = getUniversePtr();
+  const auto& universe = getUniverse();
   auto makeTuple = [&](auto& move) {
     return std::make_tuple(
-        universe->getEntityName(move.getObject()),
-        universe->getEntityName(move.getSourceContainer()),
-        universe->getEntityName(move.getDestinationContainer()));
+        universe.getEntityName(move.getObject()),
+        universe.getEntityName(move.getSourceContainer()),
+        universe.getEntityName(move.getDestinationContainer()));
   };
 
   std::set<std::tuple<std::string, std::string, std::string>> expectedMoves;
@@ -125,7 +127,7 @@ ExprPtr MoveTestBaseT<T>::makeObjectLookup(
   return object_lookup(
       std::move(objectVector),
       std::make_shared<PackerSet<entities::ContainerId>>(containers),
-      getUniversePtr(),
+      getUniverse(),
       assignment);
 }
 
@@ -137,7 +139,7 @@ std::shared_ptr<ObjectVector> MoveTestBaseT<T>::makeAllUnequalObjectVector(
   for (const auto i : folly::irange(1, objectCount + 1)) {
     values[object(i)] = negateAllValues ? -i : i;
   }
-  return makeObjectVector(values, getUniversePtr());
+  return makeObjectVector(values, getUniverse());
 }
 
 // explicit instantiations

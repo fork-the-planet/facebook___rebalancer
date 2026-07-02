@@ -32,7 +32,7 @@ class GroupRoutingTrafficLookup : public Expression {
   GroupRoutingTrafficLookup(
       std::shared_ptr<GroupRoutingRing> groupRoutingRing,
       entities::ScopeItemId destinationScopeItemId,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   const std::string_view& getType() const override;
 

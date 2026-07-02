@@ -28,10 +28,10 @@ SRBufferCapacitySpecBuilder::SRBufferCapacitySpecBuilder(
 
 folly::coro::Task<ExprPtr> SRBufferCapacitySpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
-  auto result = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
   auto exprs = co_await constraints(expressionBuilder);
   for (auto& expr : exprs) {
-    result += max({const_expr(0, universe_), expr.constraintExpr}, universe_);
+    result += max({const_expr(0, *universe_), expr.constraintExpr}, *universe_);
   }
   co_return result;
 }
@@ -96,7 +96,7 @@ SRBufferCapacitySpecBuilder::constraints(
     auto bufferAllocated = co_await expressionBuilder.getAbsoluteUtil(
         UtilMetric::AFTER, dimensionId, scopeId, bufferItemId);
 
-    auto bufferDeficitExpr = const_expr(0, universe_);
+    auto bufferDeficitExpr = const_expr(0, *universe_);
 
     // Lowerbound requirement:
     // bufferAllocated >= bufferRequired - theta
@@ -104,7 +104,7 @@ SRBufferCapacitySpecBuilder::constraints(
       bufferDeficitExpr +=
           max(0,
               bufferRequiredForThisPartition - bufferAllocated - theta,
-              universe_);
+              *universe_);
     }
     result.emplace_back(bufferDeficitExpr);
   }

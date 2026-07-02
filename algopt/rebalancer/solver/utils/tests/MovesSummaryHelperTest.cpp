@@ -41,7 +41,7 @@ std::unique_ptr<Problem> makeProblem() {
           {"container0", {"object0"}}});
   const auto universe = builder.buildUniverse();
   return createTestProblem(
-      universe, {const_expr(0, universe)}, const_expr(0, universe));
+      universe, {const_expr(0, *universe)}, const_expr(0, *universe));
 }
 
 ObjectiveDeltaSet makeDeltaSet(int numObjectives, double perObjectiveChange) {

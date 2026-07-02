@@ -35,7 +35,7 @@ namespace {
 void expandVecToIndex(
     int index,
     std::vector<ExprPtr>& vec,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   auto fromIndex = vec.size();
   for (int j = fromIndex; j < index + 1; ++j) {
     vec.emplace_back(const_expr(0, universe));
@@ -45,9 +45,9 @@ void inplaceAddToVecIndex(
     int index,
     std::vector<ExprPtr>& vec,
     const ExprPtr& expr,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Universe& universe) {
   expandVecToIndex(index, vec, universe);
-  inplace_add(vec.at(index), expr, std::move(universe));
+  inplace_add(vec.at(index), expr, universe);
 }
 } // namespace
 
@@ -79,7 +79,7 @@ Materializer::Materializer(
       universe_(std::move(universe)),
       specBuilderFactory_(universe_, continuousExpressions, logger),
       logger_(std::move(logger)),
-      materialized_(std::make_shared<MaterializedProblem>(universe_)),
+      materialized_(std::make_shared<MaterializedProblem>(*universe_)),
       metricsBuilder_(
           shouldCollectMetrics ? std::make_shared<Metrics::Builder>()
                                : nullptr) {
@@ -114,8 +114,8 @@ std::shared_ptr<MaterializedProblem> Materializer::materialize() {
     wlockedMaterialized.similarContainers = getSimilarContainers();
 
     // Initialize the constraint.
-    wlockedMaterialized.finalConstraint = any_positive({}, universe_);
-    wlockedMaterialized.userConstraintSum = const_expr(0, universe_);
+    wlockedMaterialized.finalConstraint = any_positive({}, *universe_);
+    wlockedMaterialized.userConstraintSum = const_expr(0, *universe_);
   });
 
   ExpressionBuilder expressionBuilder(
@@ -213,9 +213,9 @@ folly::coro::Task<void> Materializer::materializeConstraintCoro(
       fmt::format("[constraint] {}", description));
   const algopt::Timer timer(true);
 
-  auto userConstraint = const_expr(0, universe_);
+  auto userConstraint = const_expr(0, *universe_);
   ExprPtr softConstraint;
-  auto hardConstraint = any_positive({}, universe_);
+  auto hardConstraint = any_positive({}, *universe_);
 
   auto constraints = co_await specBuilder->constraints(expressionBuilder);
 
@@ -232,16 +232,16 @@ folly::coro::Task<void> Materializer::materializeConstraintCoro(
   // components (since they take significant time to initialize, etc.).
   // Parellelize it after making Context thread-safe.
   for (auto& constraintInfo : constraints) {
-    userConstraint += max(0, constraintInfo.constraintExpr, universe_);
+    userConstraint += max(0, constraintInfo.constraintExpr, *universe_);
 
     auto [hardComponent, softComponent] = splitConstraintComponent(
         expressionBuilder, constraint, constraintInfo, universe_);
 
     if (softComponent != nullptr) {
       if (softConstraint == nullptr) {
-        softConstraint = const_expr(0, universe_);
+        softConstraint = const_expr(0, *universe_);
       }
-      inplace_add(softConstraint, softComponent, universe_);
+      inplace_add(softConstraint, softComponent, *universe_);
     }
 
     if (hardComponent != nullptr) {
@@ -259,7 +259,7 @@ folly::coro::Task<void> Materializer::materializeConstraintCoro(
           constraint.getTupleIndex(),
           wlockedMaterialized.finalGoals,
           softConstraint,
-          universe_);
+          *universe_);
       wlockedMaterialized.softConstraints.emplace(constraintId, softConstraint);
     });
 
@@ -279,7 +279,7 @@ folly::coro::Task<void> Materializer::materializeConstraintCoro(
     inplace_add(
         wlockedMaterialized.userConstraintSum,
         std::move(userConstraint),
-        universe_);
+        *universe_);
     wlockedMaterialized.hardConstraints.emplace(constraintId, hardConstraint);
     wlockedMaterialized.fixedObjects.insert(
         std::move_iterator(fixedObjects.begin()),
@@ -370,7 +370,7 @@ folly::coro::Task<void> Materializer::materializeGoalCoro(
         goal.getTupleIndex(),
         wlockedMaterialized.finalGoals,
         expression,
-        universe_);
+        *universe_);
     wlockedMaterialized.userGoals.emplace(goalId, expression);
   });
 
@@ -400,8 +400,7 @@ ExprPtr Materializer::getSoftenedConstraint(
     return weightedPenalty;
   }
 
-  return invalidState *
-      step(constraintInfo.constraintExpr, std::move(universe)) +
+  return invalidState * step(constraintInfo.constraintExpr, *universe) +
       std::move(weightedPenalty);
 }
 
@@ -457,14 +456,14 @@ void Materializer::buildGlobalObjectiveAndLabeledObjectives() {
       globalObjectiveBuilder.setObjective(pos, goalExpr);
     }
     wlockedMaterialized.globalObjective =
-        globalObjectiveBuilder.build(universe_);
+        globalObjectiveBuilder.build(*universe_);
 
     // if there are no userGoals or softConstraints, then just set a
-    // labeledObjective with root to be const_expr(0, universe_) as
-    // finalGoals(0) still exists with expr = const_expr(0, universe_)
+    // labeledObjective with root to be const_expr(0, *universe_) as
+    // finalGoals(0) still exists with expr = const_expr(0, *universe_)
     if (wlockedMaterialized.softConstraints.size() == 0 &&
         wlockedMaterialized.userGoals.size() == 0) {
-      globalLabeledObjectivesBuilder.setRoot(0, const_expr(0, universe_));
+      globalLabeledObjectivesBuilder.setRoot(0, const_expr(0, *universe_));
     }
   });
 

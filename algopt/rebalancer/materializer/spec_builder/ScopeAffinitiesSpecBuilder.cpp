@@ -28,7 +28,7 @@ folly::coro::Task<ExprPtr> ScopeAffinitiesSpecBuilder::goalCoro(
   auto scopeId = universe_->getScopeId(*spec_.scope());
   auto dimensionId = universe_->getDimensionId(*spec_.dimension());
 
-  auto result = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
   for (auto& [scopeItemName, affinity] : *spec_.affinities()) {
     auto scopeItemId = universe_->getScopeItemId(scopeId, scopeItemName);
     auto util = co_await expressionBuilder.getRelativeUtil(

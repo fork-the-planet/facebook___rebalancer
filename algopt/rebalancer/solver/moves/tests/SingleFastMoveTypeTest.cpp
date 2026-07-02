@@ -71,9 +71,9 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveSetBasic) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          universe,
+          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
-      /*constraint=*/const_expr(0, universe));
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = singleFastMoveType.findBestMove(
       getMovesEvaluator(),
@@ -107,9 +107,9 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveSetBasicBiggerMinHotObject) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          universe,
+          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
-      /*constraint=*/const_expr(0, universe));
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = singleFastMoveType.findBestMove(
       getMovesEvaluator(),
@@ -145,9 +145,9 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveSetBasic2) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          universe,
+          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
-      /*constraint=*/const_expr(0, universe));
+      /*constraint=*/const_expr(0, *universe));
 
   const auto bestResult = singleFastMoveType.findBestMove(
       getMovesEvaluator(),
@@ -185,9 +185,9 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveEvalsWithExploreInRegion) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          getUniversePtr(),
+          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
-      /*constraint=*/const_expr(0, universe));
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = singleFastMoveType.findBestMove(
       getMovesEvaluator(),
@@ -228,9 +228,9 @@ CO_TEST_F(
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          universe,
+          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
-      /*constraint=*/const_expr(0, universe));
+      /*constraint=*/const_expr(0, *universe));
 
   auto bestResult = singleFastMoveType.findBestMove(
       getMovesEvaluator(),
@@ -287,9 +287,9 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveEvalsWithMoveToScopeItems) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          universe,
+          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
-      /*constraint=*/const_expr(0, universe));
+      /*constraint=*/const_expr(0, *universe));
 
   {
     auto bestResult = singleFastMoveType.findBestMove(
@@ -387,9 +387,9 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveEvalsGroupToScopeItemLists) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          getUniversePtr(),
+          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
-      /*constraint=*/const_expr(0, getUniversePtr()));
+      /*constraint=*/const_expr(0, getUniverse()));
 
   {
     auto bestResult = singleFastMoveType.findBestMove(
@@ -439,12 +439,12 @@ CO_TEST_F(SingleFastMoveTypeTest, FilterReducesEvaluatedMoves) {
   auto objectiveTuple = std::vector<ExprPtr>{object_lookup(
       makeAllUnequalObjectVector(9),
       containers,
-      universe,
+      *universe,
       Assignment(universe->getContainers().getInitialAssignment()))};
 
   // Without filter: all destinations evaluated
   auto problemNoFilter =
-      createTestProblem(universe, objectiveTuple, const_expr(0, universe));
+      createTestProblem(universe, objectiveTuple, const_expr(0, *universe));
   const MovesEvaluator evalNoFilter(*problemNoFilter, 0, 1, "stage");
   MoveStatsAggregator statsNoFilter(universe->getPrecision());
   auto resultNoFilter = SingleFastMoveType(
@@ -467,7 +467,7 @@ CO_TEST_F(SingleFastMoveTypeTest, FilterReducesEvaluatedMoves) {
   auto problemWithFilter = createTestProblem(
       universe,
       objectiveTuple,
-      const_expr(0, universe),
+      const_expr(0, *universe),
       /*nonAcceptingContainers=*/{},
       /*config=*/{},
       /*performInitialFullApply=*/true,

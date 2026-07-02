@@ -46,8 +46,8 @@ using entities::ObjectId;
 
 Max::Max(
     const std::vector<std::shared_ptr<Expression>>& exprs,
-    std::shared_ptr<const entities::Universe> universe)
-    : Expression(std::move(universe)) {
+    const entities::Universe& universe)
+    : Expression(universe) {
   for (const auto& it : exprs) {
     add_child(it);
   }
@@ -204,7 +204,7 @@ static bool isThereAtleastOneGeneralChild(
 
 static ExprPtr getSumOfbinaryChildren(
     const PackerSet<ExprPtr>& children,
-    const std::shared_ptr<const entities::Universe>& universe) {
+    const entities::Universe& universe) {
   PackerMap<std::shared_ptr<Expression>, double> childToCoeff;
   for (auto& child : children) {
     childToCoeff[child] = 1;
@@ -228,7 +228,7 @@ static ExprPtr getEquivExprForNonGeneralChildren(
     }
     newChildren.push_back(child - maxLB);
   }
-  return max(newChildren, evaluator.getProblem().getUniversePtr()) + maxLB;
+  return max(newChildren, evaluator.getProblem().getUniverse()) + maxLB;
 }
 
 algopt::lp::Expression Max::binary_inner_lp(
@@ -243,7 +243,7 @@ algopt::lp::Expression Max::binary_inner_lp(
 
   if (!binaryChildrenSum_) {
     binaryChildrenSum_ = getSumOfbinaryChildren(
-        children(), evaluator.getProblem().getUniversePtr());
+        children(), evaluator.getProblem().getUniverse());
   }
   const auto& children_sum =
       evaluator.lp(binaryChildrenSum_.get(), minimizing, configs);
@@ -293,7 +293,7 @@ void Max::lpIntent(const LpEvaluator& evaluator, bool minimizing) {
     // children().size * max_var >= sum of children
     if (!binaryChildrenSum_) {
       binaryChildrenSum_ = getSumOfbinaryChildren(
-          children(), evaluator.getProblem().getUniversePtr());
+          children(), evaluator.getProblem().getUniverse());
     }
     return evaluator.computeLpIntent(binaryChildrenSum_, minimizing);
   }

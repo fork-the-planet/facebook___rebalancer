@@ -33,7 +33,7 @@ AggregatedGroupSpecBuilder::AggregatedGroupSpecBuilder(
 folly::coro::Task<ExprPtr> AggregatedGroupSpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 folly::coro::Task<std::vector<ConstraintInfo>>
@@ -57,12 +57,12 @@ AggregatedGroupSpecBuilder::constraints(
   if (spec_.contributions()) {
     for (auto& [itemName, contribution] : *spec_.contributions()) {
       auto scopeItemId = universe_->getScopeItemId(scopeId, itemName);
-      LimitWrapper lim(universe_, contribution, scopeId);
+      LimitWrapper lim(*universe_, contribution, scopeId);
       coeMap.emplace(scopeItemId, std::move(lim));
     }
   }
 
-  const LimitWrapper wrapper(universe_, limit, scopeId);
+  const LimitWrapper wrapper(*universe_, limit, scopeId);
   const std::map<entities::ContainerId, entities::ScopeItemId>
       containerReverseMap;
 
@@ -97,7 +97,7 @@ AggregatedGroupSpecBuilder::constraints(
           weight *= coefficient;
           if (withinGroupAggregationType ==
               interface::AggregatedGroupSpecAggType::MAX) {
-            inplace_max(groupValue, withinGroupRes * weight, universe_);
+            inplace_max(groupValue, withinGroupRes * weight, *universe_);
           } else if (
               withinGroupAggregationType ==
               interface::AggregatedGroupSpecAggType::SUM) {
@@ -111,7 +111,7 @@ AggregatedGroupSpecBuilder::constraints(
         }
         if (groupAggregationType ==
             interface::AggregatedGroupSpecAggType::MAX) {
-          inplace_max(containerValue, groupValue, universe_);
+          inplace_max(containerValue, groupValue, *universe_);
         } else if (
             groupAggregationType ==
             interface::AggregatedGroupSpecAggType::SUM) {
@@ -126,7 +126,7 @@ AggregatedGroupSpecBuilder::constraints(
 
       if (containerAggregationType ==
           interface::AggregatedGroupSpecAggType::MAX) {
-        inplace_max(scopeItemValue, containerValue, universe_);
+        inplace_max(scopeItemValue, containerValue, *universe_);
       } else if (
           containerAggregationType ==
           interface::AggregatedGroupSpecAggType::SUM) {

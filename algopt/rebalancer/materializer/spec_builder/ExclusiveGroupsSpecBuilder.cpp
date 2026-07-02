@@ -88,7 +88,7 @@ ExclusiveGroupsSpecBuilder::computeScopeItemToGroupAssignment(
 folly::coro::Task<ExprPtr> ExclusiveGroupsSpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 folly::coro::Task<std::vector<ConstraintInfo>>

@@ -69,10 +69,10 @@ ExclusiveScopeItemsSpecBuilder::getMinimizeInvalidatedScopeItemsCountGoal(
 
   // objective is the count of scope items that are invalidated because one of
   // their conflicting scope items is utilized
-  auto objective = const_expr(0, universe_);
+  auto objective = const_expr(0, *universe_);
   for (const auto& [scopeItem, conflictingScopeItems] :
        scopeItemToConflictingScopeItems) {
-    auto conflictSum = const_expr(0, universe_);
+    auto conflictSum = const_expr(0, *universe_);
     for (const auto& conflictingScopeItem : conflictingScopeItems) {
       auto conflictingScopeItemId =
           universe_->getScopeItemId(scopeId_, conflictingScopeItem);
@@ -82,9 +82,9 @@ ExclusiveScopeItemsSpecBuilder::getMinimizeInvalidatedScopeItemsCountGoal(
               dimensionId_,
               scopeId_,
               conflictingScopeItemId);
-      inplace_add(conflictSum, conflictingScopeItemUtil, universe_);
+      inplace_add(conflictSum, conflictingScopeItemUtil, *universe_);
     }
-    inplace_add(objective, step(conflictSum, universe_), universe_);
+    inplace_add(objective, step(conflictSum, *universe_), *universe_);
   }
   co_return objective;
 }
@@ -109,18 +109,18 @@ ExclusiveScopeItemsSpecBuilder::getAggressivePackingGoal(
   }
 
   auto scopeItemWeights = *spec_.scopeItemWeights();
-  auto objective = const_expr(0, universe_);
+  auto objective = const_expr(0, *universe_);
   for (const auto& [scopeItem, conflictingScopeItems] :
        scopeItemToConflictingScopeItems) {
-    auto conflictSum = const_expr(0, universe_);
+    auto conflictSum = const_expr(0, *universe_);
     const auto scopeItemId = universe_->getScopeItemId(scopeId_, scopeItem);
     auto mainScopeItemUtil = step(
         co_await expressionBuilder.getAbsoluteUtil(
             UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId),
-        universe_);
+        *universe_);
     const auto scopeItemWeight =
         folly::get_default(scopeItemWeights, scopeItem, 1);
-    inplace_add(conflictSum, mainScopeItemUtil, universe_, scopeItemWeight);
+    inplace_add(conflictSum, mainScopeItemUtil, *universe_, scopeItemWeight);
     for (const auto& [conflictingScopeItem, overlap] : conflictingScopeItems) {
       const auto conflictingScopeItemId =
           universe_->getScopeItemId(scopeId_, conflictingScopeItem);
@@ -130,14 +130,14 @@ ExclusiveScopeItemsSpecBuilder::getAggressivePackingGoal(
               dimensionId_,
               scopeId_,
               conflictingScopeItemId),
-          universe_);
-      inplace_add(conflictSum, conflictingScopeItemUtil, universe_, overlap);
+          *universe_);
+      inplace_add(conflictSum, conflictingScopeItemUtil, *universe_, overlap);
     }
-    auto conflictSumSquared = power(conflictSum, 2, universe_);
+    auto conflictSumSquared = power(conflictSum, 2, *universe_);
     // We make the coefficient negative so that minimizing the expression
     // results in maximizing the sum of the conflictSumSquared * scopeItemWeight
     // values.
-    inplace_add(objective, conflictSumSquared, universe_, -scopeItemWeight);
+    inplace_add(objective, conflictSumSquared, *universe_, -scopeItemWeight);
   }
   co_return objective;
 }
@@ -150,7 +150,8 @@ ExclusiveScopeItemsSpecBuilder::buildConstraintPerGroup(
   auto& scope = universe_->getScope(scopeId_);
   const auto& partition = universe_->getPartition(partitionId);
   for (auto groupId : partition.getGroupIds()) {
-    auto exprForThisGroup = any_positive({const_expr(0, universe_)}, universe_);
+    auto exprForThisGroup =
+        any_positive({const_expr(0, *universe_)}, *universe_);
     bool atLeastOneConstraint = false;
     for (auto& conflictInfo : *spec_.conflictInfoList()) {
       if (conflictInfo.conflictingScopeItemsWithOverlap()->empty()) {
@@ -184,7 +185,7 @@ ExclusiveScopeItemsSpecBuilder::buildConstraintPerGroup(
 
       auto conflictScopeItemsUtilSum =
           std::make_shared<GroupScopeItemTransformUtil>(
-              universe_,
+              *universe_,
               partitionId,
               groupId,
               dimensionId_,
@@ -198,8 +199,8 @@ ExclusiveScopeItemsSpecBuilder::buildConstraintPerGroup(
 
       inplace_any_positive(
           exprForThisGroup,
-          step(mainScopeItemUtil, universe_) +
-              step(conflictScopeItemsUtilSum, universe_) - 1);
+          step(mainScopeItemUtil, *universe_) +
+              step(conflictScopeItemsUtilSum, *universe_) - 1);
     }
 
     if (atLeastOneConstraint) {
@@ -220,7 +221,7 @@ ExclusiveScopeItemsSpecBuilder::constraints(
   }
 
   // otherwise enforce this constraint on all objects at once
-  auto result = any_positive({const_expr(0, universe_)}, universe_);
+  auto result = any_positive({const_expr(0, *universe_)}, *universe_);
   bool atLeastOneConstraint = false;
   for (auto& conflictInfo : *spec_.conflictInfoList()) {
     if (conflictInfo.conflictingScopeItemsWithOverlap()->empty()) {
@@ -231,7 +232,7 @@ ExclusiveScopeItemsSpecBuilder::constraints(
         universe_->getScopeItemId(scopeId_, *conflictInfo.scopeItem());
     auto mainScopeItemUtil = co_await expressionBuilder.getAbsoluteUtil(
         UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId);
-    auto conflictingScopeItemsUtilSum = const_expr(0, universe_);
+    auto conflictingScopeItemsUtilSum = const_expr(0, *universe_);
     for (auto& conflictingScopeItemInfo :
          *conflictInfo.conflictingScopeItemsWithOverlap()) {
       auto conflictingScopeItemId = universe_->getScopeItemId(
@@ -243,12 +244,12 @@ ExclusiveScopeItemsSpecBuilder::constraints(
               dimensionId_,
               scopeId_,
               conflictingScopeItemId),
-          universe_);
+          *universe_);
     }
     inplace_any_positive(
         result,
-        step(mainScopeItemUtil, universe_) +
-            step(conflictingScopeItemsUtilSum, universe_) - 1);
+        step(mainScopeItemUtil, *universe_) +
+            step(conflictingScopeItemsUtilSum, *universe_) - 1);
   }
   co_return atLeastOneConstraint
       ? std::vector<ConstraintInfo>{ConstraintInfo(std::move(result))}

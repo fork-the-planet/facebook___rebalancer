@@ -54,10 +54,11 @@ CO_TEST_F(ObjectLookupDynamicTest, Basic) {
       "dynamicDim",
       entities::ObjectDimensionData{std::move(dynamicDimensionData)});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto dynamicDimId = dimensionId("dynamicDim");
   const auto& dynamicDimension =
-      universe->getObjects().getDimension(dynamicDimId).at(0);
+      universe.getObjects().getDimension(dynamicDimId).at(0);
 
   // Create ObjectLookup child for scopeItem0's container
   auto objVec = makeObjectVector({{object(0), 10}, {object(1), 5}}, universe);
@@ -65,7 +66,7 @@ CO_TEST_F(ObjectLookupDynamicTest, Basic) {
       PackerSet<entities::ContainerId>{container(0)});
   auto sumOfLookups = const_expr(0, universe);
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   sumOfLookups +=
       object_lookup(objVec, containers, universe, initialAssignment);
 
@@ -95,16 +96,17 @@ CO_TEST_F(ObjectLookupDynamicTest, ThrowsOnNonDynamicDimension) {
       "staticDim",
       entities::ObjectDimensionData{std::move(staticDimensionData)});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto staticDimId = dimensionId("staticDim");
   const auto& staticDimension =
-      universe->getObjects().getDimension(staticDimId).at(0);
+      universe.getObjects().getDimension(staticDimId).at(0);
 
   auto objVec = makeObjectVector({{object(0), 10}}, universe);
   auto containers = std::make_shared<PackerSet<entities::ContainerId>>(
       PackerSet<entities::ContainerId>{container(0)});
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto lookup = object_lookup(objVec, containers, universe, initialAssignment);
 
   REBALANCER_EXPECT_RUNTIME_ERROR(
@@ -154,10 +156,11 @@ CO_TEST_F(ObjectLookupDynamicTest, ContainerCoverage) {
       "dynamicDim",
       entities::ObjectDimensionData{std::move(dynamicDimensionData)});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto dynamicDimId = dimensionId("dynamicDim");
   const auto& dynamicDimension =
-      universe->getObjects().getDimension(dynamicDimId).at(0);
+      universe.getObjects().getDimension(dynamicDimId).at(0);
 
   // lookup01 is not consistent with dynamic dimension's scope because
   // containers 0, 1 are not in the same scopeItem of dynamic dimension's scope
@@ -165,7 +168,7 @@ CO_TEST_F(ObjectLookupDynamicTest, ContainerCoverage) {
   auto container01 = std::make_shared<PackerSet<entities::ContainerId>>(
       PackerSet<entities::ContainerId>{container(0), container(1)});
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto lookup01 = object_lookup(
       makeObjectVector({{object(0), 10}}, universe),
       container01,
@@ -255,10 +258,11 @@ CO_TEST_F(ObjectLookupDynamicTest, EvaluateAndPartialApply) {
       "dynamicDim",
       entities::ObjectDimensionData{std::move(dynamicDimensionData)});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto dynamicDimId = dimensionId("dynamicDim");
   const auto& dynamicDimension =
-      universe->getObjects().getDimension(dynamicDimId).at(0);
+      universe.getObjects().getDimension(dynamicDimId).at(0);
 
   // Create ObjectLookup children for scopeItem0's containers
   auto objVecScopeItem0 = makeObjectVector(
@@ -283,7 +287,7 @@ CO_TEST_F(ObjectLookupDynamicTest, EvaluateAndPartialApply) {
           PackerSet<entities::ContainerId>{container(0), container(1)});
   auto sumOfLookups = const_expr(0, universe);
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   sumOfLookups += object_lookup(
       objVecScopeItem0, scopeItem0Containers, universe, initialAssignment);
   auto scopeItem1Containers =

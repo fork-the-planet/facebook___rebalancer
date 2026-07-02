@@ -37,7 +37,7 @@ static ExprPtr getStayedObjectCountExpr(
     ExpressionBuilder& expressionBuilder,
     ContainerId containerId,
     const std::vector<ObjectId>& objectIds,
-    std::shared_ptr<const Universe> universe) {
+    const Universe& universe) {
   // When there are most two objects, experiments show it is not worth (both in
   // terms of time and memory) to create an objectLookup. So handling that
   // separately.
@@ -54,7 +54,7 @@ static ExprPtr getStayedObjectCountExpr(
 
   // Create an object vector where every object in objectIds has value 1,
   // everything else has value 0
-  const auto numObjects = universe->getNumObjects();
+  const auto numObjects = universe.getNumObjects();
   auto objectIdToValue = std::make_shared<entities::ObjectIdToDoubleMap>(
       numObjects, /*defaultValue=*/0.0, objectIds.size());
   for (auto objectId : objectIds) {
@@ -66,7 +66,7 @@ static ExprPtr getStayedObjectCountExpr(
       objVector,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{containerId}),
-      std::move(universe),
+      universe,
       expressionBuilder.getInitialAssignment());
 }
 
@@ -113,11 +113,11 @@ AvoidMovingSpecBuilder::constraints(
   // Final desired constraint expression is N - S <= 0, where N =
   // totalObjectCount and S = the total number of objects of interest that stay
   // in their respective initial containers
-  auto constraint = const_expr(totalObjectCount, universe_);
+  auto constraint = const_expr(totalObjectCount, *universe_);
   const std::vector<ExprPtr> constraints;
   for (auto& [containerId, objectIds] : relevantContainerToObjects) {
     constraint -= getStayedObjectCountExpr(
-        expressionBuilder, containerId, objectIds, universe_);
+        expressionBuilder, containerId, objectIds, *universe_);
   }
 
   co_return std::vector<ConstraintInfo>{ConstraintInfo(constraint)};

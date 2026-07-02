@@ -54,7 +54,8 @@ class PropertiesTest : public ExpressionTestsBase {
 class PropertiesTestCustom : public ExpressionTestsBase {};
 
 TEST_F(PropertiesTest, AnyPositive) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const AnyPositive anyPositive({}, universe, 1e-3);
   ASSERT_EQ("AnyPositive", anyPositive.getType());
 
@@ -69,7 +70,8 @@ TEST_F(PropertiesTest, AnyPositive) {
 }
 
 TEST_F(PropertiesTest, Product) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const ProductOperation product(
       const_expr(1, universe), const_expr(1, universe), universe);
   ASSERT_EQ("Product", product.getType());
@@ -81,7 +83,8 @@ TEST_F(PropertiesTest, Product) {
 }
 
 TEST_F(PropertiesTest, Quotient) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const QuotientOperation quotient(
       const_expr(1, universe), const_expr(1, universe), universe);
   ASSERT_EQ("Quotient", quotient.getType());
@@ -93,7 +96,8 @@ TEST_F(PropertiesTest, Quotient) {
 }
 
 TEST_F(PropertiesTest, BipartiteSwaps) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const BipartiteSwaps swaps(
       {}, {container(1), container(2)}, {container(3)}, universe);
   ASSERT_EQ("BipartiteSwaps", swaps.getType());
@@ -119,7 +123,8 @@ TEST_F(PropertiesTest, BipartiteSwaps) {
 }
 
 TEST_F(PropertiesTest, LinearSum) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto sum = const_expr(42, universe);
   ASSERT_EQ("LinearSum", sum->getType());
 
@@ -130,7 +135,8 @@ TEST_F(PropertiesTest, LinearSum) {
 }
 
 TEST_F(PropertiesTest, NthLargest) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const NthLargest nth({const_expr(1, universe)}, 4, false, universe);
   ASSERT_EQ("NthLargest", nth.getType());
 
@@ -141,8 +147,9 @@ TEST_F(PropertiesTest, NthLargest) {
 }
 
 TEST_F(PropertiesTest, ObjectLookup) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto lookup = object_lookup(
       makeObjectVector(PackerMap<entities::ObjectId, double>(), universe),
       std::make_shared<PackerSet<entities::ContainerId>>(
@@ -166,7 +173,8 @@ TEST_F(PropertiesTest, ObjectLookup) {
 }
 
 TEST_F(PropertiesTest, ObjectVector) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto vector = makeObjectVector({{object(3), 1.3}}, universe);
   ASSERT_EQ("ObjectVector", vector->getType());
 
@@ -184,7 +192,8 @@ TEST_F(PropertiesTest, ObjectVector) {
 }
 
 TEST_F(PropertiesTest, Piecewise) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto pw = piecewise(
       {{0.0, 10.0}, {10.0, 5.0}}, const_expr(2.5, universe), universe);
   ASSERT_EQ("Piecewise", pw->getType());
@@ -201,7 +210,8 @@ TEST_F(PropertiesTest, Piecewise) {
 }
 
 TEST_F(PropertiesTest, TransformPower) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto transform = power(const_expr(1.0, universe), 2.0, universe);
   ASSERT_EQ("Power", transform->getType());
 
@@ -212,7 +222,8 @@ TEST_F(PropertiesTest, TransformPower) {
 }
 
 TEST_F(PropertiesTest, TransformRectangle) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto transform = rectangle(const_expr(1.0, universe), 2.0, 3.0, universe);
   ASSERT_EQ("Rectangle", transform->getType());
 
@@ -225,8 +236,9 @@ TEST_F(PropertiesTest, TransformRectangle) {
 }
 
 TEST_F(PropertiesTest, Variable) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto var = variable(object(3), container(4), universe, assignment);
   ASSERT_EQ("Variable", var->getType());
 
@@ -241,16 +253,18 @@ TEST_F(PropertiesTest, Variable) {
 }
 
 TEST_F(PropertiesTest, Ceil) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto ceil =
       Ceil(variable(object(2), container(3), universe, assignment), universe);
   ASSERT_EQ("Ceil", ceil.getType());
 }
 
 TEST_F(PropertiesTest, Log) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto log = Log(
       200 * variable(object(2), container(3), universe, assignment), universe);
   ASSERT_EQ(log.getType(), "Log");
@@ -264,8 +278,9 @@ CO_TEST_F(PropertiesTestCustom, ObjectPartition) {
   const auto objectCountDimensionId = dimensionId("object_count");
   co_await addPartition("partition1", {});
 
+  const auto universe = buildUniverse();
   auto objPartition = object_partition(
-      partitionId("partition1"), objectCountDimensionId, {}, buildUniverse());
+      partitionId("partition1"), objectCountDimensionId, {}, *universe);
 
   EXPECT_EQ("ObjectPartition", objPartition->getType());
 }
@@ -278,8 +293,9 @@ CO_TEST_F(PropertiesTestCustom, ObjectPartitionLookup) {
   const auto objectCountDimensionId = dimensionId("object_count");
   co_await addPartition("partition1", {});
 
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   const auto containerScopeId = scopeId("container");
   const auto container1ScopeItemId =
       scopeItemId(containerScopeId, "container1");
@@ -303,7 +319,8 @@ CO_TEST_F(PropertiesTestCustom, ObjectPartitionMoveLimit) {
   const auto objectCountDimensionId = dimensionId("object_count");
   co_await addPartition("partition1", {});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   auto moveLimit = ObjectPartitionMoveLimit(
       universe,
@@ -317,16 +334,18 @@ CO_TEST_F(PropertiesTestCustom, ObjectPartitionMoveLimit) {
 }
 
 TEST_F(PropertiesTest, Square) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto square =
       Square(variable(object(3), container(4), universe, assignment), universe);
   ASSERT_EQ("Square", square.getType());
 }
 
 TEST_F(PropertiesTest, StableStayed) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto vec =
       makeObjectVector(PackerMap<entities::ObjectId, double>{}, universe);
   auto stayed = stable_stayed(
@@ -340,16 +359,18 @@ TEST_F(PropertiesTest, StableStayed) {
 }
 
 TEST_F(PropertiesTest, Step) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto stepExpr =
       step(variable(object(2), container(3), universe, assignment), universe);
   ASSERT_EQ("Step", stepExpr->getType());
 }
 
 TEST_F(PropertiesTest, SumOverThreshold) {
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto overThreshold = sum_over_threshold(
       const_expr(0.6, universe),
       {variable(object(0), container(1), universe, assignment) + 0.2},

@@ -39,8 +39,8 @@ SumOverThreshold::SumOverThreshold(
     std::shared_ptr<Expression> threshold,
     const std::vector<std::shared_ptr<Expression>>& values,
     bool square,
-    std::shared_ptr<const entities::Universe> universe)
-    : Expression(std::move(universe)),
+    const entities::Universe& universe)
+    : Expression(universe),
       squares(square),
       collection(
           [](Node n1, Node n2) {

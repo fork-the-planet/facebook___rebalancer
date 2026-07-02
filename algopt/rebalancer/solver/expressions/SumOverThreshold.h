@@ -25,7 +25,7 @@ class SumOverThreshold : public Expression {
       std::shared_ptr<Expression> threshold,
       const std::vector<std::shared_ptr<Expression>>& values,
       bool square,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   AbstractContainer<ObjectPotential> getObjectPotentials(
       bool descending) const override;

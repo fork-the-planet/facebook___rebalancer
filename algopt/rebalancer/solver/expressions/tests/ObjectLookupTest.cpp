@@ -28,7 +28,7 @@ class ObjectLookupTest : public ExpressionTestsBase {
   ExprPtr makeLookup(
       std::shared_ptr<ObjectVector> vec,
       bool isStableStayed,
-      const std::shared_ptr<const entities::Universe>& universe,
+      const entities::Universe& universe,
       const Assignment& assignment) {
     // only one container, so initial and full object vectors are same for
     // StableStayed
@@ -44,9 +44,10 @@ class ObjectLookupTest : public ExpressionTestsBase {
   void lookupBasic() {
     setInitialAssignment(
         {{"container0", {"object0"}}, {"container1", {"object1"}}});
-    const auto universe = buildUniverse();
+    buildUniverse();
+    const auto& universe = getUniverse();
     const Assignment assignment(
-        universe->getContainers().getInitialAssignment());
+        universe.getContainers().getInitialAssignment());
     const PackerMap<entities::ObjectId, double> vector = {
         {object(0), 4}, {object(1), 3}};
     auto vec = makeObjectVector(vector, universe);
@@ -61,7 +62,7 @@ class ObjectLookupTest : public ExpressionTestsBase {
 
     EXPECT_EQ(0, apply(lookup, Assignment()));
 
-    EquivalenceSets equivalenceSets(*universe);
+    EquivalenceSets equivalenceSets(universe);
     // before : 1 equivalent set
     equivalenceSets.combine(
         std::vector<entities::ObjectId>{object(0), object(1)});
@@ -78,9 +79,10 @@ class ObjectLookupTest : public ExpressionTestsBase {
         {{"container0", {"object0", "object1"}},
          {"container1", {"object2", "object3"}}});
 
-    const auto universe = buildUniverse();
+    buildUniverse();
+    const auto& universe = getUniverse();
     const Assignment assignment(
-        universe->getContainers().getInitialAssignment());
+        universe.getContainers().getInitialAssignment());
 
     auto objectVector =
         makeObjectVector({{object(0), 4}, {object(1), 3}}, universe);
@@ -118,10 +120,10 @@ TEST_F(ObjectLookupTest, LookupPartialApplyUsingObjects) {
 
   setInitialAssignment(containerToObjects);
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
-  auto assignment =
-      Assignment(universe->getContainers().getInitialAssignment());
+  auto assignment = Assignment(universe.getContainers().getInitialAssignment());
 
   // there are 100 objects, but only 3 of them have non-default values
   auto objectVector = makeObjectVector(
@@ -169,14 +171,15 @@ TEST_F(ObjectLookupTest, StableStayedEquivSets) {
       {{"container0", {"object0", "object1"}},
        {"container1", {"object2", "object3"}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const PackerMap<entities::ObjectId, double> objectIdToVal = {
       {object(0), 4}, {object(1), 4}, {object(2), 4}, {object(3), 4}};
   auto vec = makeObjectVector(objectIdToVal, universe);
   auto containerPtr = std::make_shared<PackerSet<entities::ContainerId>>();
   containerPtr->insert({container(0), container(1)});
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
 
   const PackerMap<entities::ObjectId, double> initialValCtr1 = {
       {object(0), 4}, {object(1), 4}, {object(2), 0}, {object(3), 0}};
@@ -184,11 +187,11 @@ TEST_F(ObjectLookupTest, StableStayedEquivSets) {
       {object(0), 0}, {object(1), 0}, {object(2), 4}, {object(3), 4}};
   auto initialVec1 = makeObjectVector(initialValCtr1, universe);
   auto initialVec2 = makeObjectVector(initialValCtr2, universe);
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   StableStayed stayed1(initialVec1, vec, containerPtr, universe, assignment);
   StableStayed stayed2(initialVec2, vec, containerPtr, universe, assignment);
 
-  EquivalenceSets equivalenceSets(*universe);
+  EquivalenceSets equivalenceSets(universe);
   // before : 1 equivalent set
   equivalenceSets.combine(
       std::vector<entities::ObjectId>{
@@ -211,7 +214,8 @@ TEST_F(ObjectLookupTest, isInteger) {
   setInitialAssignment(
       {{"container0", {"object0"}},
        {"container1", {"object1", "object2", "object3"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const auto numObjects = getNumObjects();
   {
     auto objectVector = makeObjectVector(
@@ -220,7 +224,7 @@ TEST_F(ObjectLookupTest, isInteger) {
         numObjects,
         universe);
     const Assignment assignment(
-        universe->getContainers().getInitialAssignment());
+        universe.getContainers().getInitialAssignment());
     auto objectLookup = object_lookup(
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(
@@ -239,7 +243,7 @@ TEST_F(ObjectLookupTest, isInteger) {
         numObjects,
         universe);
     const Assignment assignment(
-        universe->getContainers().getInitialAssignment());
+        universe.getContainers().getInitialAssignment());
     auto objectLookup = object_lookup(
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(
@@ -258,7 +262,7 @@ TEST_F(ObjectLookupTest, isInteger) {
         numObjects,
         universe);
     const Assignment assignment(
-        universe->getContainers().getInitialAssignment());
+        universe.getContainers().getInitialAssignment());
     auto objectLookup = object_lookup(
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(
@@ -277,7 +281,7 @@ TEST_F(ObjectLookupTest, isInteger) {
         numObjects,
         universe);
     const Assignment assignment(
-        universe->getContainers().getInitialAssignment());
+        universe.getContainers().getInitialAssignment());
     auto objectLookup = object_lookup(
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(
@@ -297,8 +301,9 @@ TEST_F(ObjectLookupTest, VariableInitialValue) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}, {"container1", {"object2"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto var0c0 =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
@@ -317,8 +322,9 @@ TEST_F(ObjectLookupTest, ObjectLookupInitialValue) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}, {"container1", {"object2"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto objVec = makeObjectVector(
       {{object(0), 10}, {object(1), 5}, {object(2), 3}}, universe);

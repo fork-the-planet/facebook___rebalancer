@@ -49,7 +49,7 @@ class ObjectsToExploreGeneratorTest : public MoveTestBase {
         });
 
     const auto universe = buildUniverse();
-    createProblem({const_expr(0, universe)}, const_expr(0, universe));
+    createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
   }
 
   folly::coro::Task<void> setUpProblemForBundleGeneration() {
@@ -80,7 +80,7 @@ class ObjectsToExploreGeneratorTest : public MoveTestBase {
           groupId(partitionId(kPartitionName), fmt::format("group{}", i)));
     }
 
-    createProblem({const_expr(0, universe)}, const_expr(0, universe));
+    createProblem({const_expr(0, *universe)}, const_expr(0, *universe));
   }
 
   entities::GroupId CheckAndGetGroupId(

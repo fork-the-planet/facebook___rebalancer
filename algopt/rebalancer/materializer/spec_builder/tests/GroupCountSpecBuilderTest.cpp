@@ -105,7 +105,7 @@ CO_TEST_F(GroupCountSpecBuilderTest, GlobalRelativeLimit) {
   const GroupCountSpecBuilder specBuilder(universe, groupCountSpec);
   auto goal = co_await specBuilder.goalCoro(expressionBuilder());
   auto root =
-      facebook::rebalancer::any_positive(std::vector<ExprPtr>{goal}, universe);
+      facebook::rebalancer::any_positive(std::vector<ExprPtr>{goal}, *universe);
 
   // initially goal will not be satisfied
   EXPECT_NEAR(1, evaluate(root, deltaFromInitial({})), 1e-8);

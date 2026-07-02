@@ -28,7 +28,7 @@ FlowSpecBuilder::FlowSpecBuilder(
 folly::coro::Task<ExprPtr> FlowSpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 folly::coro::Task<std::vector<ConstraintInfo>> FlowSpecBuilder::constraints(
@@ -38,8 +38,8 @@ folly::coro::Task<std::vector<ConstraintInfo>> FlowSpecBuilder::constraints(
   auto scopeId = universe_->getScopeId(*spec_.scope());
   auto dimensionId = universe_->getDimensionId(*spec_.dimension());
 
-  const LimitWrapper limits(universe_, *spec_.limit(), scopeId);
-  const LimitWrapper coefficients(universe_, *spec_.coefficients(), scopeId);
+  const LimitWrapper limits(*universe_, *spec_.limit(), scopeId);
+  const LimitWrapper coefficients(*universe_, *spec_.coefficients(), scopeId);
   auto& objectDimension =
       universe_->getObjects().getDimension(dimensionId).at(0);
 
@@ -71,7 +71,7 @@ folly::coro::Task<std::vector<ConstraintInfo>> FlowSpecBuilder::constraints(
             expressionBuilder.isAssigned(scopeId, sourceItemId, objectId1);
         auto assigned2 =
             expressionBuilder.isAssigned(scopeId, destinationItemId, objectId2);
-        expr += weight * binary_min(assigned1, assigned2, universe_);
+        expr += weight * binary_min(assigned1, assigned2, *universe_);
       }
 
       auto& destinationItemName = universe_->getEntityName(destinationItemId);

@@ -29,7 +29,7 @@ class GroupRoutingRing : public Expression {
   GroupRoutingRing(
       entities::RoutingConfigId routingConfigId,
       entities::GroupId groupId,
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       const Assignment& initialAssignment);
 
   const std::string_view& getType() const override;
@@ -116,7 +116,6 @@ class GroupRoutingRing : public Expression {
  private:
   entities::RoutingConfigId routingConfigId_;
   entities::GroupId groupId_;
-  std::shared_ptr<const entities::Universe> universe_;
   const entities::RoutingConfig* routingConfigPtr_;
   std::optional<double> totalOriginTraffic_ = std::nullopt;
 

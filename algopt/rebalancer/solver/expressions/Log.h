@@ -22,7 +22,7 @@ class Log : public Transform {
  public:
   explicit Log(
       std::shared_ptr<Expression> expr,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   virtual bool inner_is_integer(Context& context) override;
 

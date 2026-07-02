@@ -35,7 +35,8 @@ class SwapsTest : public ExpressionTestsBase {
 };
 
 TEST_F(SwapsTest, Swaps) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto s = swaps(
       {{object(1), container(1)},
        {object(2), container(1)},
@@ -138,7 +139,8 @@ TEST_F(SwapsTest, Swaps) {
 }
 
 TEST_F(SwapsTest, SwapSubsets) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto s = swaps(
       {{object(1), container(1)},
        {object(2), container(1)},
@@ -246,7 +248,8 @@ TEST_F(SwapsTest, SwapSubsets) {
 }
 
 TEST_F(SwapsTest, Swaps2) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto s = swaps(
       {{object(1), container(10)},
        {object(2), container(20)},
@@ -270,7 +273,8 @@ TEST_F(SwapsTest, Swaps2) {
 }
 
 TEST_F(SwapsTest, SwapSubsets2) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto s = swaps(
       {{object(1), container(10)},
        {object(2), container(20)},
@@ -322,7 +326,8 @@ TEST_F(SwapsTest, SwapSubsets2) {
 }
 
 TEST_F(SwapsTest, SwapSubsetAtLeastOne) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   // Initial assignment:
   //   Container 10: Object 1, Object 3
   //   Container 20: Object 2, Object 4
@@ -379,7 +384,8 @@ TEST_F(SwapsTest, SwapSubsetAtLeastOne) {
 }
 
 TEST_F(SwapsTest, SwapSubsetExactlyOne) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   // Initial assignment:
   //   Container 10: Object 1, Object 3
   //   Container 20: Object 2, Object 4
@@ -436,7 +442,8 @@ TEST_F(SwapsTest, SwapSubsetExactlyOne) {
 }
 
 TEST_F(SwapsTest, SwapBothSameSideOfSubset) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   // Initial assignment:
   //   Container 10: Object 1, Object 3, Object 5
   //   Container 20: Object 2, Object 4
@@ -502,7 +509,8 @@ TEST_F(SwapsTest, SwapBothSameSideOfSubset) {
 }
 
 TEST_F(SwapsTest, SwapsInitialValue) {
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   auto sw =
       swaps({{object(0), container(0)}, {object(1), container(1)}}, universe);

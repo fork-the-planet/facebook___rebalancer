@@ -138,7 +138,7 @@ CO_TEST_F(BalanceSpecBuilderTest, GoalBasic) {
       1,
       evaluate(
           facebook::rebalancer::any_positive(
-              std::vector<ExprPtr>{goal}, universe),
+              std::vector<ExprPtr>{goal}, *universe),
           deltaFromInitial({})),
       1e-8);
 

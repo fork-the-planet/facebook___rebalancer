@@ -81,7 +81,7 @@ GroupCountSpecBuilder::GroupCountSpecBuilder(
       scopeId_(universe_->getScopeId(*spec_.scope())),
       partitionId_(universe_->getPartitionId(*spec_.partitionName())),
       partition_(universe_->getPartition(partitionId_)),
-      limits_(universe_, *spec_.limit(), scopeId_, partitionId_),
+      limits_(*universe_, *spec_.limit(), scopeId_, partitionId_),
       scopeFilter_(*universe_, *spec_.filter(), scopeId_) {}
 
 ExprPtr GroupCountSpecBuilder::buildObjectPartition(
@@ -316,7 +316,7 @@ folly::coro::Task<ExprPtr> GroupCountSpecBuilder::buildSingleRequirement(
     // integer
     auto temp = expr / limitConstant;
     // return the "distance" from nearest integer multiple of limit
-    expr = (ceil(temp, universe_) - temp) * limitConstant;
+    expr = (ceil(temp, *universe_) - temp) * limitConstant;
   } else if (bound == GroupCountSpecBound::MAX) {
     expr = expr - limitExpr;
     if (squares) {
@@ -326,13 +326,13 @@ folly::coro::Task<ExprPtr> GroupCountSpecBuilder::buildSingleRequirement(
       // the same cost.
 
       expr = square(
-          max({const_expr(0, universe_),
+          max({const_expr(0, *universe_),
                expr /
                    universe_->getPartition(partitionId_)
                        .getObjectIds(groupId)
                        .size()},
-              universe_),
-          universe_);
+              *universe_),
+          *universe_);
     }
   } else {
     if (zeroAllowed) {
@@ -342,7 +342,7 @@ folly::coro::Task<ExprPtr> GroupCountSpecBuilder::buildSingleRequirement(
           expr,
           *spec_.minimumLimit() + kRectangleTolerance,
           limitConstant - kRectangleTolerance,
-          universe_);
+          *universe_);
     } else {
       expr = limitExpr - expr;
     }
@@ -362,7 +362,7 @@ folly::coro::Task<ExprPtr> GroupCountSpecBuilder::buildLimitExpr(
 
   switch (limitType) {
     case LimitType::ABSOLUTE:
-      co_return const_expr(limitConstant, universe_);
+      co_return const_expr(limitConstant, *universe_);
 
     case LimitType::RELATIVE:
       switch (limitRelativeTo) {
@@ -379,7 +379,7 @@ folly::coro::Task<ExprPtr> GroupCountSpecBuilder::buildLimitExpr(
                       groupId,
                       dimensionId,
                       scopeItemId),
-              universe_);
+              *universe_);
 
         case GroupCountSpecLimitRelativeTo::
             GROUP_TO_SCOPE_ITEM_ROUTING_TRAFFIC: {
@@ -388,7 +388,7 @@ folly::coro::Task<ExprPtr> GroupCountSpecBuilder::buildLimitExpr(
                 "Expected routingConfigForLimit parameter to be set when using GroupCountSpecLimitRelativeTo::GROUP_TO_SCOPE_ITEM_ROUTING_TRAFFIC");
           }
           if (limitConstant == 0.0) {
-            co_return const_expr(0, universe_);
+            co_return const_expr(0, *universe_);
           }
           co_return limitConstant* expressionBuilder
               .getGroupRoutingTrafficLookup(
@@ -446,7 +446,7 @@ GroupCountSpecBuilder::constraints(ExpressionBuilder& expressionBuilder) const {
 folly::coro::Task<ExprPtr> GroupCountSpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 std::string GroupCountSpecBuilder::description() const {

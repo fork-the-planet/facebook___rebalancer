@@ -26,10 +26,8 @@ BoundsOverride::BoundsOverride(
     std::shared_ptr<Expression> child,
     std::optional<double> lowerBound,
     std::optional<double> upperBound,
-    std::shared_ptr<const entities::Universe> universe)
-    : Expression(std::move(universe)),
-      lowerBound_(lowerBound),
-      upperBound_(upperBound) {
+    const entities::Universe& universe)
+    : Expression(universe), lowerBound_(lowerBound), upperBound_(upperBound) {
   if (child == nullptr) {
     throw std::runtime_error("Child cannot be null");
   }

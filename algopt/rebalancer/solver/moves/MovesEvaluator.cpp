@@ -29,7 +29,7 @@ MovesEvaluator::DoNotWorsenGoalConfig::DoNotWorsenGoalConfig(
     const std::string& stageName,
     const std::optional<algopt::common::thrift::HigherPriorityObjectivesConfig>&
         higherPriorityObjConfig)
-    : goal(problem.getUniversePtr()), universe_(problem.getUniverse()) {
+    : goal(problem.getUniverse()), universe_(problem.getUniverse()) {
   if (objTupleEnd == 0) {
     return;
   }
@@ -121,7 +121,7 @@ MovesEvaluator::MovesEvaluator(
           objTupleBegin_,
           stageName,
           higherPriorityObjConfig)),
-      minimizingGoal_(problem.getUniversePtr()) {
+      minimizingGoal_(problem.getUniverse()) {
   if (objTupleBegin_ < 0 || objTupleEnd_ > problem.objective.size()) {
     throw std::runtime_error(
         fmt::format(

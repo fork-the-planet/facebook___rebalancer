@@ -138,7 +138,7 @@ static ExprPtr createObjectVector(
     const int id = objectToValue.size();
     objectToValue[object(id, universe)] = id;
   }
-  return makeObjectVector(objectToValue, 0, totalObjects, universe);
+  return makeObjectVector(objectToValue, 0, totalObjects, *universe);
 }
 
 static ExprPtr createObjectLookupWithGivenContainerSet(
@@ -155,8 +155,9 @@ static ExprPtr createObjectLookupWithGivenContainerSet(
     objectToValue[object(id, universe)] = 1;
   }
 
-  auto objectVector = makeObjectVector(objectToValue, 0, objectCount, universe);
-  return object_lookup(objectVector, containers, universe, assignment);
+  auto objectVector =
+      makeObjectVector(objectToValue, 0, objectCount, *universe);
+  return object_lookup(objectVector, containers, *universe, assignment);
 }
 
 static ExprPtr createObjectLookup(
@@ -320,7 +321,7 @@ BENCHMARK(LookupPartialLargeChangeManyObjectsPerLookup) {
   auto objectVector =
       createObjectVector(nObjectsPerLookup, objectCount, universe);
 
-  auto root = const_expr(0, universe);
+  auto root = const_expr(0, *universe);
   for (const auto lookupNum : folly::irange(nLookups)) {
     PackerSet<entities::ContainerId> containers = {
         container(lookupNum % containerCount, universe)};
@@ -330,9 +331,9 @@ BENCHMARK(LookupPartialLargeChangeManyObjectsPerLookup) {
             objectVector,
             std::make_shared<PackerSet<entities::ContainerId>>(
                 std::move(containers)),
-            universe,
+            *universe,
             assignment),
-        universe);
+        *universe);
   }
 
   // Perform an initial full_apply and then do a partial_apply with the
@@ -370,12 +371,12 @@ BENCHMARK(LookupPartialLargeChangeManyContainersPerLookup) {
     allContainers->insert(container(i, universe));
   }
 
-  auto root = const_expr(0, universe);
+  auto root = const_expr(0, *universe);
   for (const auto _ : folly::irange(nLookups)) {
     inplace_add(
         root,
-        object_lookup(objectVector, allContainers, universe, assignment),
-        universe);
+        object_lookup(objectVector, allContainers, *universe, assignment),
+        *universe);
   }
 
   // Perform an initial full_apply and then do a partial_apply with the
@@ -411,15 +412,15 @@ BENCHMARK(EvaluateSmallChangesAvoidLeavesDedupe) {
   auto objectVector =
       createObjectVector(nObjectsPerLookup, objectCount, universe);
 
-  auto root = const_expr(0, universe);
+  auto root = const_expr(0, *universe);
   for (const auto i : folly::irange(nLookups)) {
     auto containers = std::make_shared<PackerSet<entities::ContainerId>>();
     containers->insert(container(i % containerCount, universe));
     inplace_add(
         root,
         object_lookup(
-            objectVector, std::move(containers), universe, assignment),
-        universe);
+            objectVector, std::move(containers), *universe, assignment),
+        *universe);
   }
 
   // Perform an initial full_apply and then do a partial_apply with the
@@ -538,7 +539,7 @@ BENCHMARK(LookupPartialApplyAffectedByObjects) {
   constexpr int nObjectsWithNonZeroValue = 10;
   constexpr int nContainersToLookup = 100;
 
-  auto objective = const_expr(0, universe);
+  auto objective = const_expr(0, *universe);
   for (const auto lookupNum : folly::irange(nLookupExprs)) {
     objective += createObjectLookup(
         objectCount,
@@ -609,7 +610,7 @@ BENCHMARK(NeedPruningLookupNodesByBothObjectAndContainers) {
   auto assignment =
       Assignment(universe->getContainers().getInitialAssignment());
 
-  auto objective = const_expr(0, universe);
+  auto objective = const_expr(0, *universe);
   for (const auto lookupNum : folly::irange(nLookupExprs)) {
     objective += createObjectLookupWithGivenContainerSet(
         objectCount,
@@ -661,14 +662,14 @@ BENCHMARK(EquivalentSetsComputation) {
   universe = buildUniverse(nObjects, nContainers);
   const Assignment assignment{};
   exprs.reserve(nExprs);
-  auto sum = const_expr(0, universe);
+  auto sum = const_expr(0, *universe);
   for (const auto _ : folly::irange(nExprs)) {
     auto objectVector = makeObjectVector(
-        PackerMap<entities::ObjectId, double>{}, 1, nObjects, universe);
+        PackerMap<entities::ObjectId, double>{}, 1, nObjects, *universe);
     auto containersPtr = std::make_shared<PackerSet<entities::ContainerId>>(
         PackerSet<entities::ContainerId>({container(0, universe)}));
     auto objectLookup =
-        object_lookup(objectVector, containersPtr, universe, assignment);
+        object_lookup(objectVector, containersPtr, *universe, assignment);
     exprs.push_back(objectLookup);
   }
 
@@ -689,7 +690,7 @@ BENCHMARK(EquivalentSetsComputationLinearSum) {
   constexpr int nContainers = 1;
   const auto universe = buildUniverse(nObjects, nContainers);
   const Assignment assignment{};
-  auto sum = const_expr(0, universe);
+  auto sum = const_expr(0, *universe);
   std::vector<entities::ObjectId> allObjectIds;
   Orchestrator orchestrator;
 
@@ -700,9 +701,9 @@ BENCHMARK(EquivalentSetsComputationLinearSum) {
       PackerSet<entities::ContainerId>{container(0, universe)});
   for (const auto _ : folly::irange(nExprs)) {
     auto objectVector = makeObjectVector(
-        PackerMap<entities::ObjectId, double>{}, 1, nObjects, universe);
+        PackerMap<entities::ObjectId, double>{}, 1, nObjects, *universe);
     auto objectLookup =
-        object_lookup(objectVector, containersPtr, universe, assignment);
+        object_lookup(objectVector, containersPtr, *universe, assignment);
     sum += objectLookup;
   }
   orchestrator.init(
@@ -733,7 +734,7 @@ BENCHMARK(EquivalenceSetsComputationEarlyStop) {
   ExprPtr sum;
 
   universe = buildUniverse(nObjects, nContainers);
-  sum = const_expr(0, universe);
+  sum = const_expr(0, *universe);
 
   for (const auto id : folly::irange(nObjects)) {
     allObjectIds.push_back(object(id, universe));
@@ -751,9 +752,9 @@ BENCHMARK(EquivalenceSetsComputationEarlyStop) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   for (const auto _ : folly::irange(nLookups)) {
     sum += object_lookup(
-        makeObjectVector(objectToValue, 0, nObjects, universe),
+        makeObjectVector(objectToValue, 0, nObjects, *universe),
         containersPtr,
-        universe,
+        *universe,
         assignment);
 
     orchestrator.init(
@@ -784,7 +785,7 @@ BENCHMARK(EquivalenceSetsComputationMultiVisit) {
 
   BENCHMARK_SUSPEND {
     universe = buildUniverse(nObjects, nContainers);
-    sum = const_expr(0, universe);
+    sum = const_expr(0, *universe);
     for (const auto id : folly::irange(nObjects)) {
       allObjectIds.push_back(object(id, universe));
     }
@@ -795,7 +796,7 @@ BENCHMARK(EquivalenceSetsComputationMultiVisit) {
       objectToValue[objectId] = objectId.asInt() / 2;
     }
     auto fullObjectVector =
-        makeObjectVector(objectToValue, 0, nObjects, universe);
+        makeObjectVector(objectToValue, 0, nObjects, *universe);
     // create as many StableStayed expressions as number of objects.
     // StableStayed only splits equivalence sets based on fullObjectVector, so
     // there should be exactly one split based on fullObjectVector. This will be
@@ -807,12 +808,12 @@ BENCHMARK(EquivalenceSetsComputationMultiVisit) {
         universe->getContainers().getInitialAssignment());
     for (const auto id : folly::irange(nObjects)) {
       auto initialObjectVector =
-          makeObjectVector({{object(id, universe), 1}}, 0, nObjects, universe);
+          makeObjectVector({{object(id, universe), 1}}, 0, nObjects, *universe);
       sum += stable_stayed(
           initialObjectVector,
           fullObjectVector,
           containersPtr,
-          universe,
+          *universe,
           assignment);
     }
 
@@ -871,11 +872,11 @@ BENCHMARK(ObjectPartitionLookupBounds) {
   const auto universe = builder.buildUniverse();
   const Assignment assignment{};
 
-  sum = const_expr(0, universe);
+  sum = const_expr(0, *universe);
 
   for (const auto _ : folly::irange(nObjectPartitions)) {
     auto objectPartition =
-        object_partition(partitionId, dimensionId, {}, universe);
+        object_partition(partitionId, dimensionId, {}, *universe);
 
     for (const auto j : folly::irange(nLookupsPerPartition)) {
       const auto containerId =
@@ -886,7 +887,7 @@ BENCHMARK(ObjectPartitionLookupBounds) {
               PackerSet<entities::ContainerId>{containerId}),
           scopeId,
           scopeItem0,
-          universe,
+          *universe,
           assignment);
     }
   }
@@ -918,7 +919,7 @@ BENCHMARK(LookupEvalSparseObjectIndexed) {
   auto objectVector =
       createObjectVector(nNonDefaultObjects, objectCount, universe);
 
-  auto objective = const_expr(0, universe);
+  auto objective = const_expr(0, *universe);
   for (const auto i : folly::irange(nLookups)) {
     auto containers = std::make_shared<PackerSet<entities::ContainerId>>();
     for (const auto j : folly::irange(nContainersPerLookup)) {
@@ -928,8 +929,8 @@ BENCHMARK(LookupEvalSparseObjectIndexed) {
     inplace_add(
         objective,
         object_lookup(
-            objectVector, std::move(containers), universe, assignment),
-        universe);
+            objectVector, std::move(containers), *universe, assignment),
+        *universe);
   }
 
   Context context;
@@ -972,7 +973,7 @@ BENCHMARK(LookupEvalSparseContainerIndexed) {
   auto assignment =
       Assignment(universe->getContainers().getInitialAssignment());
 
-  auto objective = const_expr(0, universe);
+  auto objective = const_expr(0, *universe);
   for (const auto lookupNum : folly::irange(nLookups)) {
     objective += createObjectLookup(
         objectCount,
@@ -1016,7 +1017,7 @@ BENCHMARK(LookupEvalDenseContainerIndexed) {
   auto assignment =
       Assignment(universe->getContainers().getInitialAssignment());
 
-  auto objective = const_expr(0, universe);
+  auto objective = const_expr(0, *universe);
   for (const auto lookupNum : folly::irange(nLookups)) {
     objective += createObjectLookup(
         objectCount,
@@ -1061,13 +1062,13 @@ BENCHMARK(LinearSumEvalAllCoeffsOne) {
       Assignment(universe->getContainers().getInitialAssignment());
 
   // All children are Variable(object0, container0) — same variable repeated
-  auto objective = const_expr(0, universe);
+  auto objective = const_expr(0, *universe);
   for (const auto _ : folly::irange(nChildren)) {
     inplace_add(
         objective,
         variable(
-            object(0, universe), container(0, universe), universe, assignment),
-        universe);
+            object(0, universe), container(0, universe), *universe, assignment),
+        *universe);
   }
 
   Context context;
@@ -1103,15 +1104,15 @@ BENCHMARK(LinearSumEvalMixedCoeffs) {
   auto assignment =
       Assignment(universe->getContainers().getInitialAssignment());
 
-  auto objective = const_expr(0, universe);
+  auto objective = const_expr(0, *universe);
   for (const auto i : folly::irange(nChildren)) {
     const double coef =
         (i < static_cast<int>(nChildren * fractionNonOne)) ? i : 1.0;
     inplace_add(
         objective,
         variable(
-            object(0, universe), container(0, universe), universe, assignment),
-        universe,
+            object(0, universe), container(0, universe), *universe, assignment),
+        *universe,
         coef);
   }
 

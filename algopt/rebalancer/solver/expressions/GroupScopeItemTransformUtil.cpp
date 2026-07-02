@@ -108,7 +108,7 @@ uint32_t ModKTransformData::get(entities::ScopeItemId scopeItemId) const {
 }
 
 GroupScopeItemTransformUtil::GroupScopeItemTransformUtil(
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     entities::PartitionId partitionId,
     entities::GroupId groupId,
     entities::DimensionId dimensionId,
@@ -121,8 +121,7 @@ GroupScopeItemTransformUtil::GroupScopeItemTransformUtil(
     TransformFunctionType transformType,
     double normalizationConstant,
     TransformFunctionData transformFunctionData)
-    : Expression(std::move(universe)),
-      universe_(getUniversePtr()),
+    : Expression(universe),
       scopeId_(scopeId),
       scope_(universe_->getScope(scopeId_)),
       partitionId_(partitionId),
@@ -587,7 +586,7 @@ ExprPtr GroupScopeItemTransformUtil::getExprForLp(
   }
 
   const Assignment& lpAssignment = problem.initial_assignment;
-  auto expr = const_expr(0, getUniversePtr());
+  auto expr = const_expr(0, getUniverse());
   for (auto scopeItemId : allowedScopeItems_) {
     auto& containerIds = scope_.getContainerIds(scopeItemId);
     auto scopeItemWeight = getWeight(scopeItemId);
@@ -595,7 +594,7 @@ ExprPtr GroupScopeItemTransformUtil::getExprForLp(
       continue;
     }
 
-    auto scopeItemUtil = const_expr(0, getUniversePtr());
+    auto scopeItemUtil = const_expr(0, getUniverse());
     for (auto containerId : containerIds) {
       for (auto& [equivSetId, repObjectIdAndCount] :
            equivSetIdToRepresentativeObjectAndCount) {
@@ -606,7 +605,7 @@ ExprPtr GroupScopeItemTransformUtil::getExprForLp(
         }
 
         scopeItemUtil += (count * objectValue) *
-            variable(repObjectId, containerId, getUniversePtr(), lpAssignment);
+            variable(repObjectId, containerId, getUniverse(), lpAssignment);
       }
     }
 
@@ -619,12 +618,12 @@ ExprPtr GroupScopeItemTransformUtil::getExprForLp(
 
       case TransformFunctionType::STEP: {
         // Formula: sum_{s in S} w(g, s) * STEP(UTIL(g, s))
-        expr += scopeItemWeight * step(scopeItemUtil, getUniversePtr());
+        expr += scopeItemWeight * step(scopeItemUtil, getUniverse());
         break;
       }
 
       case TransformFunctionType::SQUARE: {
-        expr += scopeItemWeight * square(scopeItemUtil, getUniversePtr());
+        expr += scopeItemWeight * square(scopeItemUtil, getUniverse());
         break;
       }
 
@@ -632,8 +631,7 @@ ExprPtr GroupScopeItemTransformUtil::getExprForLp(
         assert(transformFunctionData_.kForModKTransform);
         const auto k =
             transformFunctionData_.kForModKTransform->get(scopeItemId);
-        expr +=
-            scopeItemWeight * step_mod_k(scopeItemUtil, k, getUniversePtr());
+        expr += scopeItemWeight * step_mod_k(scopeItemUtil, k, getUniverse());
       }
     }
   }

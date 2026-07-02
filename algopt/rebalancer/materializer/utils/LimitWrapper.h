@@ -26,11 +26,11 @@ namespace facebook::rebalancer::materializer {
 class LimitWrapper {
  public:
   LimitWrapper(
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       const facebook::rebalancer::interface::Limit& limit,
       entities::ScopeId scopeId);
   LimitWrapper(
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       const facebook::rebalancer::interface::Limit& limit,
       entities::ScopeId scopeId,
       entities::PartitionId partitionId);
@@ -53,7 +53,7 @@ class LimitWrapper {
 
   /** get limits for all groups of the partition @param partitionId */
   static entities::Map<entities::GroupId, double> getAllGroupLimits(
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       entities::PartitionId partitionId,
       const interface::Limit& limit);
 
@@ -74,7 +74,7 @@ class LimitWrapper {
   static double parseGlobalLimit(const interface::Limit& limit);
 
  private:
-  std::shared_ptr<const entities::Universe> universe_;
+  const entities::Universe* universe_;
   std::optional<entities::ScopeId> scopeId_;
   std::optional<entities::PartitionId> partitionId_;
   facebook::rebalancer::interface::LimitType type_;

@@ -26,7 +26,7 @@ DrainCapacitySpecBuilder::DrainCapacitySpecBuilder(
 folly::coro::Task<ExprPtr> DrainCapacitySpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 folly::coro::Task<std::vector<ConstraintInfo>>

@@ -55,8 +55,8 @@ class DestinationsToExploreGeneratorTest : public MoveTestBase {
     }
 
     createProblem(
-        {const_expr(0, universe)} /*objective*/,
-        const_expr(0, universe) /*constraint*/,
+        {const_expr(0, *universe)} /*objective*/,
+        const_expr(0, *universe) /*constraint*/,
         std::nullopt /*higherPriorityObjConfig*/,
         nonAcceptingContainers);
   }

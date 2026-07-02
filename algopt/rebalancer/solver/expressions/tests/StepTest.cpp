@@ -29,9 +29,10 @@ TEST_F(StepTest, Lp) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto var = 0.6 * variable(object(0), container(0), universe, assignment);
   auto stepExpr = step(var, universe);
 
@@ -39,7 +40,7 @@ TEST_F(StepTest, Lp) {
   EXPECT_DOUBLE_EQ(1.0, stepExpr->getInitialValue());
 
   auto p_ptr = createTestProblem(
-      universe, {const_expr(0, universe)}, const_expr(0, universe));
+      getUniversePtr(), {const_expr(0, universe)}, const_expr(0, universe));
   auto& p = *p_ptr;
 
   const PackerSet<entities::ContainerId> dynamicContainers = {container(0)};

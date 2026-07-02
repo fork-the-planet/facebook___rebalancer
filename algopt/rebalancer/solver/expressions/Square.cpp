@@ -26,18 +26,18 @@ namespace facebook::rebalancer {
 Square::Square(
     std::shared_ptr<Expression> expr,
     const ApproximationHint& hint,
-    std::shared_ptr<const entities::Universe> universe)
+    const entities::Universe& universe)
     : Transform(
           std::move(expr),
-          std::move(universe),
+          universe,
           std::optional<ApproximationHint>{hint}) {
   setInitialValue(perform_transform(getOnlyChildRawPtr()->getInitialValue()));
 }
 
 Square::Square(
     std::shared_ptr<Expression> expr,
-    std::shared_ptr<const entities::Universe> universe)
-    : Transform(std::move(expr), std::move(universe)) {
+    const entities::Universe& universe)
+    : Transform(std::move(expr), universe) {
   setInitialValue(perform_transform(getOnlyChildRawPtr()->getInitialValue()));
 }
 

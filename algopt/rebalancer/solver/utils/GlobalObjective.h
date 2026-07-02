@@ -16,7 +16,6 @@
 
 #include "algopt/rebalancer/solver/expressions/Expression.h"
 #include "algopt/rebalancer/solver/expressions/Orchestrator.h"
-#include "algopt/rebalancer/solver/utils/ChangeSet.h"
 #include "algopt/rebalancer/solver/utils/GlobalObjectiveValue.h"
 
 namespace facebook::rebalancer {
@@ -28,8 +27,8 @@ class GlobalObjective {
   class View;
 
  public:
-  explicit GlobalObjective(std::shared_ptr<const entities::Universe> universe)
-      : objectives_({}), universe_(std::move(universe)) {}
+  explicit GlobalObjective(const entities::Universe& universe)
+      : objectives_({}), universe_(&universe) {}
 
   objectives_tuple::const_iterator begin() const;
   objectives_tuple::const_iterator end() const;
@@ -68,12 +67,12 @@ class GlobalObjective {
  private:
   explicit GlobalObjective(
       objectives_tuple&& objective,
-      std::shared_ptr<const entities::Universe> universe)
-      : objectives_(std::move(objective)), universe_(std::move(universe)) {}
+      const entities::Universe& universe)
+      : objectives_(std::move(objective)), universe_(&universe) {}
 
  private:
   objectives_tuple objectives_;
-  std::shared_ptr<const entities::Universe> universe_;
+  const entities::Universe* universe_;
 };
 
 class GlobalObjective::Builder {
@@ -82,10 +81,10 @@ class GlobalObjective::Builder {
   GlobalObjective::Builder& addToObjective(
       int pos,
       ExprPtr objective,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
   GlobalObjective::Builder& setObjective(int pos, ExprPtr objective);
 
-  GlobalObjective build(std::shared_ptr<const entities::Universe> universe);
+  GlobalObjective build(const entities::Universe& universe);
 
  private:
   objectives_tuple objectives_;

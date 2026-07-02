@@ -38,9 +38,10 @@ class ProductTest : public ExpressionTestsBase {
 
 TEST_F(ProductTest, NeitherBinary) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   // we have objects 1, 2 and containers: 0, 1
   // initially container 1 contains both objects
   // so variable(1, 0) = variable(2, 0) = 0
@@ -77,9 +78,10 @@ TEST_F(ProductTest, NeitherBinary) {
 
 TEST_F(ProductTest, LhsBinary) {
   setUpDefaultAssignment();
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const Assignment initialAssignment(
-      universe->getContainers().getInitialAssignment());
+      universe.getContainers().getInitialAssignment());
   auto m =
       2 * variable(object(1), container(0), universe, initialAssignment) - 1;
   auto binaryOperation = product(step(m, universe), m - 2, universe);
@@ -105,15 +107,16 @@ TEST_F(ProductTest, EquivalenceSets) {
       entities::Map<std::string, std::vector<std::string>>{
           {"container1", {"object1", "object2"}},
           {"container2", {"object3", "object4"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto o1c1 = variable(object(1), container(1), universe, assignment);
   auto o3c2 = variable(object(3), container(2), universe, assignment);
   auto b = product(o1c1, o3c2, universe);
   // o1c1 init = 1, o3c2 init = 1, so product init = 1.
   EXPECT_DOUBLE_EQ(1.0, b->getInitialValue());
 
-  EquivalenceSets equivalenceSets(*universe);
+  EquivalenceSets equivalenceSets(universe);
   equivalenceSets.combine(
       std::vector<entities::ObjectId>{
           object(1), object(2), object(3), object(4)});

@@ -26,7 +26,7 @@ class BoundsOverrideTest : public ExpressionTestsBase {
  protected:
   static ExprPtr createBoundsOverride(
       ExprPtr expr,
-      std::shared_ptr<const entities::Universe> universe) {
+      const entities::Universe& universe) {
     return std::make_shared<BoundsOverride>(
         expr, std::optional(1.0), std::optional(2.0), universe);
   }
@@ -35,7 +35,8 @@ class BoundsOverrideTest : public ExpressionTestsBase {
 TEST_F(BoundsOverrideTest, test) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{{"container1", {}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto boundsOverride = createBoundsOverride(const_expr(0, universe), universe);
   Context context;
   auto [lb, ub] = boundsOverride->lowerAndUpperBounds(context);
@@ -46,7 +47,8 @@ TEST_F(BoundsOverrideTest, test) {
 TEST_F(BoundsOverrideTest, Apply) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{{"container1", {}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto a = const_expr(1, universe);
   auto b = const_expr(-10, universe);
   auto sum = a + b;
@@ -63,7 +65,8 @@ TEST_F(BoundsOverrideTest, Apply) {
 TEST_F(BoundsOverrideTest, Type) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{{"container1", {}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto expr = createBoundsOverride(const_expr(0, universe), universe);
   EXPECT_EQ("BoundsOverride", expr->getType());
 }
@@ -71,7 +74,8 @@ TEST_F(BoundsOverrideTest, Type) {
 TEST_F(BoundsOverrideTest, isMax) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{{"container1", {}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto boundsOverride =
       createBoundsOverride(const_expr(-1, universe), universe);
   EXPECT_FALSE(boundsOverride->isMax());
@@ -80,7 +84,8 @@ TEST_F(BoundsOverrideTest, isMax) {
 TEST_F(BoundsOverrideTest, isAnyPositive) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{{"container1", {}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto boundsOverride = createBoundsOverride(const_expr(1, universe), universe);
   EXPECT_FALSE(boundsOverride->isAnyPositive());
 }
@@ -88,7 +93,8 @@ TEST_F(BoundsOverrideTest, isAnyPositive) {
 TEST_F(BoundsOverrideTest, isLinearSum) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{{"container1", {}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto boundsOverride = createBoundsOverride(
       const_expr(-1, universe) + const_expr(1, universe), universe);
   EXPECT_FALSE(boundsOverride->isLinearSum());
@@ -97,7 +103,8 @@ TEST_F(BoundsOverrideTest, isLinearSum) {
 TEST_F(BoundsOverrideTest, isInteger) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{{"container1", {}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto boundsOverride = createBoundsOverride(
       const_expr(-1, universe) + const_expr(2, universe), universe);
   Context context;
@@ -118,7 +125,8 @@ TEST_F(BoundsOverrideTest, isInteger) {
 TEST_F(BoundsOverrideTest, onlyOneBoundSet) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{{"container1", {}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto boundsOverride = std::make_shared<BoundsOverride>(
       const_expr(-1, universe) + const_expr(2, universe),
       std::optional<double>(0),

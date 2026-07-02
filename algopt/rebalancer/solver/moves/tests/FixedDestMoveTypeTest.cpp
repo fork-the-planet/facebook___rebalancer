@@ -43,14 +43,14 @@ class FixedDestMoveTypeTest : public MoveTestBase {
 
     // objective = 1 + 2 ... 99
     // best move is object99 to container1, will reduce objective by 99
-    ExprPtr objective = const_expr(0, universe);
+    ExprPtr objective = const_expr(0, *universe);
     for (const auto i : folly::irange(100)) {
       objective = objective +
-          variable(object(i), container(0), universe, initialAssignment) *
+          variable(object(i), container(0), *universe, initialAssignment) *
               (i + 1);
     }
 
-    const ExprPtr dummyConstraint = const_expr(0, universe);
+    const ExprPtr dummyConstraint = const_expr(0, *universe);
     createProblem({objective}, dummyConstraint);
     co_return;
   }

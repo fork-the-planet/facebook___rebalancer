@@ -46,7 +46,7 @@ class Swaps : public Expression {
   explicit Swaps(
       const PackerMap<entities::ObjectId, entities::ContainerId>&
           initial_assignment,
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       const folly::Optional<PackerSet<entities::ObjectId>>& subset = {},
       SubsetDefinition subsetDefinition =
           SubsetDefinition::AT_LEAST_ONE_IN_SUBSET);

@@ -36,7 +36,7 @@ class ObjectVector : public Expression {
   // copying the underlying object values.
   ObjectVector(
       entities::ObjectValues objectValues,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Universe& universe);
 
   void updateEquivalenceSets(EquivalenceSets&) const override;
   void passiveUpdateEquivalenceSets(EquivalenceSets& eqSets) const;

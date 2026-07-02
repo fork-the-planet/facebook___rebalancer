@@ -132,7 +132,7 @@ class GroupRoutingExpressionsTest : public ExpressionTestsBase {
     return std::make_shared<GroupRoutingRing>(
         routingConfigId("routing_config"),
         groupId(partitionId("partition1"), "group1"),
-        universe_,
+        *universe_,
         Assignment(universe_->getContainers().getInitialAssignment()));
   }
 
@@ -190,7 +190,7 @@ class GroupRoutingExpressionsTest : public ExpressionTestsBase {
     // the aggregated latency of the group using the given metric), and
     // expectedValueAfter is the value after a simple change is applied.
     auto groupLatencyLookup = std::make_shared<GroupRoutingLatencyLookup>(
-        buildRoutingRing(), metric, universe_);
+        buildRoutingRing(), metric, *universe_);
     testExpression(
         *groupLatencyLookup, expectedValueBefore, expectedValueAfter);
   }
@@ -204,7 +204,7 @@ class GroupRoutingExpressionsTest : public ExpressionTestsBase {
     // denotes the value of the expression w.r.t. the initial assignment, and
     // expectedValueAfter is the value after a simple change is applied.
     auto groupTrafficLookup = std::make_shared<GroupRoutingTrafficLookup>(
-        buildRoutingRing(), destinationScopeItem, universe_);
+        buildRoutingRing(), destinationScopeItem, *universe_);
     testExpression(
         *groupTrafficLookup, expectedValueBefore, expectedValueAfter);
   }
@@ -366,7 +366,7 @@ CO_TEST_F(GroupRoutingExpressionsTest, ThrowWhenTrafficTableNotPopulated) {
 
   REBALANCER_EXPECT_RUNTIME_ERROR_CONTAINS(
       std::make_shared<GroupRoutingTrafficLookup>(
-          groupRoutingRing, scopeItem(1), universe_),
+          groupRoutingRing, scopeItem(1), *universe_),
       "Expected total traffic from all origins to equal 1.0");
 
   REBALANCER_EXPECT_RUNTIME_ERROR_CONTAINS(
@@ -374,7 +374,7 @@ CO_TEST_F(GroupRoutingExpressionsTest, ThrowWhenTrafficTableNotPopulated) {
           groupRoutingRing,
           thriftUtils::makeRoutingLatencyMetric(
               interface::RoutingLatencyMetric::AVG),
-          universe_),
+          *universe_),
       "Expected total traffic from all origins to equal 1.0");
 }
 
@@ -430,7 +430,7 @@ CO_TEST_F(GroupRoutingExpressionsTest, ThrowWhenSomeOriginsAreStranded) {
 
   REBALANCER_EXPECT_RUNTIME_ERROR(
       std::make_shared<GroupRoutingTrafficLookup>(
-          groupRoutingRing, scopeItem(1), universe_),
+          groupRoutingRing, scopeItem(1), *universe_),
       "Expected total traffic from all origins to equal 1.0, but found 0.6. Do the traffic values for each (origin, destination) pair reflect the fraction of total traffic from all origins to that destination?");
 
   REBALANCER_EXPECT_RUNTIME_ERROR(
@@ -438,7 +438,7 @@ CO_TEST_F(GroupRoutingExpressionsTest, ThrowWhenSomeOriginsAreStranded) {
           groupRoutingRing,
           thriftUtils::makeRoutingLatencyMetric(
               interface::RoutingLatencyMetric::AVG),
-          universe_),
+          *universe_),
       "Expected total traffic from all origins to equal 1.0, but found 0.6. Do the traffic values for each (origin, destination) pair reflect the fraction of total traffic from all origins to that destination?");
 }
 

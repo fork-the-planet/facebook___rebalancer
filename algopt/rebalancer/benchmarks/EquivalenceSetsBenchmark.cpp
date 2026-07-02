@@ -44,7 +44,7 @@ std::unique_ptr<Problem> buildTestProblem(int numObjects, int numContainers) {
 
   const auto universe = builder.buildUniverse();
   return packer::tests::createTestProblem(
-      universe, {const_expr(0, universe)}, const_expr(0, universe));
+      universe, {const_expr(0, *universe)}, const_expr(0, *universe));
 }
 
 BENCHMARK(EquivalenceSetsAccessTest) {

@@ -62,8 +62,8 @@ CO_TEST_F(ObjectAffinitiesSpecBuilderTest, ObjectBasedConstraint) {
   for (auto& constraint : constraintInfos) {
     constraintExprs.push_back(constraint.constraintExpr);
   }
-  constraintExprs.push_back(const_expr(0, universe));
-  auto constraint = max(constraintExprs, universe);
+  constraintExprs.push_back(const_expr(0, *universe));
+  auto constraint = max(constraintExprs, *universe);
 
   // Constraint satisfied because both object0 and object1 are assigned to the
   // same scope item.
@@ -144,8 +144,8 @@ CO_TEST_F(ObjectAffinitiesSpecBuilderTest, ScopeItemBasedConstraint) {
   for (auto& constraint : constraintInfos) {
     constraintExprs.push_back(constraint.constraintExpr);
   }
-  constraintExprs.push_back(const_expr(0, universe));
-  auto constraint = max(constraintExprs, universe);
+  constraintExprs.push_back(const_expr(0, *universe));
+  auto constraint = max(constraintExprs, *universe);
 
   // Constraint satisfied because object0 is assigned to the scope item object1.
   EXPECT_NEAR(
@@ -228,8 +228,8 @@ CO_TEST_F(
   for (auto& constraint : constraintInfos) {
     constraintExprs.push_back(constraint.constraintExpr);
   }
-  constraintExprs.push_back(const_expr(0, universe));
-  auto constraint = max(constraintExprs, universe);
+  constraintExprs.push_back(const_expr(0, *universe));
+  auto constraint = max(constraintExprs, *universe);
 
   // Constraint satisfied because scope item object1 is excluded by the filter.
   EXPECT_NEAR(

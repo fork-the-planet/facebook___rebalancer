@@ -34,7 +34,7 @@ bool ObjectPartitionMoveLimit::Compare::operator()(
 }
 
 ObjectPartitionMoveLimit::ObjectPartitionMoveLimit(
-    std::shared_ptr<const entities::Universe> universe,
+    const entities::Universe& universe,
     Assignment originalAssignment,
     entities::PartitionId partitionId,
     entities::DimensionId dimensionId,
@@ -43,8 +43,7 @@ ObjectPartitionMoveLimit::ObjectPartitionMoveLimit(
     entities::Set<entities::ContainerId> sourceContainerIdsNotAffectingLimit,
     entities::Set<entities::ContainerId>
         destinationContainerIdsNotAffectingLimit)
-    : Expression(std::move(universe), /*initialValue=*/0.0),
-      universe_(getUniversePtr()),
+    : Expression(universe, /*initialValue=*/0.0),
       originalAssignment_(std::move(originalAssignment)),
       partitionId_(partitionId),
       groupLimits_(std::move(groupLimits)),
@@ -337,7 +336,7 @@ std::string ObjectPartitionMoveLimit::innerDigest(
 }
 
 void ObjectPartitionMoveLimit::updateExprForLp() {
-  lpProvider_ = const_expr(0, getUniversePtr());
+  lpProvider_ = const_expr(0, getUniverse());
 
   /* For static dimensions = (summation of weight * (1-variable)) - limit <= 0
    */
@@ -345,7 +344,7 @@ void ObjectPartitionMoveLimit::updateExprForLp() {
    * - limit <= 0 */
   const auto& partition = universe_->getPartition(partitionId_);
   for (auto groupId : partition.getGroupIds()) {
-    auto expr = const_expr(0, getUniversePtr());
+    auto expr = const_expr(0, getUniverse());
     for (auto objectId : partition.getObjectIds(groupId)) {
       auto sourceContainerId = originalAssignment_.getContainer(objectId);
       if (!dimension_->isDynamic() &&
@@ -356,7 +355,7 @@ void ObjectPartitionMoveLimit::updateExprForLp() {
              variable(
                  objectId,
                  sourceContainerId,
-                 getUniversePtr(),
+                 getUniverse(),
                  originalAssignment_));
       } else {
         for (auto destinationContainerId :
@@ -366,14 +365,14 @@ void ObjectPartitionMoveLimit::updateExprForLp() {
                variable(
                    objectId,
                    destinationContainerId,
-                   getUniversePtr(),
+                   getUniverse(),
                    originalAssignment_));
         }
       }
     }
 
     expr -= groupLimits_.at(groupId);
-    inplace_max(lpProvider_, expr, getUniversePtr());
+    inplace_max(lpProvider_, expr, getUniverse());
   }
 }
 

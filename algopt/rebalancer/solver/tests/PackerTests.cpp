@@ -84,11 +84,11 @@ void PackerTests::basic(
   std::vector<ExprPtr> exprs;
   for (const auto i : folly::irange(10)) {
     if (i != 6 && i != 0) {
-      exprs.push_back(variable(object(0), container(i), universe, assignment));
+      exprs.push_back(variable(object(0), container(i), *universe, assignment));
     }
   }
 
-  auto p_ptr = createTestProblem(universe, {objective}, max(exprs, universe));
+  auto p_ptr = createTestProblem(universe, {objective}, max(exprs, *universe));
   auto& p = *p_ptr;
   const MovesEvaluator evaluator(p, 0, p.objective.size(), "Stage 1");
 
@@ -128,11 +128,11 @@ void PackerTests::mipbasic(
   std::vector<ExprPtr> exprs;
   for (const auto i : folly::irange(10)) {
     if (i != 6 && i != 0) {
-      exprs.push_back(variable(object(0), container(i), universe, assignment));
+      exprs.push_back(variable(object(0), container(i), *universe, assignment));
     }
   }
 
-  auto p_ptr = createTestProblem(universe, {objective}, max(exprs, universe));
+  auto p_ptr = createTestProblem(universe, {objective}, max(exprs, *universe));
   auto& p = *p_ptr;
   const MovesEvaluator evaluator(p, 0, p.objective.size(), "Stage 1");
 
@@ -168,8 +168,8 @@ TEST_F(PackerTests, Step) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
       step(
-          variable(object(0), container(0), universe, assignment) * 10 - 5,
-          universe),
+          variable(object(0), container(0), *universe, assignment) * 10 - 5,
+          *universe),
       1,
       0,
       universe);
@@ -180,8 +180,8 @@ TEST_F(PackerTests, Square) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
       square(
-          variable(object(0), container(0), universe, assignment) * 10 + 5,
-          universe),
+          variable(object(0), container(0), *universe, assignment) * 10 + 5,
+          *universe),
       225,
       25,
       universe);
@@ -191,8 +191,8 @@ TEST_F(PackerTests, Log) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
-      log(variable(object(0), container(0), universe, assignment) * 10 + 5,
-          universe),
+      log(variable(object(0), container(0), *universe, assignment) * 10 + 5,
+          *universe),
       std::log(15),
       std::log(5),
       universe);
@@ -203,9 +203,9 @@ TEST_F(PackerTests, Power) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
       power(
-          variable(object(0), container(0), universe, assignment) * 10 + 5,
+          variable(object(0), container(0), *universe, assignment) * 10 + 5,
           0.5,
-          universe),
+          *universe),
       pow(15, 0.5),
       pow(5, 0.5),
       universe);
@@ -216,8 +216,8 @@ TEST_F(PackerTests, Ceil) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
       ceil(
-          variable(object(0), container(0), universe, assignment) * 10 - 2.9,
-          universe),
+          variable(object(0), container(0), *universe, assignment) * 10 - 2.9,
+          *universe),
       8,
       -2,
       universe);
@@ -227,10 +227,10 @@ TEST_F(PackerTests, MultipleMoves) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
-      variable(object(0), container(0), universe, assignment) * 2 +
-          variable(object(1), container(1), universe, assignment) * 3 +
-          variable(object(3), container(3), universe, assignment) * 4 +
-          variable(object(0), container(6), universe, assignment) + 2,
+      variable(object(0), container(0), *universe, assignment) * 2 +
+          variable(object(1), container(1), *universe, assignment) * 3 +
+          variable(object(3), container(3), *universe, assignment) * 4 +
+          variable(object(0), container(6), *universe, assignment) + 2,
       11,
       3,
       universe);
@@ -241,10 +241,10 @@ TEST_F(PackerTests, Lookup) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
       object_lookup(
-          makeObjectVector({{object(0), 10}, {object(1), 5}}, universe),
+          makeObjectVector({{object(0), 10}, {object(1), 5}}, *universe),
           std::make_shared<PackerSet<entities::ContainerId>>(
               PackerSet<entities::ContainerId>{container(0)}),
-          universe,
+          *universe,
           assignment),
       10,
       0,
@@ -255,12 +255,12 @@ TEST_F(PackerTests, BrokenConstraintStats) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   auto objective = step(
-      variable(object(0), container(0), universe, assignment) * 10 - 5,
-      universe);
+      variable(object(0), container(0), *universe, assignment) * 10 - 5,
+      *universe);
   std::vector<ExprPtr> exprs;
   for (const auto i : folly::irange(10)) {
     if (i != 6) {
-      exprs.push_back(variable(object(0), container(i), universe, assignment));
+      exprs.push_back(variable(object(0), container(i), *universe, assignment));
     }
   }
 
@@ -268,7 +268,7 @@ TEST_F(PackerTests, BrokenConstraintStats) {
   config.moveStatsSpec.trackContainers() = true;
 
   auto p_ptr = createTestProblem(
-      universe, {objective}, max(exprs, universe), {}, config);
+      universe, {objective}, max(exprs, *universe), {}, config);
   auto& p = *p_ptr;
   const MovesEvaluator evaluator(p, 0, p.objective.size(), "Stage 1");
 
@@ -303,11 +303,11 @@ TEST_F(PackerTests, ObjectDeduplication) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
   auto expr = rebalancer::max(
-      {variable(object(0), container(1), universe, assignment),
-       variable(object(1), container(1), universe, assignment),
-       variable(object(2), container(0), universe, assignment),
-       variable(object(3), container(0), universe, assignment)},
-      universe);
+      {variable(object(0), container(1), *universe, assignment),
+       variable(object(1), container(1), *universe, assignment),
+       variable(object(2), container(0), *universe, assignment),
+       variable(object(3), container(0), *universe, assignment)},
+      *universe);
 
   auto p_ptr = createTestProblem(universe, {expr}, expr);
   auto& p = *p_ptr;
@@ -341,17 +341,17 @@ TEST_F(PackerTests, NonObjectDeduplication) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
   auto objective = rebalancer::max(
-      {variable(object(0), container(0), universe, assignment),
-       variable(object(1), container(1), universe, assignment),
-       variable(object(2), container(1), universe, assignment),
-       variable(object(3), container(0), universe, assignment)},
-      universe);
+      {variable(object(0), container(0), *universe, assignment),
+       variable(object(1), container(1), *universe, assignment),
+       variable(object(2), container(1), *universe, assignment),
+       variable(object(3), container(0), *universe, assignment)},
+      *universe);
   auto constraint = rebalancer::max(
-      {variable(object(0), container(1), universe, assignment),
-       variable(object(1), container(1), universe, assignment),
-       variable(object(2), container(0), universe, assignment),
-       variable(object(3), container(0), universe, assignment)},
-      universe);
+      {variable(object(0), container(1), *universe, assignment),
+       variable(object(1), container(1), *universe, assignment),
+       variable(object(2), container(0), *universe, assignment),
+       variable(object(3), container(0), *universe, assignment)},
+      *universe);
 
   auto p_ptr = createTestProblem(universe, {objective}, constraint);
   auto& p = *p_ptr;
@@ -383,12 +383,12 @@ TEST_F(PackerTests, MipExprVar) {
 
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
-  auto v1 = variable(object(0), container(1), universe, assignment);
-  auto v2 = variable(object(1), container(1), universe, assignment);
-  auto v3 = variable(object(2), container(0), universe, assignment);
-  auto v4 = variable(object(3), container(0), universe, assignment);
+  auto v1 = variable(object(0), container(1), *universe, assignment);
+  auto v2 = variable(object(1), container(1), *universe, assignment);
+  auto v3 = variable(object(2), container(0), *universe, assignment);
+  auto v4 = variable(object(3), container(0), *universe, assignment);
 
-  auto expr = rebalancer::max({v1, v2, v3, v4}, universe);
+  auto expr = rebalancer::max({v1, v2, v3, v4}, *universe);
 
   auto p_ptr = createTestProblem(universe, {expr}, expr);
   auto& p = *p_ptr;
@@ -425,12 +425,12 @@ TEST_F(PackerTests, MipExprLinearSum) {
   });
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
-  auto o0c0 = variable(object(0), container(0), universe, assignment);
-  auto o0c1 = variable(object(0), container(1), universe, assignment);
-  auto o1c0 = variable(object(1), container(0), universe, assignment);
+  auto o0c0 = variable(object(0), container(0), *universe, assignment);
+  auto o0c1 = variable(object(0), container(1), *universe, assignment);
+  auto o1c0 = variable(object(1), container(0), *universe, assignment);
   auto objective = 8 * o0c0 - 10 * o1c0 + 5 * o0c1;
   auto p_ptr =
-      createTestProblem(universe, {objective}, const_expr(0, universe));
+      createTestProblem(universe, {objective}, const_expr(0, *universe));
   auto& p = *p_ptr;
   const MovesEvaluator evaluator(p, 0, p.objective.size(), "Stage 1");
 
@@ -472,16 +472,16 @@ TEST_F(PackerTests, MipExprMax) {
   });
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
-  auto o0c0 = variable(object(0), container(0), universe, assignment);
-  auto o1c0 = variable(object(1), container(0), universe, assignment);
-  auto o0c1 = variable(object(0), container(1), universe, assignment);
-  auto o1c1 = variable(object(1), container(1), universe, assignment);
-  auto max1 = rebalancer::max(o0c0, o0c1, universe);
-  auto max2 = rebalancer::max(o1c0, o1c1, universe);
-  auto max3 = rebalancer::max(o0c1, o1c1, universe);
+  auto o0c0 = variable(object(0), container(0), *universe, assignment);
+  auto o1c0 = variable(object(1), container(0), *universe, assignment);
+  auto o0c1 = variable(object(0), container(1), *universe, assignment);
+  auto o1c1 = variable(object(1), container(1), *universe, assignment);
+  auto max1 = rebalancer::max(o0c0, o0c1, *universe);
+  auto max2 = rebalancer::max(o1c0, o1c1, *universe);
+  auto max3 = rebalancer::max(o0c1, o1c1, *universe);
   auto objective = 8 * max1 - 10 * max2 + 5 * max3;
   auto p_ptr =
-      createTestProblem(universe, {objective}, const_expr(0, universe));
+      createTestProblem(universe, {objective}, const_expr(0, *universe));
   auto& p = *p_ptr;
   const MovesEvaluator evaluator(p, 0, p.objective.size(), "Stage 1");
 
@@ -514,15 +514,15 @@ TEST_F(PackerTests, MipExprBinaryMax) {
   });
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
-  auto o0c0 = variable(object(0), container(0), universe, assignment);
-  auto o1c0 = variable(object(1), container(0), universe, assignment);
-  auto o0c1 = variable(object(2), container(0), universe, assignment);
-  auto o1c1 = variable(object(3), container(0), universe, assignment);
-  auto max1 = rebalancer::max({o0c0, o0c1, o1c0}, universe);
-  auto max2 = rebalancer::max(max1, o1c1, universe);
+  auto o0c0 = variable(object(0), container(0), *universe, assignment);
+  auto o1c0 = variable(object(1), container(0), *universe, assignment);
+  auto o0c1 = variable(object(2), container(0), *universe, assignment);
+  auto o1c1 = variable(object(3), container(0), *universe, assignment);
+  auto max1 = rebalancer::max({o0c0, o0c1, o1c0}, *universe);
+  auto max2 = rebalancer::max(max1, o1c1, *universe);
   auto objective = max2;
   auto p_ptr =
-      createTestProblem(universe, {objective}, const_expr(0, universe));
+      createTestProblem(universe, {objective}, const_expr(0, *universe));
   auto& p = *p_ptr;
   const MovesEvaluator evaluator(p, 0, p.objective.size(), "Stage 1");
 
@@ -551,10 +551,10 @@ TEST_F(PackerTests, MipExprBinaryMin) {
   });
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
-  auto o0c0 = variable(object(0), container(0), universe, assignment);
-  auto o1c0 = variable(object(1), container(0), universe, assignment);
-  auto expr = rebalancer::min(o0c0, o1c0, universe); // -max(-v1, -v2)
-  auto p_ptr = createTestProblem(universe, {const_expr(0, universe)}, expr);
+  auto o0c0 = variable(object(0), container(0), *universe, assignment);
+  auto o1c0 = variable(object(1), container(0), *universe, assignment);
+  auto expr = rebalancer::min(o0c0, o1c0, *universe); // -max(-v1, -v2)
+  auto p_ptr = createTestProblem(universe, {const_expr(0, *universe)}, expr);
   auto& p = *p_ptr;
 
   REBALANCER_SKIP_IF_NO_MIP_SOLVER();
@@ -582,8 +582,8 @@ TEST_F(PackerTests, MipStep) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   mipbasic(
       step(
-          variable(object(0), container(0), universe, assignment) * 10 - 5,
-          universe),
+          variable(object(0), container(0), *universe, assignment) * 10 - 5,
+          *universe),
       1,
       0,
       universe);
@@ -595,8 +595,8 @@ TEST_F(PackerTests, MipSquare) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   mipbasic(
       square(
-          variable(object(0), container(0), universe, assignment) * 10 + 5,
-          universe),
+          variable(object(0), container(0), *universe, assignment) * 10 + 5,
+          *universe),
       225,
       25,
       universe);
@@ -608,8 +608,8 @@ TEST_F(PackerTests, MipCeil) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   mipbasic(
       ceil(
-          variable(object(0), container(0), universe, assignment) * 10 - 2.9,
-          universe),
+          variable(object(0), container(0), *universe, assignment) * 10 - 2.9,
+          *universe),
       8,
       -2,
       universe);
@@ -621,10 +621,10 @@ TEST_F(PackerTests, MipRectangle) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   mipbasic(
       rectangle(
-          variable(object(0), container(0), universe, assignment) * 10 - 10,
+          variable(object(0), container(0), *universe, assignment) * 10 - 10,
           -1,
           1,
-          universe),
+          *universe),
       1,
       0,
       universe);
@@ -636,10 +636,10 @@ TEST_F(PackerTests, MipLookup) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   mipbasic(
       object_lookup(
-          makeObjectVector({{object(0), 10}, {object(1), 5}}, universe),
+          makeObjectVector({{object(0), 10}, {object(1), 5}}, *universe),
           std::make_shared<PackerSet<entities::ContainerId>>(
               PackerSet<entities::ContainerId>{container(0)}),
-          universe,
+          *universe,
           assignment),
       10,
       0,
@@ -655,11 +655,11 @@ TEST_F(PackerTests, MipExprBinary) {
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
   auto objective = product(
-      variable(object(0), container(1), universe, assignment),
-      variable(object(1), container(0), universe, assignment),
-      universe);
+      variable(object(0), container(1), *universe, assignment),
+      variable(object(1), container(0), *universe, assignment),
+      *universe);
   auto p_ptr =
-      createTestProblem(universe, {objective}, const_expr(0, universe));
+      createTestProblem(universe, {objective}, const_expr(0, *universe));
   auto& p = *p_ptr;
   const MovesEvaluator evaluator(p, 0, p.objective.size(), "Stage 1");
 
@@ -684,10 +684,10 @@ TEST_F(PackerTests, MipExprSwaps) {
   });
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
-  auto v1 = variable(object(1), container(1), universe, assignment);
-  auto v2 = variable(object(2), container(1), universe, assignment);
+  auto v1 = variable(object(1), container(1), *universe, assignment);
+  auto v2 = variable(object(2), container(1), *universe, assignment);
   auto sw =
-      swaps({{object(1), container(1)}, {object(2), container(2)}}, universe);
+      swaps({{object(1), container(1)}, {object(2), container(2)}}, *universe);
 
   auto objective = 0 - v1 - v2;
   auto constraint = 1 - sw;
@@ -710,18 +710,18 @@ TEST_F(PackerTests, MipQuotient) {
   });
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
-  auto x11 = variable(object(1), container(1), universe, assignment);
-  auto x12 = variable(object(1), container(2), universe, assignment);
-  auto x21 = variable(object(2), container(1), universe, assignment);
-  auto x22 = variable(object(2), container(2), universe, assignment);
+  auto x11 = variable(object(1), container(1), *universe, assignment);
+  auto x12 = variable(object(1), container(2), *universe, assignment);
+  auto x21 = variable(object(2), container(1), *universe, assignment);
+  auto x22 = variable(object(2), container(2), *universe, assignment);
   auto sw =
-      swaps({{object(1), container(1)}, {object(2), container(2)}}, universe);
+      swaps({{object(1), container(1)}, {object(2), container(2)}}, *universe);
 
-  auto objective = quotient(x11 + x12, x11 + x12 + x21 + x22, universe) +
-      quotient(x21 + x12, x11 + x12 + x21 + x22, universe);
+  auto objective = quotient(x11 + x12, x11 + x12 + x21 + x22, *universe) +
+      quotient(x21 + x12, x11 + x12 + x21 + x22, *universe);
 
   auto p_ptr =
-      createTestProblem(universe, {objective}, const_expr(0, universe));
+      createTestProblem(universe, {objective}, const_expr(0, *universe));
   auto& p = *p_ptr;
   const MovesEvaluator evaluator(p, 0, p.objective.size(), "Stage 1");
 
@@ -762,7 +762,7 @@ CO_TEST_F(PackerTests, MipExprObjParLookup) {
       {{groupId(partId, "group0"), 1},
        {groupId(partId, "group1"), 1.5},
        {groupId(partId, "group2"), 3}},
-      universe);
+      *universe);
 
   auto objective = object_partition_lookup(
       obj_part,
@@ -770,10 +770,10 @@ CO_TEST_F(PackerTests, MipExprObjParLookup) {
           PackerSet<entities::ContainerId>{container(1), container(2)}),
       scope,
       scopeItem0,
-      universe,
+      *universe,
       assignment);
   auto p_ptr =
-      createTestProblem(universe, {objective}, const_expr(0, universe));
+      createTestProblem(universe, {objective}, const_expr(0, *universe));
   auto& p = *p_ptr;
   const MovesEvaluator evaluator(p, 0, p.objective.size(), "Stage 1");
 
@@ -811,7 +811,7 @@ CO_TEST_F(PackerTests, ObjPartitionLookupBrokenConstraint) {
   const auto objectCountDimensionId = dimensionId("object_count");
 
   auto obj_part = object_partition(
-      partId, objectCountDimensionId, /*groupLimits=*/{}, universe);
+      partId, objectCountDimensionId, /*groupLimits=*/{}, *universe);
   // let us say containers are allowed to have just one group (group 0)
   // the constraint is initially broken
   const Assignment assignment(universe->getContainers().getInitialAssignment());
@@ -823,7 +823,7 @@ CO_TEST_F(PackerTests, ObjPartitionLookupBrokenConstraint) {
               PackerSet<entities::ContainerId>{container(1), container(2)}),
           scope,
           scopeItem0,
-          universe,
+          *universe,
           assignment,
           {{groupId(partId, "group0"), -1}},
           {},
@@ -869,46 +869,46 @@ TEST_F(PackerTests, StableStayedMultipleSolves) {
   });
 
   const Assignment assignment(universe->getContainers().getInitialAssignment());
-  auto ov = makeObjectVector({{object(1), 1}, {object(2), 1}}, universe);
+  auto ov = makeObjectVector({{object(1), 1}, {object(2), 1}}, *universe);
 
   auto after_1 = object_lookup(
       ov,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(1)}),
-      universe,
+      *universe,
       assignment);
   auto after_2 = object_lookup(
       ov,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(2)}),
-      universe,
+      *universe,
       assignment);
   auto after_3 = object_lookup(
       ov,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(3)}),
-      universe,
+      *universe,
       assignment);
 
   auto stayed_1 = stable_stayed(
-      makeObjectVector({{object(1), 1}}, universe),
+      makeObjectVector({{object(1), 1}}, *universe),
       ov,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(1)}),
-      universe,
+      *universe,
       assignment);
   auto stayed_2 = stable_stayed(
-      makeObjectVector({{object(2), 1}}, universe),
+      makeObjectVector({{object(2), 1}}, *universe),
       ov,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(2)}),
-      universe,
+      *universe,
       assignment);
 
   // Don't allow new objects on containers 1 and 2
   // Ensure container 3 only has at most 1 object
   auto constraints = rebalancer::max(
-      {after_1 - stayed_1, after_2 - stayed_2, after_3 - 1}, universe);
+      {after_1 - stayed_1, after_2 - stayed_2, after_3 - 1}, *universe);
 
   // We're going to push for 1 object on container 3 and 1 object on
   // container 2. The bug this test is for, is to ensure container
@@ -941,10 +941,10 @@ TEST_F(PackerTests, NegativeConstraintOptimization) {
   });
   const Assignment assignment(universe->getContainers().getInitialAssignment());
 
-  auto o0c0 = variable(object(0), container(0), universe, assignment);
-  auto o1c0 = variable(object(1), container(0), universe, assignment);
+  auto o0c0 = variable(object(0), container(0), *universe, assignment);
+  auto o1c0 = variable(object(1), container(0), *universe, assignment);
   auto expr = -1 * o0c0 - o1c0; // will never be positive
-  auto p_ptr = createTestProblem(universe, {const_expr(0, universe)}, expr);
+  auto p_ptr = createTestProblem(universe, {const_expr(0, *universe)}, expr);
   auto& p = *p_ptr;
 
   REBALANCER_SKIP_IF_NO_MIP_SOLVER();

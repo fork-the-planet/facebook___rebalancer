@@ -78,7 +78,7 @@ folly::coro::Task<ExprPtr> AssignmentAffinitiesSpecBuilder::goalCoro(
   // containers. With this implementation, containers with unhappy objects
   // will have a non-zero potential (value minus lower bound), and the
   // local search heuristic to select source containers will pick them first.
-  auto result = const_expr(0, universe_);
+  auto result = const_expr(0, *universe_);
   for (auto& [scopeItemId, objectPenalty] : itemObjectPenalty) {
     const ObjectStaticDimension objectDimension(std::move(objectPenalty));
     result += co_await expressionBuilder.getAbsoluteUtil(

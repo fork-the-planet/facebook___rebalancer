@@ -24,7 +24,7 @@
 using namespace facebook::rebalancer;
 
 TEST(GlobalLabeledObjectivesTest, Preconditions) {
-  const auto universe = std::make_shared<const entities::Universe>();
+  const entities::Universe universe{};
   auto c1 = const_expr(1, universe);
   auto c2 = const_expr(2, universe);
 
@@ -49,7 +49,7 @@ TEST(GlobalLabeledObjectivesTest, Preconditions) {
 }
 
 TEST(GlobalLabeledObjectivesTest, Basic) {
-  auto universe = std::make_shared<entities::Universe>();
+  const entities::Universe universe{};
   GlobalObjective::Builder objective_builder;
   GlobalLabeledObjectives::Builder labeled_objective_builder;
 

@@ -137,11 +137,11 @@ struct BenchmarkFixture {
       containers->insert(container(i, universe));
     }
 
-    root = const_expr(0, universe);
+    root = const_expr(0, *universe);
     for (const auto g : folly::irange(groupCount)) {
       const auto gId = builder.groupId(partId, fmt::format("group{}", g));
       auto expr = std::make_shared<GroupScopeItemTransformUtil>(
-          universe,
+          *universe,
           partId,
           gId,
           dimId,
@@ -152,7 +152,7 @@ struct BenchmarkFixture {
           folly::F14FastMap<entities::ScopeItemId, double>{},
           1.0,
           GroupScopeItemTransformUtil::TransformFunctionType::STEP);
-      inplace_add(root, expr, universe);
+      inplace_add(root, expr, *universe);
     }
 
     root->fullApply(TopToBottomEvaluator(context), assignment);

@@ -34,7 +34,7 @@ GroupIsolationLimitSpecBuilder::constraints(
   std::vector<ConstraintInfo> exprs;
 
   const LimitWrapper limitWrapper(
-      universe_, *spec_.limit(), scopeId, partitionId);
+      *universe_, *spec_.limit(), scopeId, partitionId);
   const ScopeItemFilterWrapper filter(*universe_, *spec_.filter(), scopeId);
 
   auto objectCountDimension = universe_->getDimensionId(
@@ -63,7 +63,7 @@ GroupIsolationLimitSpecBuilder::constraints(
 folly::coro::Task<ExprPtr> GroupIsolationLimitSpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
   co_return getAggregatedConstraintViolation(
-      co_await constraints(expressionBuilder), universe_);
+      co_await constraints(expressionBuilder), *universe_);
 }
 
 /**

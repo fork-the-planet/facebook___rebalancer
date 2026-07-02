@@ -46,13 +46,13 @@ class ObjectPartitionMoveLimitTest : public ExpressionTestsBase {
 
   // Create the expression after universe is built
   ExprPtr makeObjectPartitionMoveLimit(
-      std::shared_ptr<const entities::Universe> universe,
+      const entities::Universe& universe,
       const PackerMap<entities::GroupId, double>& groupLimits,
       const entities::Set<entities::ContainerId>& srcNotAffecting = {},
       const entities::Set<entities::ContainerId>& dstNotAffecting = {}) {
     return std::make_shared<ObjectPartitionMoveLimit>(ObjectPartitionMoveLimit(
         universe,
-        getInitialAssignment(*universe),
+        getInitialAssignment(universe),
         partitionId(),
         dimensionId(),
         groupLimits,
@@ -89,12 +89,13 @@ CO_TEST_F(
       /*objWeights=*/
       {{"object0", 1}, {"object1", 2}, {"object2", 1}, {"object3", 1}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const PackerMap<entities::GroupId, double> groupLimits = {
       {group(1), 0}, {group(2), 0}};
   const auto expr = makeObjectPartitionMoveLimit(universe, groupLimits);
 
-  EquivalenceSets equivalenceSets(*universe);
+  EquivalenceSets equivalenceSets(universe);
   updateEquivalenceSets(equivalenceSets, *expr);
 
   // 4 objects belongs to different sets
@@ -116,7 +117,8 @@ CO_TEST_F(
       {{"group1", {"object0", "object1"}}, {"group2", {"object2", "object3"}}},
       /*objWeights=*/{});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   const PackerMap<entities::GroupId, double> groupLimits = {
       {group(1), 0}, {group(2), 0}};
@@ -124,7 +126,7 @@ CO_TEST_F(
       makeObjectPartitionMoveLimit(universe, groupLimits);
 
   // initially, expect the value of the expr to be 0.0 as there are no moves
-  auto assignment = getInitialAssignment(*universe);
+  auto assignment = getInitialAssignment(universe);
   EXPECT_EQ(0.0, apply(objPartitionMoveLimitExpr, assignment));
 
   //
@@ -204,7 +206,8 @@ CO_TEST_F(
        {"group3", {"object4"}}},
       /*objWeights=*/{});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   const PackerMap<entities::GroupId, double> groupLimits = {
       {group(1), 0}, {group(2), 1}, {group(3), 0}};
@@ -214,7 +217,7 @@ CO_TEST_F(
       /*srcNotAffecting=*/{container(0)},
       /*dstNotAffecting=*/{container(3)});
 
-  auto assignment = getInitialAssignment(*universe);
+  auto assignment = getInitialAssignment(universe);
   EXPECT_EQ(0.0, apply(objPartitionMoveLimitExpr, assignment));
 
   {
@@ -323,7 +326,8 @@ CO_TEST_F(
       /*groupToObjs=*/{{"group1", {"object1", "object2"}}},
       /*objWeights=*/{});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const PackerMap<entities::GroupId, double> groupLimits = {{group(1), 0}};
 
   const auto objPartitionMoveLimitExpr = makeObjectPartitionMoveLimit(
@@ -332,7 +336,7 @@ CO_TEST_F(
       /*srcNotAffecting=*/{container(0)},
       /*dstNotAffecting=*/{container(0)});
 
-  auto assignment = getInitialAssignment(*universe);
+  auto assignment = getInitialAssignment(universe);
   EXPECT_EQ(0.0, apply(objPartitionMoveLimitExpr, assignment));
 
   {
@@ -393,7 +397,8 @@ CO_TEST_F(ObjectPartitionMoveLimitTest, BoundsTest) {
       {{"group0", {"object0", "object1"}}, {"group1", {"object2"}}},
       /*objWeights=*/{{"object0", 1}, {"object1", 3}, {"object2", 3}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const PackerMap<entities::GroupId, double> groupLimits = {{group(1), 0}};
   const auto expr = makeObjectPartitionMoveLimit(universe, groupLimits);
 
@@ -439,12 +444,13 @@ CO_TEST_F(ObjectPartitionMoveLimitTest, DynamicDimension) {
             {"object4", 1},
             {"object5", 6}}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   const PackerMap<entities::GroupId, double> groupLimits = {
       {group(0), 0}, {group(1), 0}};
   const auto expr = makeObjectPartitionMoveLimit(universe, groupLimits);
 
-  auto assignment = getInitialAssignment(*universe);
+  auto assignment = getInitialAssignment(universe);
 
   // Initially, we expect apply to return 0 because there are no moves
   EXPECT_EQ(0.0, apply(expr, assignment));
@@ -523,7 +529,8 @@ CO_TEST_F(ObjectPartitionMoveLimitTest, DynamicDimensionEquivalenceSetsTest) {
             {"object4", 1},
             {"object5", 6}}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   const PackerMap<entities::GroupId, double> groupLimits = {
       {group(0), 0}, {group(1), 0}};
@@ -533,7 +540,7 @@ CO_TEST_F(ObjectPartitionMoveLimitTest, DynamicDimensionEquivalenceSetsTest) {
       /*srcNotAffecting=*/{container(2)});
 
   // Equivalence sets
-  EquivalenceSets equivalenceSets(*universe);
+  EquivalenceSets equivalenceSets(universe);
   updateEquivalenceSets(equivalenceSets, *expr);
 
   // we expect 4 sets - {{1,2,5}, {4,6}, {3}, {0}}
@@ -563,7 +570,8 @@ CO_TEST_F(ObjectPartitionMoveLimitTest, DynamicDimensionBoundsTest) {
           {"container2",
            {{"object0", 1}, {"object1", 2}, {"object2", 2}, {"object3", 1}}}});
 
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
 
   const PackerMap<entities::GroupId, double> groupLimits = {
       {group(0), 0}, {group(1), 0}};

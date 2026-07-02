@@ -27,7 +27,8 @@ TEST_F(ObjectVectorTest, VectorBounds) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto vec = makeObjectVector({{object(0), 5}, {object(1), -3}}, universe);
   EXPECT_EQ(5, upper_bound(*vec));
   EXPECT_EQ(-3, lower_bound(*vec));
@@ -37,7 +38,8 @@ TEST_F(ObjectVectorTest, VectorTotalTooSmall) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   EXPECT_THROW(
       makeObjectVector({{object(0), 5}, {object(1), -3}}, -3, 1, universe),
       std::runtime_error);

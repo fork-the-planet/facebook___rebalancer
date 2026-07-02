@@ -40,7 +40,7 @@ folly::coro::Task<ExprPtr> SumOfMaxSpecBuilder::goalCoro(
   const ScopeItemFilterWrapper filter(*universe_, *spec_.filter(), scopeId);
   auto filteredScopeItemIds = filter.getScopeItemIds();
 
-  ExprPtr sum = const_expr(0, universe_);
+  ExprPtr sum = const_expr(0, *universe_);
   for (auto scopeItemId : filteredScopeItemIds) {
     std::vector<ExprPtr> partitionExprs;
     for (auto groupId : universe_->getPartition(partitionId).getGroupIds()) {
@@ -53,7 +53,7 @@ folly::coro::Task<ExprPtr> SumOfMaxSpecBuilder::goalCoro(
               partitionId,
               groupId));
     }
-    sum += max(partitionExprs, universe_);
+    sum += max(partitionExprs, *universe_);
   }
   co_return sum;
 }

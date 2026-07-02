@@ -82,10 +82,10 @@ CO_TEST_F(ReplicaDropMoveTypeTest, VerifyMoveSetBasic) {
       {object_lookup(
           makeAllUnequalObjectVector(8),
           containers,
-          universe,
+          *universe,
           Assignment(
               universe->getContainers().getInitialAssignment()))} /*objective*/,
-      const_expr(0, universe) /*constraint*/);
+      const_expr(0, *universe) /*constraint*/);
 
   auto bestResult = replicaDropMoveType.findBestMove(
       getMovesEvaluator(),
@@ -120,10 +120,10 @@ CO_TEST_F(ReplicaDropMoveTypeTest, VerifyMoveSetWithOutOfScopeObject) {
       {object_lookup(
           makeAllUnequalObjectVector(8),
           containers,
-          universe,
+          *universe,
           Assignment(
               universe->getContainers().getInitialAssignment()))} /*objective*/,
-      const_expr(0, universe) /*constraint*/);
+      const_expr(0, *universe) /*constraint*/);
 
   auto bestResult = replicaDropMoveType.findBestMove(
       getMovesEvaluator(),
@@ -159,7 +159,7 @@ CO_TEST_F(ReplicaDropMoveTypeTest, VerifyMoveSetBasicEmptyBest) {
       {{object(5), -1}, {object(6), -1}, {object(7), -1}, {object(8), -1}},
       0 /*defautValue*/,
       8 /*objectCount*/,
-      universe);
+      *universe);
   auto containers = std::make_shared<PackerSet<entities::ContainerId>>(
       PackerSet<entities::ContainerId>{
           container(1), container(3), container(4)});
@@ -167,10 +167,10 @@ CO_TEST_F(ReplicaDropMoveTypeTest, VerifyMoveSetBasicEmptyBest) {
       {object_lookup(
           objVector,
           containers,
-          universe,
+          *universe,
           Assignment(
               universe->getContainers().getInitialAssignment()))} /*objective*/,
-      const_expr(0, universe) /*constraint*/);
+      const_expr(0, *universe) /*constraint*/);
 
   auto bestResult = replicaDropMoveType.findBestMove(
       getMovesEvaluator(),
@@ -195,8 +195,8 @@ CO_TEST_F(ReplicaDropMoveTypeTest, VerifyMoveSetOutOfScopeHotContainer) {
   const auto universe = co_await setUpUniverse(getDefaultAssignment());
 
   createProblem(
-      {const_expr(0, universe)} /*objective*/,
-      const_expr(0, universe) /*constraint*/);
+      {const_expr(0, *universe)} /*objective*/,
+      const_expr(0, *universe) /*constraint*/);
 
   auto bestResult = replicaDropMoveType.findBestMove(
       getMovesEvaluator(),
@@ -224,8 +224,8 @@ CO_TEST_F(ReplicaDropMoveTypeTest, VerifyMoveSetMultipleOutOfScopeContainers) {
   });
 
   createProblem(
-      {const_expr(0, universe)} /*objective*/,
-      const_expr(0, universe) /*constraint*/);
+      {const_expr(0, *universe)} /*objective*/,
+      const_expr(0, *universe) /*constraint*/);
 
   auto bestResult = replicaDropMoveType.findBestMove(
       getMovesEvaluator(),

@@ -29,8 +29,9 @@ TEST_F(PowerTest, InitialValue) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0"}}});
-  const auto universe = buildUniverse();
-  const Assignment assignment(universe->getContainers().getInitialAssignment());
+  buildUniverse();
+  const auto& universe = getUniverse();
+  const Assignment assignment(universe.getContainers().getInitialAssignment());
 
   auto v = variable(object(0), container(0), universe, assignment);
   // v=1, 2*v + 1 = 3, 3^3 = 27.
@@ -43,7 +44,8 @@ TEST_F(PowerTest, CubedBoundsTests) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto vector = makeObjectVector({{object(0), 1}, {object(1), 4}}, universe);
   Power power(vector, 3, universe);
   EXPECT_EQ(125, upper_bound(power));
@@ -54,7 +56,8 @@ TEST_F(PowerTest, NegativeCubedBoundsTests) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto vector = makeObjectVector({{object(0), -1}, {object(1), -4}}, universe);
   Power power(vector, 3, universe);
   EXPECT_EQ(0, upper_bound(power));
@@ -65,7 +68,8 @@ TEST_F(PowerTest, NegativePowerBoundsTests) {
   setInitialAssignment(
       entities::Map<std::string, std::vector<std::string>>{
           {"container0", {"object0", "object1"}}});
-  const auto universe = buildUniverse();
+  buildUniverse();
+  const auto& universe = getUniverse();
   auto vector = makeObjectVector({{object(0), .25}, {object(1), -5}}, universe);
   Power power(vector, -2, universe);
   EXPECT_EQ(pow(.25, -2), 16);

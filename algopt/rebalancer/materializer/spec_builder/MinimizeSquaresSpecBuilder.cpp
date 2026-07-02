@@ -42,7 +42,7 @@ ApproximationHint MinimizeSquaresSpecBuilder::getApproximationHint() const {
 
 folly::coro::Task<ExprPtr> MinimizeSquaresSpecBuilder::goalCoro(
     ExpressionBuilder& expressionBuilder) const {
-  ExprPtr goal = const_expr(0, universe_);
+  ExprPtr goal = const_expr(0, *universe_);
   auto hint = getApproximationHint();
   auto scopeId = universe_->getScopeId(*spec_.scope());
   auto dimensionId = universe_->getDimensionId(*spec_.dimension());
@@ -55,8 +55,8 @@ folly::coro::Task<ExprPtr> MinimizeSquaresSpecBuilder::goalCoro(
   for (auto scopeItemId : filteredScopeItemIds) {
     auto relUtil = co_await expressionBuilder.getRelativeUtil(
         UtilMetric::AFTER, dimensionId, scopeId, scopeItemId);
-    auto after_expr = max({const_expr(0, universe_), relUtil}, universe_);
-    goal += (coef * square(after_expr, hint, universe_));
+    auto after_expr = max({const_expr(0, *universe_), relUtil}, *universe_);
+    goal += (coef * square(after_expr, hint, *universe_));
   }
   co_return goal;
 }

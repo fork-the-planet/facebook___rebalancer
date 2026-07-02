@@ -29,9 +29,8 @@ namespace facebook::rebalancer {
 GroupRoutingLatencyLookup::GroupRoutingLatencyLookup(
     std::shared_ptr<GroupRoutingRing> groupRoutingRing,
     interface::RoutingLatencyMetricInfo aggregationMetric,
-    std::shared_ptr<const entities::Universe> universe)
-    : Expression(std::move(universe)),
-      aggregationMetric_(std::move(aggregationMetric)) {
+    const entities::Universe& universe)
+    : Expression(universe), aggregationMetric_(std::move(aggregationMetric)) {
   add_child(groupRoutingRing);
 
   // Moving objects in or out of any container related to routing ring of the
