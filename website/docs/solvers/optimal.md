@@ -525,9 +525,7 @@ solver.addSolver(spec);
 
 ## Next Steps
 
-- **Learn Local Search**: [Local Search Guide](local-search)
-- **Performance Tuning**: [Performance Guide](performance)
-- **Solver Strategies**: [Strategies Guide](strategies)
+- **Learn Local Search**: [Local Search Guide](local-search/local-search.md)
 - **Compare Solvers**: [Solver Overview](overview)
 
 ## Related Documentation

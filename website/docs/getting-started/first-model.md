@@ -116,7 +116,7 @@ Second, we want each job to survive a rack failure: if a rack loses power, every
 
 ## Solving the Problem
 
-The model is complete. Now we choose a **solver** to compute the placement. Rebalancer offers a few strategies; for this example we use the [local search](../solvers/local-search) solver, a good default that scales to large problems. We run it and print where each task ended up:
+The model is complete. Now we choose a **solver** to compute the placement. Rebalancer offers a few strategies; for this example we use the [local search](../solvers/local-search/local-search.md) solver, a good default that scales to large problems. We run it and print where each task ended up:
 
 ```cpp file=algopt/rebalancer/examples/website/getting_started/tasks_on_hosts/tasks_on_hosts.cpp start=solve_print_start end=solve_print_end
 ```

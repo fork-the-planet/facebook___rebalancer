@@ -138,10 +138,8 @@ import TabItem from '@theme/TabItem';
 
 ## Next Steps
 
-- **Learn Local Search**: [Local Search Solver Guide](local-search)
+- **Learn Local Search**: [Local Search Solver Guide](local-search/local-search.md)
 - **Learn Optimal Solvers**: [Optimal Solver Guide](optimal)
-- **Performance Tuning**: [Performance Guide](performance)
-- **Advanced Strategies**: [Solver Strategies](strategies)
 
 ## Related Documentation
 

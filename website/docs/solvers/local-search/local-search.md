@@ -51,45 +51,45 @@ import TabItem from '@theme/TabItem';
 
 ## Move Types
 
-Local Search explores different types of moves. Each move type searches a different "neighborhood" of solutions. See the **[Move Types Reference](../move-types/)** for complete documentation of all 27 move types.
+Local Search explores different types of moves. Each move type searches a different "neighborhood" of solutions. See the **[Move Types Reference](move-types/move-types.md)** for complete documentation of all 27 move types.
 
 ### Common Move Types
 
-**[Single](../move-types/basic/single)**: Move one object to a different container
+**[Single](move-types/move-types.md)**: Move one object to a different container
 - **When**: Always useful - most fundamental move type
 - **Cost**: O(objects × containers) per iteration
 - **Example**: Move task5 from host1 to host3
 
-**[Swap](../move-types/swap/)**: Swap two objects between containers
+**[Swap](move-types/move-types.md)**: Swap two objects between containers
 - **When**: Capacity constrained (can't just add objects)
 - **Cost**: O(objects²) per iteration
 - **Example**: Swap task5 on host1 with task8 on host3
 
-**[TripleLoop](../move-types/advanced/triple-loop)**: Try complex multi-object rearrangements
+**[TripleLoop](move-types/move-types.md)**: Try complex multi-object rearrangements
 - **When**: Need to escape local optima
 - **Cost**: Expensive, O(objects³)
 - **Example**: Move 3+ objects in a cycle
 
 ### Specialized Move Types
 
-**[KLSearch](../move-types/advanced/kl-search)**: Kernighan-Lin style search with sequences of moves
+**[KLSearch](move-types/move-types.md)**: Kernighan-Lin style search with sequences of moves
 - **When**: Graph partitioning-style problems
 - **Cost**: Expensive but powerful
 
-**[Chain Moves](../move-types/chain/single-chain)**: Move sequences of objects in a chain
+**[Chain Moves](move-types/move-types.md)**: Move sequences of objects in a chain
 - **When**: Moving objects creates opportunities for other moves
 - **Cost**: Medium
-- **Best**: [SingleEndChain](../move-types/chain/single-end-chain) (recommended over SingleChain)
+- **Best**: [SingleEndChain](move-types/move-types.md) (recommended over SingleChain)
 
-**[Group Moves](../move-types/group/colocate-groups)**: Move entire groups together
+**[Group Moves](move-types/move-types.md)**: Move entire groups together
 - **When**: Using MoveGroupSpec or colocation goals
 - **Cost**: Depends on group sizes
-- **Example**: [ColocateGroups](../move-types/group/colocate-groups)
+- **Example**: [ColocateGroups](move-types/move-types.md)
 
-**[Fixed Source/Dest](../move-types/fixed/fixed-dest)**: Only consider moves from/to specific containers
+**[Fixed Source/Dest](move-types/move-types.md)**: Only consider moves from/to specific containers
 - **When**: Draining specific containers (`ToFree`) or filling specific containers
 - **Cost**: Reduced search space, faster
-- **Example**: [FixedSource](../move-types/fixed/fixed-source) for draining
+- **Example**: [FixedSource](move-types/move-types.md) for draining
 
 ### Configuring Move Types
 
@@ -415,7 +415,7 @@ Take time to find best solution:
 
 ### Draining Containers
 
-Use [FixedSource](../move-types/fixed/fixed-source) move type for draining specific containers (e.g., with `ToFreeSpec`):
+Use [FixedSource](move-types/move-types.md) move type for draining specific containers (e.g., with `ToFreeSpec`):
 
 <Tabs groupId="programming-language">
 <TabItem value="python" label="Python">
@@ -620,8 +620,6 @@ solver.addSolver(multiStage);
 </TabItem>
 </Tabs>
 
-See [Solver Strategies](strategies) for multi-stage solving.
-
 ## Troubleshooting
 
 ### Problem: Non-deterministic results
@@ -662,11 +660,8 @@ solver.add_constraint(spec, invalid_cost=1000.0)
 
 ## Next Steps
 
-- **Learn Optimal Solver**: [Optimal Solver Guide](optimal)
-- **Performance Tuning**: [Performance Guide](performance)
-- **Multi-Stage Solving**: [Solver Strategies](strategies)
+- **Learn Optimal Solver**: [Optimal Solver Guide](../optimal.md)
 
 ## Related Documentation
 
-- [Solver Overview](overview) - Choosing between solvers
-- [Performance Guide](performance) - Tuning for speed
+- [Solver Overview](../overview.md) - Choosing between solvers
