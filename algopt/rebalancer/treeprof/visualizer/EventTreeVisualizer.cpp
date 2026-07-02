@@ -94,7 +94,7 @@ std::string EventTreeVisualizer::digest(
       colDelimiter,
       dontShowValues ? "" : percentStr);
   std::vector<std::shared_ptr<const Event>> qualifiedChildren;
-  auto& children = node->getChildren();
+  const auto& children = node->getChildren();
   qualifiedChildren.reserve(children.size());
   for (const auto& child : children) {
     if (isVisible_.at(child)) {

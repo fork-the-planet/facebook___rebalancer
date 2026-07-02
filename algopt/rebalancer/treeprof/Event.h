@@ -37,7 +37,7 @@ class Event {
   void finalize();
 
   const std::string& getName() const;
-  const std::vector<std::shared_ptr<const Event>>& getChildren() const;
+  std::vector<std::shared_ptr<const Event>> getChildren() const;
   double getBeginTime() const;
   double getEndTime() const;
   double duration() const;

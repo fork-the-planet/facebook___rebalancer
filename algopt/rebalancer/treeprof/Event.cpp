@@ -91,9 +91,8 @@ const std::string& Event::getName() const {
   return name_;
 }
 
-const std::vector<std::shared_ptr<const Event>>& Event::getChildren() const {
+std::vector<std::shared_ptr<const Event>> Event::getChildren() const {
   return *children_.rlock();
-  throw std::runtime_error("unreachable");
 }
 
 double Event::getBeginTime() const {
