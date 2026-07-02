@@ -74,12 +74,13 @@ below lists the move types; dedicated pages for each will be linked from this ta
 | [Single Random Object Stratified](single-random-object-stratified.md) | Evaluates moving a sample of objects to a pre-defined container. |
 | [Single Random Stratified](single-random-stratified.md) | Tries moving every object in the source container to a random sample of destination containers drawn evenly from similarity classes. |
 | [Single Coldest Stratified](single-coldest-stratified.md) | Like Single Random Stratified, but picks the coldest containers within each similarity class instead of a random sample. |
-| Group Move With Hint Strategies | Moves a related set of objects together, guided by hint strategies. |
+| [Group Move With Hint Strategies](group-move-with-hint-strategies.md) | Moves a related set of objects together, guided by hint strategies. |
 | Group Routing | Routes groups of objects together between scope items. |
 | Greedy Group To Scope Item | Greedily moves a group's objects into a scope item. |
-| Colocate Groups | Tries moving a related set of objects in a scope item to every possible combination of containers in every different scope item. |
+| [Colocate Groups](colocate-groups.md) | Tries moving a related set of objects in a scope item to every possible combination of containers in every different scope item. |
 | Replica Drop | Drops replicas of an object when moving it. |
-| Fixed Dest | Tries moving every object in the source container to a specified destination container. |
-| Fixed Source | Tries moving every object out of one or more specified source containers. |
-| Fixed Dest Multi Move | Tries moving every set of related objects from the hot container to a specified destination container. |
-| Fixed Source Multi Move | Tries moving every set of related objects from a specified source container to the hot container. |
+| [Fixed Dest](fixed-dest.md) | Tries moving every object in the source container to a specified destination container. |
+| [Fixed Source](fixed-source.md) | Tries moving every object out of one or more specified source containers. |
+| [Fixed Dest Multi Move](fixed-dest-multi-move.md) | Tries moving every set of related objects from the hot container to a specified destination container. |
+| [Fixed Source Multi Move](fixed-source-multi-move.md) | Tries moving every set of related objects from a specified source container to the hot container. |
+| [Fixed Dest Swap Multi Move](fixed-dest-swap-multi-move.md) | Tries swapping every set of related objects between the hot container and a specified destination container, supporting uneven 1:k swaps. |
