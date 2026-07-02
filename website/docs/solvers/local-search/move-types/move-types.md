@@ -58,10 +58,10 @@ below lists the move types; dedicated pages for each will be linked from this ta
 
 | Name | Description |
 |------|-------------|
-| Single | Tries moving every object in the source container to every possible destination container. |
-| Single Fast | Like Single, but stops after fully exploring the first object that improves the objective, so it may not explore all objects in the source container. |
-| Single Greedy | Tries moving every object to every possible destination, prioritizing destinations by how hot they are, and stops as soon as an improving move is found. Single threaded. |
-| Single Random Batches | Like Single Greedy, but processes multiple containers at a time to benefit from multi-threading, stopping as soon as an improving move is found. |
+| [Single](single.md) | Tries moving every object in the source container to every possible destination container. |
+| [Single Fast](single-fast.md) | Like Single, but stops after fully exploring the first object that improves the objective, so it may not explore all objects in the source container. |
+| [Single Greedy](single-greedy.md) | Tries moving every object to every possible destination, prioritizing destinations by how hot they are, and stops as soon as an improving move is found. Single threaded. |
+| [Single Random Batches](single-random-batches.md) | Like Single Greedy, but processes multiple containers at a time to benefit from multi-threading, stopping as soon as an improving move is found. |
 | Swap | Tries swapping each object in the source container with every other object in every possible destination container. |
 | Swap Full Containers | Tries exchanging all objects in the source container with all objects in every possible destination container. |
 | Swap Full With Empty Containers | Tries moving all objects in the source container to every possible empty destination container. |
