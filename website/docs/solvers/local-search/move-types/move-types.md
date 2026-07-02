@@ -68,12 +68,12 @@ below lists the move types; dedicated pages for each will be linked from this ta
 | Swap Sampled | Like Swap, but evaluates only a sampled subset of all possible swaps, controlled by parameters. |
 | [Triple Loop](triple-loop.md) | Tries moving every triplet of objects in a cycle, where one object is from the source container and the other two are from different destination containers. |
 | KL Search | Inspired by the Kernighan–Lin algorithm: sequentially picks the move (in either direction) with the best objective change regardless of improvement, then keeps the point with the minimum objective. |
-| Single Chain | Tries all pairs of moves where an object leaves the hot container and a second object from another container takes its place. Prefer Single End Chain. |
-| Single End Chain | Tries all pairs of moves where an object moves from the hot container to a destination, and a second object from that destination moves to another destination. |
-| Single Chain Fast | Like Single Chain, but evaluates all moves in parallel and returns as soon as an improving move is found. |
-| Single Random Object Stratified | Evaluates moving a sample of objects to a pre-defined container. |
-| Single Random Stratified | Tries moving every object in the source container to a random sample of destination containers drawn evenly from similarity classes. |
-| Single Coldest Stratified | Like Single Random Stratified, but picks the coldest containers within each similarity class instead of a random sample. |
+| [Single Chain](single-chain.md) | Tries all pairs of moves where an object leaves the hot container and a second object from another container takes its place. Prefer Single End Chain. |
+| [Single End Chain](single-end-chain.md) | Tries all pairs of moves where an object moves from the hot container to a destination, and a second object from that destination moves to another destination. |
+| [Single Chain Fast](single-chain-fast.md) | Like Single Chain, but evaluates all moves in parallel and returns as soon as an improving move is found. |
+| [Single Random Object Stratified](single-random-object-stratified.md) | Evaluates moving a sample of objects to a pre-defined container. |
+| [Single Random Stratified](single-random-stratified.md) | Tries moving every object in the source container to a random sample of destination containers drawn evenly from similarity classes. |
+| [Single Coldest Stratified](single-coldest-stratified.md) | Like Single Random Stratified, but picks the coldest containers within each similarity class instead of a random sample. |
 | Group Move With Hint Strategies | Moves a related set of objects together, guided by hint strategies. |
 | Group Routing | Routes groups of objects together between scope items. |
 | Greedy Group To Scope Item | Greedily moves a group's objects into a scope item. |
