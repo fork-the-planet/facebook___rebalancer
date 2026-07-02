@@ -1,0 +1,577 @@
+'use client';
+
+import {memo, useCallback, useMemo, useState} from 'react';
+
+import ArrowDownward from '@mui/icons-material/ArrowDownward';
+import ArrowUpward from '@mui/icons-material/ArrowUpward';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
+import type {SortingState} from '@tanstack/react-table';
+
+import CollapsibleText from '@/app/components/evaluation/CollapsibleText';
+import {
+  compileEvaluationFilters,
+  matchesEvaluationFilters,
+} from '@/app/components/evaluation/evaluation-filters';
+import PreciseNumber from '@/app/components/evaluation/PreciseNumber';
+import SpecViewerButton from '@/app/components/evaluation/SpecViewerButton';
+import TreeViewer from '@/app/components/evaluation/TreeViewer';
+import useCopyOnClick from '@/app/components/useCopyOnClick';
+import type {
+  Assignment,
+  ExpressionResult,
+  Filter,
+  Handle,
+} from '@/lib/rebalancer-explorer-types';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type HideAllUnchangedControl = {
+  hideAllUnchanged: boolean;
+  setHideAllUnchanged: (v: boolean) => void;
+  uncheckedByTable: number | null;
+  setUncheckedByTable: (v: number | null) => void;
+  tableIndex: number;
+};
+
+type EvaluationTableProps = {
+  title: string;
+  srcExpressions: ExpressionResult[];
+  dstExpressions: ExpressionResult[];
+  expressionType: 'CONSTRAINT' | 'OBJECTIVE';
+  hideAllUnchangedControl: HideAllUnchangedControl;
+  handle: Handle;
+  sourceAssignment: Assignment;
+  destinationAssignment: Assignment;
+  evaluationFilters?: Filter[];
+};
+
+/** Merged row joining src and dst expression data. */
+interface EvaluationRow {
+  expressionId: number;
+  name: string;
+  description: string;
+  srcValue: number;
+  dstValue: number;
+  delta: number;
+  percentage: number;
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute percentage change: (B - A) / |A| * 100.
+ * Returns 0 when both are zero, 100 when only A is zero.
+ */
+function calculatePercentageChange(src: number, dst: number): number {
+  const delta = dst - src;
+  if (src === 0) {
+    return dst === 0 ? 0 : 100;
+  }
+  return (delta / Math.abs(src)) * 100;
+}
+
+// ---------------------------------------------------------------------------
+// Column definitions
+// ---------------------------------------------------------------------------
+
+const columnHelper = createColumnHelper<EvaluationRow>();
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
+const EvaluationTable = memo(function EvaluationTable({
+  title,
+  srcExpressions,
+  dstExpressions,
+  expressionType,
+  hideAllUnchangedControl,
+  handle,
+  sourceAssignment,
+  destinationAssignment,
+  evaluationFilters,
+}: EvaluationTableProps) {
+  const {
+    hideAllUnchanged,
+    setHideAllUnchanged,
+    uncheckedByTable,
+    setUncheckedByTable,
+    tableIndex,
+  } = hideAllUnchangedControl;
+
+  const [hideUnchanged, setHideUnchanged] = useState(hideAllUnchanged);
+  const {copyOnClick, copyOnKeyDown, snackbar} = useCopyOnClick();
+
+  const handleTableHideUnchangedChange = useCallback(
+    (newState: boolean) => {
+      setHideUnchanged(newState);
+      if (!newState) {
+        setHideAllUnchanged(false);
+        setUncheckedByTable(tableIndex);
+      }
+    },
+    [setHideAllUnchanged, setUncheckedByTable, tableIndex],
+  );
+
+  // Sync local state with global "hide all" control whenever the parent
+  // values change:
+  // 1. hideAll checked → check this table
+  // 2. hideAll unchecked directly (uncheckedByTable === null) → uncheck
+  // 3. hideAll unchecked by THIS table → uncheck
+  // 4. hideAll unchecked by ANOTHER table → leave unchanged
+  const [prevHideAllUnchanged, setPrevHideAllUnchanged] =
+    useState(hideAllUnchanged);
+  const [prevUncheckedByTable, setPrevUncheckedByTable] =
+    useState(uncheckedByTable);
+  if (
+    hideAllUnchanged !== prevHideAllUnchanged ||
+    uncheckedByTable !== prevUncheckedByTable
+  ) {
+    setPrevHideAllUnchanged(hideAllUnchanged);
+    setPrevUncheckedByTable(uncheckedByTable);
+    if (hideAllUnchanged) {
+      setHideUnchanged(true);
+    } else if (uncheckedByTable === null || uncheckedByTable === tableIndex) {
+      setHideUnchanged(false);
+    }
+  }
+
+  const isConstraint = expressionType === 'CONSTRAINT';
+
+  // Join src and dst by expression id
+  const allRows = useMemo<EvaluationRow[]>(() => {
+    const dstMap = new Map<number, ExpressionResult>();
+    for (const expr of dstExpressions) {
+      dstMap.set(expr.id, expr);
+    }
+
+    return srcExpressions
+      .map(src => {
+        const dst = dstMap.get(src.id);
+        if (dst == null) {
+          return null;
+        }
+        const delta = dst.value - src.value;
+        return {
+          expressionId: src.id,
+          name: src.name,
+          description: src.description,
+          srcValue: src.value,
+          dstValue: dst.value,
+          delta,
+          percentage: calculatePercentageChange(src.value, dst.value),
+        };
+      })
+      .filter((row): row is EvaluationRow => row != null);
+  }, [srcExpressions, dstExpressions]);
+
+  // Rows matching the user-selected evaluation filters.
+  const filteredRows = useMemo(() => {
+    if (evaluationFilters == null || evaluationFilters.length === 0) {
+      return allRows;
+    }
+    const compiled = compileEvaluationFilters(evaluationFilters);
+    return allRows.filter(row => matchesEvaluationFilters(row, compiled));
+  }, [allRows, evaluationFilters]);
+
+  // Rows actually rendered in the table body: the "hide unchanged" toggle
+  // layered on top of the filtered rows.
+  const displayRows = useMemo(
+    () =>
+      hideUnchanged
+        ? filteredRows.filter(row => row.delta !== 0)
+        : filteredRows,
+    [filteredRows, hideUnchanged],
+  );
+
+  // Footer totals sum exactly the rows rendered in the table body, so they
+  // always match what is on screen — both the evaluation filter and the
+  // "hide unchanged" toggle are reflected.
+  const totals = useMemo(() => {
+    let srcTotal = 0;
+    let dstTotal = 0;
+    for (const row of displayRows) {
+      srcTotal += row.srcValue;
+      dstTotal += row.dstValue;
+    }
+    const deltaTotal = dstTotal - srcTotal;
+    const percentTotal = calculatePercentageChange(srcTotal, dstTotal);
+    return {srcTotal, dstTotal, deltaTotal, percentTotal};
+  }, [displayRows]);
+
+  // Sorting state
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  // Column definitions
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('name', {
+        header: 'Name',
+        cell: info => (
+          <Typography
+            variant="body2"
+            sx={{fontWeight: 500, fontSize: '0.8125rem'}}>
+            {info.getValue()}
+          </Typography>
+        ),
+        enableSorting: false,
+        size: 180,
+      }),
+      columnHelper.accessor('description', {
+        header: 'Description',
+        cell: info => <CollapsibleText text={info.getValue()} />,
+        enableSorting: false,
+        size: 280,
+      }),
+      columnHelper.accessor('srcValue', {
+        header: 'A',
+        cell: info => (
+          <PreciseNumber value={info.getValue()} highlight={isConstraint} />
+        ),
+        size: 120,
+        meta: {numeric: true},
+      }),
+      columnHelper.accessor('dstValue', {
+        header: 'B',
+        cell: info => (
+          <PreciseNumber value={info.getValue()} highlight={isConstraint} />
+        ),
+        size: 120,
+        meta: {numeric: true},
+      }),
+      columnHelper.accessor('delta', {
+        header: 'B - A',
+        cell: info => (
+          <PreciseNumber value={info.getValue()} highlight={!isConstraint} />
+        ),
+        size: 120,
+        meta: {numeric: true},
+      }),
+      columnHelper.accessor('percentage', {
+        header: '%',
+        cell: info => (
+          <PreciseNumber
+            value={info.getValue()}
+            highlight={!isConstraint}
+            fixedDecimals={3}
+          />
+        ),
+        size: 100,
+        meta: {numeric: true},
+      }),
+      columnHelper.display({
+        id: 'actions',
+        header: ' ',
+        cell: info => {
+          const row = info.row.original;
+          return (
+            <Box sx={{display: 'flex', gap: 0.5}}>
+              <SpecViewerButton
+                name={row.name}
+                expressionType={expressionType}
+                handle={handle}
+              />
+              <TreeViewer
+                expressionId={row.expressionId}
+                handle={handle}
+                sourceAssignment={sourceAssignment}
+                destinationAssignment={destinationAssignment}
+                minimizing={isConstraint}
+              />
+            </Box>
+          );
+        },
+        size: 90,
+        enableSorting: false,
+      }),
+    ],
+    [
+      isConstraint,
+      expressionType,
+      handle,
+      sourceAssignment,
+      destinationAssignment,
+    ],
+  );
+
+  const table = useReactTable({
+    data: displayRows,
+    columns,
+    state: {sorting},
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
+  const headerGroups = table.getHeaderGroups();
+  const rows = table.getRowModel().rows;
+
+  return (
+    <Box>
+      {/* Title bar with per-table hide unchanged */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          px: 2,
+          py: 0.5,
+          backgroundColor: '#fafafa',
+          borderBottom: '1px solid #e0e0e0',
+        }}>
+        <Typography variant="subtitle2" sx={{fontWeight: 600}}>
+          {title}
+        </Typography>
+        <Tooltip title="Hide rows where the two assignments have the same value">
+          <FormControlLabel
+            sx={{mr: 0}}
+            control={
+              <Checkbox
+                size="small"
+                checked={hideUnchanged}
+                onChange={(_e, checked) =>
+                  handleTableHideUnchangedChange(checked)
+                }
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{fontSize: '0.8125rem'}}>
+                {`Hide unchanged ${title}`}
+              </Typography>
+            }
+          />
+        </Tooltip>
+      </Box>
+
+      {/* Table */}
+      <Box sx={{overflow: 'auto'}}>
+        <table
+          style={{
+            width: '100%',
+            tableLayout: 'fixed',
+            borderCollapse: 'separate',
+            borderSpacing: 0,
+          }}>
+          <thead>
+            {headerGroups.map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => {
+                  const meta = header.column.columnDef.meta as
+                    | {numeric?: boolean}
+                    | undefined;
+                  const canSort = header.column.getCanSort();
+                  const sorted = header.column.getIsSorted();
+
+                  return (
+                    <th
+                      key={header.id}
+                      style={{
+                        width: header.getSize(),
+                        textAlign: meta?.numeric ? 'right' : 'left',
+                        padding: '8px 12px',
+                        borderBottom: '2px solid #e0e0e0',
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                        cursor: canSort ? 'pointer' : 'default',
+                        userSelect: 'none',
+                        backgroundColor: '#fafafa',
+                      }}
+                      onClick={
+                        canSort
+                          ? header.column.getToggleSortingHandler()
+                          : undefined
+                      }>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: meta?.numeric
+                            ? 'flex-end'
+                            : 'flex-start',
+                          gap: 0.5,
+                        }}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {sorted === 'asc' && (
+                          <ArrowUpward sx={{fontSize: 16}} />
+                        )}
+                        {sorted === 'desc' && (
+                          <ArrowDownward sx={{fontSize: 16}} />
+                        )}
+                      </Box>
+                    </th>
+                  );
+                })}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {rows.map(row => (
+              <tr
+                key={row.id}
+                style={{backgroundColor: 'white'}}
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor = '#f5f5f5';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                }}>
+                {row.getVisibleCells().map(cell => {
+                  const meta = cell.column.columnDef.meta as
+                    | {numeric?: boolean}
+                    | undefined;
+                  const copyable = cell.column.id !== 'actions';
+                  return (
+                    <td
+                      key={cell.id}
+                      onClick={copyable ? copyOnClick : undefined}
+                      onKeyDown={copyable ? copyOnKeyDown : undefined}
+                      tabIndex={copyable ? 0 : undefined}
+                      style={{
+                        textAlign: meta?.numeric ? 'right' : 'left',
+                        padding: '8px 12px',
+                        borderBottom: '1px solid #e0e0e0',
+                        fontSize: '0.875rem',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'anywhere',
+                        cursor: copyable ? 'pointer' : undefined,
+                      }}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+            {rows.length === 0 && (
+              <tr>
+                <td
+                  colSpan={7}
+                  style={{
+                    textAlign: 'center',
+                    padding: '24px 12px',
+                    color: '#999',
+                    fontSize: '0.875rem',
+                  }}>
+                  {hideUnchanged
+                    ? 'All rows are unchanged'
+                    : 'No evaluation results'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+          <tfoot>
+            <tr style={{backgroundColor: '#fafafa'}}>
+              {/* Name */}
+              <td
+                style={{
+                  padding: '8px 12px',
+                  borderTop: '2px solid #e0e0e0',
+                }}>
+                <Typography
+                  variant="body2"
+                  sx={{fontWeight: 600, fontSize: '0.8125rem'}}>
+                  Total
+                </Typography>
+              </td>
+              {/* Description */}
+              <td
+                style={{
+                  padding: '8px 12px',
+                  borderTop: '2px solid #e0e0e0',
+                }}>
+                <Typography
+                  variant="body2"
+                  sx={{color: 'text.secondary', fontSize: '0.75rem'}}>
+                  Sum of the rows shown above. % is recomputed from the A and B
+                  totals.
+                </Typography>
+              </td>
+              {/* A */}
+              <td
+                style={{
+                  textAlign: 'right',
+                  padding: '8px 12px',
+                  borderTop: '2px solid #e0e0e0',
+                }}>
+                <PreciseNumber
+                  value={totals.srcTotal}
+                  highlight={isConstraint}
+                />
+              </td>
+              {/* B */}
+              <td
+                style={{
+                  textAlign: 'right',
+                  padding: '8px 12px',
+                  borderTop: '2px solid #e0e0e0',
+                }}>
+                <PreciseNumber
+                  value={totals.dstTotal}
+                  highlight={isConstraint}
+                />
+              </td>
+              {/* B - A */}
+              <td
+                style={{
+                  textAlign: 'right',
+                  padding: '8px 12px',
+                  borderTop: '2px solid #e0e0e0',
+                }}>
+                <PreciseNumber
+                  value={totals.deltaTotal}
+                  highlight={!isConstraint}
+                />
+              </td>
+              {/* % */}
+              <td
+                style={{
+                  textAlign: 'right',
+                  padding: '8px 12px',
+                  borderTop: '2px solid #e0e0e0',
+                }}>
+                <PreciseNumber
+                  value={Math.round(totals.percentTotal * 1000) / 1000}
+                  highlight={!isConstraint}
+                  fixedDecimals={3}
+                />
+              </td>
+              {/* Actions */}
+              <td
+                style={{
+                  padding: '8px 12px',
+                  borderTop: '2px solid #e0e0e0',
+                }}
+              />
+            </tr>
+          </tfoot>
+        </table>
+      </Box>
+      {snackbar}
+    </Box>
+  );
+});
+
+export default EvaluationTable;

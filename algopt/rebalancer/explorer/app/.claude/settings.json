@@ -1,0 +1,11 @@
+{
+  "extraKnownMarketplaces": {
+    "Wlis": {
+      "source": { "source": "file", "path": "../../../fbcode/scripts/wlis/claude/marketplace.json" }
+    }
+  },
+  "enabledPlugins": {
+    "nest-shared-skills@agent-market": true,
+    "graphql@Wlis": true
+  }
+}

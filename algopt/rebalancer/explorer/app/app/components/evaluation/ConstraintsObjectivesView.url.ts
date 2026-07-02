@@ -1,0 +1,166 @@
+import type {
+  Assignments,
+  UIAssignment,
+} from '@/app/components/evaluation/AssignmentCard';
+import type {MoveSetsViewState} from '@/app/components/evaluation/MoveSetsTable';
+import type {Filter} from '@/lib/rebalancer-explorer-types';
+import {OrderDirection} from '@/lib/rebalancer-explorer-types';
+import {
+  asArray,
+  asString,
+  normalizeFilters,
+  parseQs,
+  safeInt,
+  stringifyQs,
+} from '@/lib/url-state';
+
+export const MS_DEFAULT_PAGE_SIZE = 10;
+
+export interface ParsedURLState {
+  srcBase: UIAssignment['base'];
+  srcStep: number | null;
+  srcOverrides: Array<{variable: string; container: string}>;
+  dstBase: UIAssignment['base'] | null;
+  dstStep: number | null;
+  dstOverrides: Array<{variable: string; container: string}>;
+  hideAllUnchanged: boolean;
+  evalFilters: Filter[];
+  msPartition: string | null;
+  msScope: string | null;
+  msObjectives: string[];
+  msFilters: Filter[];
+  msOffset: number;
+  msPageSize: number;
+  msOrderColumn: string | null;
+  msOrderDirection: OrderDirection;
+  msMinimized: boolean;
+}
+
+export const VALID_BASES = new Set(['INITIAL', 'FINAL', 'INTERMEDIATE']);
+
+export function parseCOSearchParams(
+  searchParams: URLSearchParams,
+): ParsedURLState {
+  const parsed = parseQs(searchParams);
+
+  const srcBaseRaw = asString(parsed.srcBase);
+  const srcBase = (
+    VALID_BASES.has(srcBaseRaw ?? '') ? srcBaseRaw : 'INITIAL'
+  ) as UIAssignment['base'];
+
+  const srcStep = parsed.srcStep != null ? safeInt(parsed.srcStep, 0) : null;
+
+  const dstBaseRaw = asString(parsed.dstBase);
+  const dstBase =
+    dstBaseRaw != null && VALID_BASES.has(dstBaseRaw)
+      ? (dstBaseRaw as UIAssignment['base'])
+      : null;
+
+  const dstStep = parsed.dstStep != null ? safeInt(parsed.dstStep, 0) : null;
+
+  return {
+    srcBase,
+    srcStep,
+    srcOverrides: asArray<{variable: string; container: string}>(
+      parsed.srcOverrides,
+      [],
+    ),
+    dstBase,
+    dstStep,
+    dstOverrides: asArray<{variable: string; container: string}>(
+      parsed.dstOverrides,
+      [],
+    ),
+    hideAllUnchanged: parsed.hideUnchanged !== '0',
+    evalFilters: normalizeFilters(parsed.evalFilters),
+    msPartition: asString(parsed.msPartition),
+    msScope: asString(parsed.msScope),
+    msObjectives: asArray<string>(parsed.msObjectives, []),
+    msFilters: normalizeFilters(parsed.msFilters),
+    msOffset: safeInt(parsed.msOffset, 0),
+    msPageSize: safeInt(parsed.msPageSize, MS_DEFAULT_PAGE_SIZE),
+    msOrderColumn: asString(parsed.msOrderCol),
+    msOrderDirection: safeInt(parsed.msOrderDir, 0) as OrderDirection,
+    msMinimized: parsed.msMinimized !== '0',
+  };
+}
+
+// Skip serializing overrides to URL when there are too many — the URL becomes
+// enormous and router.replace() bogs down the UI.
+export const MAX_URL_OVERRIDES = 100;
+
+export function buildCOSearchParams(
+  assignments: Assignments,
+  hideAllUnchanged: boolean,
+  evalFilters: Filter[],
+  ms: MoveSetsViewState,
+): string {
+  const obj: Record<string, unknown> = {};
+
+  // Assignment A
+  if (assignments.src.base !== 'INITIAL') {
+    obj.srcBase = assignments.src.base;
+  }
+  if (assignments.src.step != null) {
+    obj.srcStep = assignments.src.step;
+  }
+  if (
+    assignments.src.overrides.length > 0 &&
+    assignments.src.overrides.length <= MAX_URL_OVERRIDES
+  ) {
+    obj.srcOverrides = assignments.src.overrides;
+  }
+
+  // Assignment B — always include base (default is metadata-dependent)
+  obj.dstBase = assignments.dst.base;
+  if (assignments.dst.step != null) {
+    obj.dstStep = assignments.dst.step;
+  }
+  if (
+    assignments.dst.overrides.length > 0 &&
+    assignments.dst.overrides.length <= MAX_URL_OVERRIDES
+  ) {
+    obj.dstOverrides = assignments.dst.overrides;
+  }
+
+  // Global
+  if (!hideAllUnchanged) {
+    obj.hideUnchanged = '0';
+  }
+
+  // Evaluation filters
+  if (evalFilters.length > 0) {
+    obj.evalFilters = evalFilters;
+  }
+
+  // MoveSets table
+  if (ms.partition != null) {
+    obj.msPartition = ms.partition;
+  }
+  if (ms.scope != null) {
+    obj.msScope = ms.scope;
+  }
+  if (ms.objectives.length > 0) {
+    obj.msObjectives = ms.objectives;
+  }
+  if (ms.filters.length > 0) {
+    obj.msFilters = ms.filters;
+  }
+  if (ms.offset !== 0) {
+    obj.msOffset = ms.offset;
+  }
+  if (ms.pageSize !== MS_DEFAULT_PAGE_SIZE) {
+    obj.msPageSize = ms.pageSize;
+  }
+  if (ms.orderColumn != null) {
+    obj.msOrderCol = ms.orderColumn;
+  }
+  if (ms.orderDirection !== 0) {
+    obj.msOrderDir = ms.orderDirection;
+  }
+  if (!ms.isMinimized) {
+    obj.msMinimized = '0';
+  }
+
+  return stringifyQs(obj);
+}

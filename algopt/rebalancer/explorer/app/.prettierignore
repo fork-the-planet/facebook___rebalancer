@@ -1,0 +1,8 @@
+.next
+node_modules
+public
+.vercel
+pnpm-lock.yaml
+package-lock.json
+__generated__
+*.graphql

@@ -1,0 +1,4 @@
+# Bootstrap schema - will be replaced by relay compiler
+type Query {
+  _placeholder: String
+}
