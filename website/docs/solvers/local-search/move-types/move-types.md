@@ -62,11 +62,11 @@ below lists the move types; dedicated pages for each will be linked from this ta
 | [Single Fast](single-fast.md) | Like Single, but stops after fully exploring the first object that improves the objective, so it may not explore all objects in the source container. |
 | [Single Greedy](single-greedy.md) | Tries moving every object to every possible destination, prioritizing destinations by how hot they are, and stops as soon as an improving move is found. Single threaded. |
 | [Single Random Batches](single-random-batches.md) | Like Single Greedy, but processes multiple containers at a time to benefit from multi-threading, stopping as soon as an improving move is found. |
-| Swap | Tries swapping each object in the source container with every other object in every possible destination container. |
-| Swap Full Containers | Tries exchanging all objects in the source container with all objects in every possible destination container. |
-| Swap Full With Empty Containers | Tries moving all objects in the source container to every possible empty destination container. |
+| [Swap](swap.md) | Tries swapping each object in the source container with every other object in every possible destination container. |
+| [Swap Full Containers](swap-full-containers.md) | Tries exchanging all objects in the source container with all objects in every possible destination container. |
+| [Swap Full With Empty Containers](swap-full-with-empty-containers.md) | Tries moving all objects in the source container to every possible empty destination container. |
 | Swap Sampled | Like Swap, but evaluates only a sampled subset of all possible swaps, controlled by parameters. |
-| Triple Loop | Tries moving every triplet of objects in a cycle, where one object is from the source container and the other two are from different destination containers. |
+| [Triple Loop](triple-loop.md) | Tries moving every triplet of objects in a cycle, where one object is from the source container and the other two are from different destination containers. |
 | KL Search | Inspired by the Kernighan–Lin algorithm: sequentially picks the move (in either direction) with the best objective change regardless of improvement, then keeps the point with the minimum objective. |
 | Single Chain | Tries all pairs of moves where an object leaves the hot container and a second object from another container takes its place. Prefer Single End Chain. |
 | Single End Chain | Tries all pairs of moves where an object moves from the hot container to a destination, and a second object from that destination moves to another destination. |
