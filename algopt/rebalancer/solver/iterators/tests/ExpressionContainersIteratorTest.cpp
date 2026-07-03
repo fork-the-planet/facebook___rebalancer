@@ -320,7 +320,6 @@ TEST_F(
       makeObjectVector(
           PackerMap<entities::ObjectId, double>{}, 1, 3, *universe),
       allContainers,
-      *universe,
       assignment);
   auto lookup2 = object_lookup(
       makeObjectVector(
@@ -328,7 +327,6 @@ TEST_F(
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{
               container(3), container(1), container(2)}),
-      *universe,
       assignment);
 
   auto obj = lookup1 + lookup2;
@@ -381,7 +379,6 @@ TEST_F(
           makeObjectVector(
               PackerMap<entities::ObjectId, double>{}, 5, 4, *universe),
           allContainers,
-          *universe,
           assignment)); // 20 (0 + 5 * 4))
 
   auto sum2 = 4 * variable(object(3), container(3), *universe, assignment);
@@ -392,7 +389,6 @@ TEST_F(
                   makeObjectVector(
                       PackerMap<entities::ObjectId, double>{}, 5, 4, *universe),
                   std::make_shared<PackerSet<entities::ContainerId>>(),
-                  *universe,
                   assignment); // sum constants and empty
                                // lookup; 13 (10 + 3)
 
@@ -401,7 +397,6 @@ TEST_F(
           PackerMap<entities::ObjectId, double>{}, 3, 4, *universe),
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(4)}),
-      *universe,
       assignment); // 3 (1 * 3; since container 4 has one object in it)
 
   auto lookup3 = object_lookup(
@@ -409,7 +404,6 @@ TEST_F(
           PackerMap<entities::ObjectId, double>{}, 2, 4, *universe),
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(2)}),
-      *universe,
       assignment); // 2 (1 * 2)
 
   auto obj = (sum1 + sum2 + sum3) + (lookup2 + lookup3);

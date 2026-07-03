@@ -50,7 +50,6 @@ BENCHMARK(AllChildrenYieldSameAffectedContainers) {
         makeObjectVector(
             PackerMap<entities::ObjectId, double>{}, 1, 4, universe),
         allContainers,
-        universe,
         assignment);
     inplace_add(obj, lookup);
   }
@@ -99,7 +98,6 @@ BENCHMARK(UpdateChildPotentialsOnlyIfRequired) {
           objectVector,
           std::make_shared<PackerSet<entities::ContainerId>>(
               PackerSet<entities::ContainerId>{container(j)}),
-          universe,
           emptyAssignment);
       childToCoeff[lookup] = 1;
     }
@@ -179,7 +177,6 @@ BENCHMARK(RefreshPotentialsFewChildChanges) {
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(
             PackerSet<entities::ContainerId>{container(i)}),
-        universe,
         emptyAssignment)] = 1;
   }
   auto sum = std::make_shared<LinearSum>(universe, 0, childToCoeff);
@@ -244,7 +241,6 @@ BENCHMARK(PruneOptimalSubgraph) {
         std::make_shared<PackerSet<entities::ContainerId>>(
             // note that there is no lookup w.r.t. containers 0 and 1
             PackerSet<entities::ContainerId>{container(i + 2)}),
-        universe,
         emptyAssignment);
     childToCoeff[lookup] = 1;
     inplace_add(obj0, std::make_shared<LinearSum>(universe, 1, childToCoeff));
@@ -255,7 +251,6 @@ BENCHMARK(PruneOptimalSubgraph) {
       objectVector,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(0)}),
-      universe,
       emptyAssignment);
 
   // initially all objects are in container 0

@@ -263,7 +263,7 @@ TEST(OrchestratorTest, DynamicChildrenTest) {
        {container(4), {}},
        {container(5), {}}});
   auto objectLookup1 =
-      object_lookup(objectVector1, allContainers, universe, initialAssignment);
+      object_lookup(objectVector1, allContainers, initialAssignment);
 
   // all objects have non-zero value; therefore, the AffectedByChangType for
   // lookup2 will be CONTAINERS_ONLY
@@ -273,7 +273,7 @@ TEST(OrchestratorTest, DynamicChildrenTest) {
       numTotalObjects,
       universe);
   auto objectLookup2 =
-      object_lookup(objectVector2, allContainers, universe, initialAssignment);
+      object_lookup(objectVector2, allContainers, initialAssignment);
 
   auto sum = objectLookup1 + objectLookup2;
 

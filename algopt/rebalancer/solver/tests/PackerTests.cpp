@@ -236,7 +236,6 @@ TEST_F(PackerTests, Lookup) {
           makeObjectVector({{object(0), 10}, {object(1), 5}}, *universe),
           std::make_shared<PackerSet<entities::ContainerId>>(
               PackerSet<entities::ContainerId>{container(0)}),
-          *universe,
           assignment),
       10,
       0,
@@ -623,7 +622,6 @@ TEST_F(PackerTests, MipLookup) {
           makeObjectVector({{object(0), 10}, {object(1), 5}}, *universe),
           std::make_shared<PackerSet<entities::ContainerId>>(
               PackerSet<entities::ContainerId>{container(0)}),
-          *universe,
           assignment),
       10,
       0,
@@ -855,19 +853,16 @@ TEST_F(PackerTests, StableStayedMultipleSolves) {
       ov,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(1)}),
-      *universe,
       assignment);
   auto after_2 = object_lookup(
       ov,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(2)}),
-      *universe,
       assignment);
   auto after_3 = object_lookup(
       ov,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(3)}),
-      *universe,
       assignment);
 
   auto stayed_1 = stable_stayed(

@@ -721,7 +721,6 @@ CO_TEST_F(SwapMoveTypeFilterTest, FilterReducesEvaluatedSwaps) {
   auto objectiveTuple = std::vector<ExprPtr>{object_lookup(
       makeAllUnequalObjectVector(3),
       containers,
-      *universe,
       Assignment(universe->getContainers().getInitialAssignment()))};
 
   interface::SwapMoveTypeSpec swapSpec;

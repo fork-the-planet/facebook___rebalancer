@@ -798,7 +798,6 @@ CO_TEST_F(GroupMoveWithHintStrategiesTest, EnsureAllTablesExplored) {
           makeAllUnequalObjectVectorLocal(numObjects),
           std::make_shared<PackerSet<entities::ContainerId>>(
               PackerSet<entities::ContainerId>{container("dummyRank")}),
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment())));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;
@@ -856,7 +855,6 @@ CO_TEST_F(
           makeAllUnequalObjectVectorLocal(numObjects),
           std::make_shared<PackerSet<entities::ContainerId>>(
               PackerSet<entities::ContainerId>{container("dummyRank")}),
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment())));
 
   interface::GroupMoveWithHintStrategiesMoveTypeSpec moveTypeSpec;

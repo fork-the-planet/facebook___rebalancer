@@ -82,7 +82,6 @@ CO_TEST_F(ReplicaDropMoveTypeTest, VerifyMoveSetBasic) {
       {object_lookup(
           makeAllUnequalObjectVector(8),
           containers,
-          *universe,
           Assignment(
               universe->getContainers().getInitialAssignment()))} /*objective*/,
       const_expr(0, *universe) /*constraint*/);
@@ -120,7 +119,6 @@ CO_TEST_F(ReplicaDropMoveTypeTest, VerifyMoveSetWithOutOfScopeObject) {
       {object_lookup(
           makeAllUnequalObjectVector(8),
           containers,
-          *universe,
           Assignment(
               universe->getContainers().getInitialAssignment()))} /*objective*/,
       const_expr(0, *universe) /*constraint*/);
@@ -167,7 +165,6 @@ CO_TEST_F(ReplicaDropMoveTypeTest, VerifyMoveSetBasicEmptyBest) {
       {object_lookup(
           objVector,
           containers,
-          *universe,
           Assignment(
               universe->getContainers().getInitialAssignment()))} /*objective*/,
       const_expr(0, *universe) /*constraint*/);

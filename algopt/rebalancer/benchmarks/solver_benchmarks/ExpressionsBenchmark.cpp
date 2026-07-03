@@ -157,7 +157,7 @@ static ExprPtr createObjectLookupWithGivenContainerSet(
 
   auto objectVector =
       makeObjectVector(objectToValue, 0, objectCount, *universe);
-  return object_lookup(objectVector, containers, *universe, assignment);
+  return object_lookup(objectVector, containers, assignment);
 }
 
 static ExprPtr createObjectLookup(
@@ -331,7 +331,6 @@ BENCHMARK(LookupPartialLargeChangeManyObjectsPerLookup) {
             objectVector,
             std::make_shared<PackerSet<entities::ContainerId>>(
                 std::move(containers)),
-            *universe,
             assignment));
   }
 
@@ -372,9 +371,7 @@ BENCHMARK(LookupPartialLargeChangeManyContainersPerLookup) {
 
   auto root = const_expr(0, *universe);
   for (const auto _ : folly::irange(nLookups)) {
-    inplace_add(
-        root,
-        object_lookup(objectVector, allContainers, *universe, assignment));
+    inplace_add(root, object_lookup(objectVector, allContainers, assignment));
   }
 
   // Perform an initial full_apply and then do a partial_apply with the
@@ -415,9 +412,7 @@ BENCHMARK(EvaluateSmallChangesAvoidLeavesDedupe) {
     auto containers = std::make_shared<PackerSet<entities::ContainerId>>();
     containers->insert(container(i % containerCount, universe));
     inplace_add(
-        root,
-        object_lookup(
-            objectVector, std::move(containers), *universe, assignment));
+        root, object_lookup(objectVector, std::move(containers), assignment));
   }
 
   // Perform an initial full_apply and then do a partial_apply with the
@@ -665,8 +660,7 @@ BENCHMARK(EquivalentSetsComputation) {
         PackerMap<entities::ObjectId, double>{}, 1, nObjects, *universe);
     auto containersPtr = std::make_shared<PackerSet<entities::ContainerId>>(
         PackerSet<entities::ContainerId>({container(0, universe)}));
-    auto objectLookup =
-        object_lookup(objectVector, containersPtr, *universe, assignment);
+    auto objectLookup = object_lookup(objectVector, containersPtr, assignment);
     exprs.push_back(objectLookup);
   }
 
@@ -699,8 +693,7 @@ BENCHMARK(EquivalentSetsComputationLinearSum) {
   for (const auto _ : folly::irange(nExprs)) {
     auto objectVector = makeObjectVector(
         PackerMap<entities::ObjectId, double>{}, 1, nObjects, *universe);
-    auto objectLookup =
-        object_lookup(objectVector, containersPtr, *universe, assignment);
+    auto objectLookup = object_lookup(objectVector, containersPtr, assignment);
     sum += objectLookup;
   }
   orchestrator.init(
@@ -751,7 +744,6 @@ BENCHMARK(EquivalenceSetsComputationEarlyStop) {
     sum += object_lookup(
         makeObjectVector(objectToValue, 0, nObjects, *universe),
         containersPtr,
-        *universe,
         assignment);
 
     orchestrator.init(
@@ -924,8 +916,7 @@ BENCHMARK(LookupEvalSparseObjectIndexed) {
     }
     inplace_add(
         objective,
-        object_lookup(
-            objectVector, std::move(containers), *universe, assignment));
+        object_lookup(objectVector, std::move(containers), assignment));
   }
 
   Context context;

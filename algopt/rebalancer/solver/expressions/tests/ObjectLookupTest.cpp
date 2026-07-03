@@ -133,7 +133,6 @@ TEST_F(ObjectLookupTest, LookupPartialApplyUsingObjects) {
       objectVector,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(1)}),
-      universe,
       assignment);
 
   // after the initial apply, we expect objectLookup to evaluate to (10 + 4) =
@@ -229,7 +228,6 @@ TEST_F(ObjectLookupTest, isInteger) {
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(
             PackerSet<entities::ContainerId>{container(1)}),
-        universe,
         assignment);
     Context intContext;
     EXPECT_TRUE(objectVector->is_integer(intContext));
@@ -248,7 +246,6 @@ TEST_F(ObjectLookupTest, isInteger) {
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(
             PackerSet<entities::ContainerId>{container(1)}),
-        universe,
         assignment);
     Context intContext;
     EXPECT_FALSE(objectVector->is_integer(intContext));
@@ -267,7 +264,6 @@ TEST_F(ObjectLookupTest, isInteger) {
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(
             PackerSet<entities::ContainerId>{container(1)}),
-        universe,
         assignment);
     Context intContext;
     EXPECT_FALSE(objectVector->is_integer(intContext));
@@ -286,7 +282,6 @@ TEST_F(ObjectLookupTest, isInteger) {
         objectVector,
         std::make_shared<PackerSet<entities::ContainerId>>(
             PackerSet<entities::ContainerId>{container(1)}),
-        universe,
         assignment);
 
     // although default value is 0.5, all the objects have integral values; so
@@ -333,7 +328,6 @@ TEST_F(ObjectLookupTest, ObjectLookupInitialValue) {
       objVec,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(0)}),
-      universe,
       assignment);
 
   EXPECT_EQ(15.0, lookupC0->getInitialValue());
@@ -342,7 +336,6 @@ TEST_F(ObjectLookupTest, ObjectLookupInitialValue) {
       objVec,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(1)}),
-      universe,
       assignment);
   EXPECT_EQ(3.0, lookupC1->getInitialValue());
 
@@ -350,7 +343,6 @@ TEST_F(ObjectLookupTest, ObjectLookupInitialValue) {
       objVec,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(0), container(1)}),
-      universe,
       assignment);
   EXPECT_EQ(18.0, lookupBoth->getInitialValue());
 }

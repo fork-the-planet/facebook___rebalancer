@@ -67,8 +67,7 @@ CO_TEST_F(ObjectLookupDynamicTest, Basic) {
   auto sumOfLookups = const_expr(0, universe);
   const Assignment initialAssignment(
       universe.getContainers().getInitialAssignment());
-  sumOfLookups +=
-      object_lookup(objVec, containers, universe, initialAssignment);
+  sumOfLookups += object_lookup(objVec, containers, initialAssignment);
 
   // Create ObjectLookupDynamic for scopeItem0
   auto lookupDynamic = object_lookup_dynamic(sumOfLookups, dynamicDimension);
@@ -106,7 +105,7 @@ CO_TEST_F(ObjectLookupDynamicTest, ThrowsOnNonDynamicDimension) {
       PackerSet<entities::ContainerId>{container(0)});
   const Assignment initialAssignment(
       universe.getContainers().getInitialAssignment());
-  auto lookup = object_lookup(objVec, containers, universe, initialAssignment);
+  auto lookup = object_lookup(objVec, containers, initialAssignment);
 
   REBALANCER_EXPECT_RUNTIME_ERROR(
       object_lookup_dynamic({lookup}, staticDimension),
@@ -171,7 +170,6 @@ CO_TEST_F(ObjectLookupDynamicTest, ContainerCoverage) {
   auto lookup01 = object_lookup(
       makeObjectVector({{object(0), 10}}, universe),
       container01,
-      universe,
       initialAssignment);
   auto sumOfLookups01 = const_expr(0, universe);
   sumOfLookups01 += lookup01;
@@ -185,7 +183,6 @@ CO_TEST_F(ObjectLookupDynamicTest, ContainerCoverage) {
   sumOfLookups += object_lookup(
       makeObjectVector({{object(1), 10}}, universe),
       container1Ptr,
-      universe,
       initialAssignment);
 
   auto container2Ptr = std::make_shared<PackerSet<entities::ContainerId>>(
@@ -193,7 +190,6 @@ CO_TEST_F(ObjectLookupDynamicTest, ContainerCoverage) {
   sumOfLookups += object_lookup(
       makeObjectVector({{object(2), 10}}, universe),
       container2Ptr,
-      universe,
       initialAssignment);
 
   auto dynamicObjLookupExpr =
@@ -287,13 +283,13 @@ CO_TEST_F(ObjectLookupDynamicTest, EvaluateAndPartialApply) {
   auto sumOfLookups = const_expr(0, universe);
   const Assignment initialAssignment(
       universe.getContainers().getInitialAssignment());
-  sumOfLookups += object_lookup(
-      objVecScopeItem0, scopeItem0Containers, universe, initialAssignment);
+  sumOfLookups +=
+      object_lookup(objVecScopeItem0, scopeItem0Containers, initialAssignment);
   auto scopeItem1Containers =
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(2)});
-  sumOfLookups += object_lookup(
-      objVecScopeItem1, scopeItem1Containers, universe, initialAssignment);
+  sumOfLookups +=
+      object_lookup(objVecScopeItem1, scopeItem1Containers, initialAssignment);
 
   auto lookupDynamic = object_lookup_dynamic(sumOfLookups, dynamicDimension);
 

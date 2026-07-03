@@ -78,7 +78,6 @@ CO_TEST_F(SingleRandomObjectStratifiedMoveTypeTest, Basic) {
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(/*objectCount=*/9),
           getAllContainers(*universe),
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -102,7 +101,6 @@ CO_TEST_F(SingleRandomObjectStratifiedMoveTypeTest, NoUsefulMoves) {
       {object_lookup(
           makeAllUnequalObjectVector(/*objectCount=*/15),
           getAllContainers(*universe),
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -154,7 +152,6 @@ CO_TEST_F(SingleRandomObjectStratifiedMoveTypeTest, SampleSizeLargerThanTotal) {
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(/*objectCount=*/9),
           getAllContainers(*universe),
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 

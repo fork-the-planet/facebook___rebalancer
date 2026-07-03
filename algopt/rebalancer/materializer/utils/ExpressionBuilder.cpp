@@ -259,7 +259,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
       : getObjectVector(dimensionId, 0);
 
   co_return object_lookup(
-      objectVector, relevantContainerIds, *universe_, initialAssignment_);
+      objectVector, relevantContainerIds, initialAssignment_);
 }
 
 double ExpressionBuilder::getUpperBound(const Expression& expression) {
@@ -814,10 +814,7 @@ std::shared_ptr<ObjectLookup> ExpressionBuilder::getObjectLookup(
     std::shared_ptr<const PackerSet<entities::ContainerId>> containerIds,
     std::shared_ptr<ObjectVector> objectVector) {
   return object_lookup(
-      std::move(objectVector),
-      std::move(containerIds),
-      *universe_,
-      initialAssignment_);
+      std::move(objectVector), std::move(containerIds), initialAssignment_);
 }
 
 std::shared_ptr<ObjectLookup> ExpressionBuilder::getObjectLookupOutOfScope(
@@ -826,7 +823,6 @@ std::shared_ptr<ObjectLookup> ExpressionBuilder::getObjectLookupOutOfScope(
   return object_lookup(
       std::move(objectVector),
       getContainersOutOfScopePtr(scopeId),
-      *universe_,
       initialAssignment_);
 }
 

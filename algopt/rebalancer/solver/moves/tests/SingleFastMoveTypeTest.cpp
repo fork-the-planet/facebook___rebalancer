@@ -71,7 +71,6 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveSetBasic) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -107,7 +106,6 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveSetBasicBiggerMinHotObject) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -145,7 +143,6 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveSetBasic2) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -185,7 +182,6 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveEvalsWithExploreInRegion) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -228,7 +224,6 @@ CO_TEST_F(
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -287,7 +282,6 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveEvalsWithMoveToScopeItems) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -387,7 +381,6 @@ CO_TEST_F(SingleFastMoveTypeTest, VerifyMoveEvalsGroupToScopeItemLists) {
       {object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, getUniverse()));
 
@@ -439,7 +432,6 @@ CO_TEST_F(SingleFastMoveTypeTest, FilterReducesEvaluatedMoves) {
   auto objectiveTuple = std::vector<ExprPtr>{object_lookup(
       makeAllUnequalObjectVector(9),
       containers,
-      *universe,
       Assignment(universe->getContainers().getInitialAssignment()))};
 
   // Without filter: all destinations evaluated

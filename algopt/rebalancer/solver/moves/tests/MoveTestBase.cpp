@@ -127,7 +127,6 @@ ExprPtr MoveTestBaseT<T>::makeObjectLookup(
   return object_lookup(
       std::move(objectVector),
       std::make_shared<PackerSet<entities::ContainerId>>(containers),
-      getUniverse(),
       assignment);
 }
 

@@ -445,8 +445,8 @@ ExprPtr bipartite_swaps(
 std::shared_ptr<ObjectLookup> object_lookup(
     ExprPtr obj_vec,
     std::shared_ptr<const PackerSet<entities::ContainerId>> containersPtr,
-    const entities::Universe& universe,
     const Assignment& initialAssignment) {
+  const auto& universe = obj_vec->getUniverse();
   return make_shared<ObjectLookup>(
       std::move(obj_vec),
       std::move(containersPtr),

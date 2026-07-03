@@ -125,7 +125,6 @@ static ExprPtr getSumOfPairsOfContainers(
                   PackerSet<entities::ContainerId>{
                       universe->getContainerId(fmt::format("container{}", i)),
                       universe->getContainerId(fmt::format("container{}", j))}),
-              *universe,
               assignment));
     }
   }
@@ -148,7 +147,6 @@ static ExprPtr getMaxOfContainers(
             std::make_shared<PackerSet<entities::ContainerId>>(
                 PackerSet<entities::ContainerId>{
                     universe->getContainerId(fmt::format("container{}", i))}),
-            *universe,
             assignment),
         *universe);
   }

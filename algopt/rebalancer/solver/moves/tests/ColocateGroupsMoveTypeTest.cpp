@@ -148,7 +148,6 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, VerifyMoveSetsBasic) {
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
       const_expr(0, getUniverse()));
 
@@ -199,7 +198,6 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, VerifyMoveSetsWithSampling) {
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
       const_expr(0, getUniverse()));
 
@@ -246,7 +244,6 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, VerifyMoveSetsWithGroupToContainers) {
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
       const_expr(0, getUniverse()));
 
@@ -303,7 +300,6 @@ CO_TEST_F(
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
       const_expr(0, getUniverse()));
 
@@ -363,7 +359,6 @@ CO_TEST_F(
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
       const_expr(0, getUniverse()));
 
@@ -422,7 +417,6 @@ CO_TEST_F(
       {object_lookup(
           makeLoadObjectVector(),
           getContainerSet(),
-          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
       const_expr(0, getUniverse()));
 
@@ -471,7 +465,6 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, VerifyMoveSetsBasicNoBetterMove) {
   auto objective = object_lookup(
       makeLoadObjectVector(),
       allContainers,
-      getUniverse(),
       Assignment(getUniverse().getContainers().getInitialAssignment()));
   createProblem({objective}, const_expr(0, getUniverse()));
 
@@ -546,7 +539,6 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, FindBestMoveStopsAtTimeLimit) {
       {object_lookup(
           makeObjectVector(objectToLoad, getUniverse()),
           containerSet,
-          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
       const_expr(0, getUniverse()));
 

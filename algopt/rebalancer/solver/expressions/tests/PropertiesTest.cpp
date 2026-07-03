@@ -154,7 +154,6 @@ TEST_F(PropertiesTest, ObjectLookup) {
       makeObjectVector(PackerMap<entities::ObjectId, double>(), universe),
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{container(3), container(4)}),
-      universe,
       assignment);
   ASSERT_EQ("ObjectLookup", lookup->getType());
 

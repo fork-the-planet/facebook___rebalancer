@@ -83,7 +83,6 @@ CO_TEST_F(SingleRandomStratifiedMoveTypeTest, VerifyMoveSetBasic) {
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -130,7 +129,6 @@ CO_TEST_F(SingleRandomStratifiedMoveTypeTest, VerifyMoveSetBasic2) {
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(9, /*negateAllValues=*/true),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -173,7 +171,6 @@ CO_TEST_F(
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -222,7 +219,6 @@ CO_TEST_F(
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -287,7 +283,6 @@ CO_TEST_F(
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -425,7 +420,6 @@ CO_TEST_F(
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -547,7 +541,6 @@ CO_TEST_F(
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -586,7 +579,6 @@ CO_TEST_F(
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          *universe,
           Assignment(universe->getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 
@@ -660,7 +652,6 @@ CO_TEST_F(SingleRandomStratifiedMoveTypeTest, VerifyGroupToScopeItemLists) {
       /*objectiveTuple=*/{object_lookup(
           makeAllUnequalObjectVector(9),
           containers,
-          getUniverse(),
           Assignment(getUniverse().getContainers().getInitialAssignment()))},
       /*constraint=*/const_expr(0, *universe));
 

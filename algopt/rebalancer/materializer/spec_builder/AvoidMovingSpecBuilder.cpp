@@ -65,7 +65,6 @@ static ExprPtr getStayedObjectCountExpr(
       objVector,
       std::make_shared<PackerSet<entities::ContainerId>>(
           PackerSet<entities::ContainerId>{containerId}),
-      universe,
       expressionBuilder.getInitialAssignment());
 }
 
