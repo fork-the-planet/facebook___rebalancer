@@ -45,7 +45,7 @@ GlobalObjective::Builder& GlobalObjective::Builder::addToObjective(
     objectives_[pos] = const_expr(0, universe);
   }
 
-  inplace_add(objectives_.at(pos), expr, universe);
+  inplace_add(objectives_.at(pos), expr);
 
   return *this;
 }

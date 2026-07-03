@@ -332,8 +332,7 @@ BENCHMARK(LookupPartialLargeChangeManyObjectsPerLookup) {
             std::make_shared<PackerSet<entities::ContainerId>>(
                 std::move(containers)),
             *universe,
-            assignment),
-        *universe);
+            assignment));
   }
 
   // Perform an initial full_apply and then do a partial_apply with the
@@ -375,8 +374,7 @@ BENCHMARK(LookupPartialLargeChangeManyContainersPerLookup) {
   for (const auto _ : folly::irange(nLookups)) {
     inplace_add(
         root,
-        object_lookup(objectVector, allContainers, *universe, assignment),
-        *universe);
+        object_lookup(objectVector, allContainers, *universe, assignment));
   }
 
   // Perform an initial full_apply and then do a partial_apply with the
@@ -419,8 +417,7 @@ BENCHMARK(EvaluateSmallChangesAvoidLeavesDedupe) {
     inplace_add(
         root,
         object_lookup(
-            objectVector, std::move(containers), *universe, assignment),
-        *universe);
+            objectVector, std::move(containers), *universe, assignment));
   }
 
   // Perform an initial full_apply and then do a partial_apply with the
@@ -887,7 +884,6 @@ BENCHMARK(ObjectPartitionLookupBounds) {
               PackerSet<entities::ContainerId>{containerId}),
           scopeId,
           scopeItem0,
-          *universe,
           assignment);
     }
   }
@@ -929,8 +925,7 @@ BENCHMARK(LookupEvalSparseObjectIndexed) {
     inplace_add(
         objective,
         object_lookup(
-            objectVector, std::move(containers), *universe, assignment),
-        *universe);
+            objectVector, std::move(containers), *universe, assignment));
   }
 
   Context context;
@@ -1067,8 +1062,10 @@ BENCHMARK(LinearSumEvalAllCoeffsOne) {
     inplace_add(
         objective,
         variable(
-            object(0, universe), container(0, universe), *universe, assignment),
-        *universe);
+            object(0, universe),
+            container(0, universe),
+            *universe,
+            assignment));
   }
 
   Context context;
@@ -1112,7 +1109,6 @@ BENCHMARK(LinearSumEvalMixedCoeffs) {
         objective,
         variable(
             object(0, universe), container(0, universe), *universe, assignment),
-        *universe,
         coef);
   }
 

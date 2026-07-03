@@ -475,15 +475,15 @@ TEST_F(LinearSumTest, InplaceAddInitialValue) {
 
   // inplace_add from nullptr: 0 + 4*v0 = 4
   ExprPtr expr = nullptr;
-  inplace_add(expr, v0, universe, 4);
+  inplace_add(expr, v0, 4);
   EXPECT_NEAR(4.0, expr->getInitialValue(), kEps);
 
   // Negative coef: 4 + (-2)*v1 = 2
-  inplace_add(expr, v1, universe, -2);
+  inplace_add(expr, v1, -2);
   EXPECT_NEAR(2.0, expr->getInitialValue(), kEps);
 
   // Zero-valued child: 2 + 5*0 = 2
-  inplace_add(expr, v0_other, universe, 5);
+  inplace_add(expr, v0_other, 5);
   EXPECT_NEAR(2.0, expr->getInitialValue(), kEps);
 }
 

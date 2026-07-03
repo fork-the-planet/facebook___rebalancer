@@ -316,7 +316,7 @@ folly::coro::Task<ExprPtr> GroupCountSpecBuilder::buildSingleRequirement(
     // integer
     auto temp = expr / limitConstant;
     // return the "distance" from nearest integer multiple of limit
-    expr = (ceil(temp, *universe_) - temp) * limitConstant;
+    expr = (ceil(temp) - temp) * limitConstant;
   } else if (bound == GroupCountSpecBound::MAX) {
     expr = expr - limitExpr;
     if (squares) {

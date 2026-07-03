@@ -149,14 +149,11 @@ void operator+=(ExprPtr& lhs, ExprPtr rhs) {
   combine(lhs, std::move(rhs), 1);
 }
 
-void inplace_add(
-    ExprPtr& lhs,
-    ExprPtr rhs,
-    const entities::Universe& universe,
-    double coef) {
+void inplace_add(ExprPtr& lhs, ExprPtr rhs, double coef) {
   if (rhs == nullptr) {
     return;
   }
+  const auto& universe = rhs->getUniverse();
   if (lhs == nullptr) {
     lhs = const_expr(0, universe);
   }
@@ -414,14 +411,13 @@ vector<ExprPtr> equals(ExprPtr lhs, ExprPtr rhs) {
   return {lhs - rhs, std::move(rhs) - std::move(lhs)};
 }
 
-vector<ExprPtr>
-equals(ExprPtr lhs, double rhs, const entities::Universe& universe) {
+vector<ExprPtr> equals(ExprPtr lhs, double rhs) {
+  const auto& universe = lhs->getUniverse();
   return equals(std::move(lhs), const_expr(rhs, universe));
 }
 
-vector<ExprPtr>
-equals(double lhs, ExprPtr rhs, const entities::Universe& universe) {
-  return equals(std::move(rhs), lhs, universe);
+vector<ExprPtr> equals(double lhs, ExprPtr rhs) {
+  return equals(std::move(rhs), lhs);
 }
 
 ExprPtr swaps(
@@ -507,7 +503,6 @@ ExprPtr object_partition_lookup(
     std::shared_ptr<const PackerSet<entities::ContainerId>> lookupContainersPtr,
     entities::ScopeId scopeId,
     entities::ScopeItemId scopeItemId,
-    const entities::Universe& universe,
     const Assignment& initialAssignment,
     PackerMap<entities::GroupId, double> groupLimitOverrides,
     PackerSet<entities::ObjectId> initialDuringObjects,
@@ -515,6 +510,7 @@ ExprPtr object_partition_lookup(
     ObjectPartitionLookupPenaltyTransform penaltyTransform,
     int groupsAllowed,
     bool minBound) {
+  const auto& universe = objectPartition->getUniverse();
   return make_shared<ObjectPartitionLookupDefault>(
       objectPartition,
       lookupContainersPtr,
@@ -574,8 +570,8 @@ ExprPtr step(ExprPtr expr) {
   return make_shared<Step>(expr, expr->getUniverse());
 }
 
-ExprPtr ceil(ExprPtr expr, const entities::Universe& universe) {
-  return make_shared<Ceil>(expr, universe);
+ExprPtr ceil(ExprPtr expr) {
+  return make_shared<Ceil>(expr, expr->getUniverse());
 }
 
 ExprPtr step_mod_k(ExprPtr expr, int k) {
@@ -584,9 +580,8 @@ ExprPtr step_mod_k(ExprPtr expr, int k) {
   } else if (k == 1) {
     return expr;
   } else {
-    const auto& universe = expr->getUniverse();
     auto quotient = std::move(expr) / k;
-    auto nextInt = ceil(quotient, universe);
+    auto nextInt = ceil(quotient);
     // (nextInt - quotient) is not same as expr % k
     // but step(nextInt - quotient) is equivalent to step(expr % k)
     return step(std::move(nextInt) - std::move(quotient));

@@ -89,7 +89,7 @@ static ExprPtr getSumOfContainersUsingVars(
 
   auto sumOfAllContainers = rebalancer::const_expr(0, *universe);
   for (const auto i : folly::irange(containerCount)) {
-    inplace_add(sumOfAllContainers, containerSum.at(i), *universe);
+    inplace_add(sumOfAllContainers, containerSum.at(i));
   }
 
   return sumOfAllContainers;
@@ -126,8 +126,7 @@ static ExprPtr getSumOfPairsOfContainers(
                       universe->getContainerId(fmt::format("container{}", i)),
                       universe->getContainerId(fmt::format("container{}", j))}),
               *universe,
-              assignment),
-          *universe);
+              assignment));
     }
   }
 

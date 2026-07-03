@@ -52,7 +52,7 @@ BENCHMARK(AllChildrenYieldSameAffectedContainers) {
         allContainers,
         universe,
         assignment);
-    inplace_add(obj, lookup, universe);
+    inplace_add(obj, lookup);
   }
 
   Context context;
@@ -103,8 +103,7 @@ BENCHMARK(UpdateChildPotentialsOnlyIfRequired) {
           emptyAssignment);
       childToCoeff[lookup] = 1;
     }
-    inplace_add(
-        obj, std::make_shared<LinearSum>(universe, 1, childToCoeff), universe);
+    inplace_add(obj, std::make_shared<LinearSum>(universe, 1, childToCoeff));
   }
 
   // initially all objects are in container 0
@@ -248,8 +247,7 @@ BENCHMARK(PruneOptimalSubgraph) {
         universe,
         emptyAssignment);
     childToCoeff[lookup] = 1;
-    inplace_add(
-        obj0, std::make_shared<LinearSum>(universe, 1, childToCoeff), universe);
+    inplace_add(obj0, std::make_shared<LinearSum>(universe, 1, childToCoeff));
   }
 
   // incentive to empty container0

@@ -46,8 +46,7 @@ static ExprPtr getStayedObjectCountExpr(
     for (auto objectId : objectIds) {
       inplace_add(
           stayedObjectCount,
-          expressionBuilder.isAssigned(containerId, objectId),
-          universe);
+          expressionBuilder.isAssigned(containerId, objectId));
     }
     return stayedObjectCount;
   }

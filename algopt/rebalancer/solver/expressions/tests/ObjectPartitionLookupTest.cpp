@@ -1615,7 +1615,6 @@ CO_TEST_F(ObjectPartitionLookupTest, ObjectPartitionLookupInitialValue) {
           PackerSet<entities::ContainerId>{container(0)}),
       scope(),
       scopeItem(),
-      universe,
       assignment);
   EXPECT_EQ(1.0, lookup->getInitialValue());
 }

@@ -144,12 +144,11 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
     auto absoluteUtil = co_await expressionBuilder.getAbsoluteUtil(
         UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId);
 
-    inplace_add(
-        sumOverUtilSquared, (1 / cost) * power(absoluteUtil, 1.1), *universe_);
+    inplace_add(sumOverUtilSquared, (1 / cost) * power(absoluteUtil, 1.1));
 
     // if absoluteUtil > 0 then step(absoluteUtil) = 1
     // else step(absoluteUtil) = 0
-    inplace_add(occupiedScopeItemsCount, step(absoluteUtil), *universe_);
+    inplace_add(occupiedScopeItemsCount, step(absoluteUtil));
   }
 
   // create a single lookup expr over all scopeItemIdsToFree

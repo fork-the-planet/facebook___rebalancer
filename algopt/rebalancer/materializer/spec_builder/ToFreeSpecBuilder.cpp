@@ -153,8 +153,7 @@ folly::coro::Task<ExprPtr> ToFreeSpecBuilder::getMinimizeTotalUtilFormulaExpr(
     inplace_add(
         objective,
         co_await expressionBuilder.getAbsoluteUtil(
-            UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId),
-        *universe_);
+            UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId));
   }
 
   co_return objective;
@@ -205,7 +204,7 @@ ToFreeSpecBuilder::getMinimizeOccupiedContainersContinuousFormulaExpr(
     scopeItemIdsToFree.emplace_back(scopeItemId);
     auto absoluteUtil = co_await expressionBuilder.getAbsoluteUtil(
         UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId);
-    inplace_add(sumOverUtilSquared, power(absoluteUtil, 2), *universe_);
+    inplace_add(sumOverUtilSquared, power(absoluteUtil, 2));
   }
 
   // create a single lookup expr over all scopeItemIdsToFree
@@ -229,8 +228,7 @@ ToFreeSpecBuilder::getMinimizeOccupiedContainersDiscreteFormulaExpr(
         objective,
         step(
             co_await expressionBuilder.getAbsoluteUtil(
-                UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId)),
-        *universe_);
+                UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId)));
   }
 
   co_return objective;

@@ -305,7 +305,6 @@ CO_TEST_F(PropertiesTestCustom, ObjectPartitionLookup) {
       std::make_shared<PackerSet<entities::ContainerId>>(),
       containerScopeId,
       container1ScopeItemId,
-      universe,
       assignment);
   EXPECT_EQ("ObjectPartitionLookup", objPartitionLookup->getType());
 }

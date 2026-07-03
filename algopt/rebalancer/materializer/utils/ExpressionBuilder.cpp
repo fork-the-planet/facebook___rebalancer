@@ -414,7 +414,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
 
   auto totalUtil = const_expr(0, *universe_);
   for (auto& [groupId, _] : routingConfig.getGroupToRoutingRings()) {
-    inplace_add(totalUtil, getGroupUtil(routingConfigId, groupId), *universe_);
+    inplace_add(totalUtil, getGroupUtil(routingConfigId, groupId));
   }
 
   co_return totalUtil;
@@ -1238,7 +1238,6 @@ std::shared_ptr<Expression> ExpressionBuilder::createObjectPartitionLookup(
       universe_->getScope(scopeId).getContainerIdsPtr(scopeItemId),
       scopeId,
       scopeItemId,
-      *universe_,
       initialAssignment_,
       overrides,
       std::move(initialObjects),
@@ -1396,8 +1395,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getBoundedAbsoluteUtil(
     for (auto groupId : partition.getGroupIds()) {
       auto boundValue = folly::get_default(groupLimits, groupId, *defaultValue);
       auto groupUtilExpr = co_await getGroupUtilExpr(groupId);
-      inplace_add(
-          utilExpr, boundedUtilExpr(groupUtilExpr, boundValue), *universe_);
+      inplace_add(utilExpr, boundedUtilExpr(groupUtilExpr, boundValue));
     }
   } else {
     // Optimized way: only bound utilization of groups that have a limit
@@ -1405,15 +1403,14 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getBoundedAbsoluteUtil(
     auto boundedGroupsTotalUtil = const_expr(0, *universe_);
     for (auto& [groupId, boundValue] : groupLimits) {
       auto groupUtilExpr = co_await getGroupUtilExpr(groupId);
-      inplace_add(boundedGroupsTotalUtil, groupUtilExpr, *universe_);
-      inplace_add(
-          utilExpr, boundedUtilExpr(groupUtilExpr, boundValue), *universe_);
+      inplace_add(boundedGroupsTotalUtil, groupUtilExpr);
+      inplace_add(utilExpr, boundedUtilExpr(groupUtilExpr, boundValue));
     }
     // collect util of remaining groups succinctly as follows
     auto remainingGroupsUtil =
         co_await getAbsoluteUtil(metric, dimensionId, scopeId, scopeItemId) -
         boundedGroupsTotalUtil;
-    inplace_add(utilExpr, remainingGroupsUtil, *universe_);
+    inplace_add(utilExpr, remainingGroupsUtil);
   }
   co_return utilExpr;
 }

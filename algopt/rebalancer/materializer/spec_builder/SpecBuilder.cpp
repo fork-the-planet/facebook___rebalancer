@@ -50,8 +50,7 @@ ExprPtr SpecBuilder::getAggregatedConstraintViolation(
     const entities::Universe& universe) {
   auto aggregatedViolation = const_expr(0, universe);
   for (auto& constraint : constraints) {
-    inplace_add(
-        aggregatedViolation, getConstraintViolation(constraint), universe);
+    inplace_add(aggregatedViolation, getConstraintViolation(constraint));
   }
 
   return aggregatedViolation;

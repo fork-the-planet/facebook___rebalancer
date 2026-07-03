@@ -114,7 +114,6 @@ CO_TEST_F(ExpressionContainersIteratorTest, ContainerTies) {
               container(1), container(2), container(3)}),
       scopeId,
       scopeItemId,
-      *universe,
       assignment);
   auto lookup2 = object_partition_lookup(
       op,
@@ -123,7 +122,6 @@ CO_TEST_F(ExpressionContainersIteratorTest, ContainerTies) {
               container(4), container(5), container(2)}),
       scopeId,
       scopeItemId,
-      *universe,
       assignment);
   auto root = lookup1 + lookup2;
 
@@ -233,7 +231,6 @@ CO_TEST_F(ExpressionContainersIteratorTest, ContainerTiesObjectiveTuple) {
               container(1), container(2), container(3)}),
       scopeId,
       scopeItemId,
-      *universe,
       assignment); // value = 3, lb = 0, potential = 3
   lookup1->description = "lookup1";
   auto lookup2 = object_partition_lookup(
@@ -243,7 +240,6 @@ CO_TEST_F(ExpressionContainersIteratorTest, ContainerTiesObjectiveTuple) {
               container(4), container(5), container(2)}),
       scopeId,
       scopeItemId,
-      *universe,
       assignment); // value = 0, lb = 0, potential = 0
   lookup2->description = "lookup2";
   auto ls1 = variable(object(1), container(1), *universe, assignment) +
@@ -386,11 +382,10 @@ TEST_F(
               PackerMap<entities::ObjectId, double>{}, 5, 4, *universe),
           allContainers,
           *universe,
-          assignment),
-      *universe); // 20 (0 + 5 * 4))
+          assignment)); // 20 (0 + 5 * 4))
 
   auto sum2 = 4 * variable(object(3), container(3), *universe, assignment);
-  inplace_add(sum2, const_expr(0, *universe), *universe); // 4 (4 + 0)
+  inplace_add(sum2, const_expr(0, *universe)); // 4 (4 + 0)
 
   auto sum3 = const_expr(10, *universe) + const_expr(3, *universe) +
       object_lookup(
@@ -486,7 +481,6 @@ CO_TEST_F(
               container(1), container(2), container(3)}),
       scopeId,
       scopeItemId,
-      *universe,
       assignment); // value = 3, lb = 0, potential = 3
   lookup1->description = "lookup1";
   const auto lookup2 = object_partition_lookup(
@@ -496,7 +490,6 @@ CO_TEST_F(
               container(4), container(5), container(2)}),
       scopeId,
       scopeItemId,
-      *universe,
       assignment); // value = 0, lb = 0, potential = 0
   lookup2->description = "lookup2";
   const auto ls1 = variable(object(1), container(1), *universe, assignment) +

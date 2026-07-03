@@ -63,8 +63,7 @@ BipartiteSwapsSpecBuilder::constraints(
           std::move(leftSubset),
           std::move(rightSubset),
           *universe_),
-      1,
-      *universe_);
+      1);
   std::vector<ConstraintInfo> constraintInfos;
   constraintInfos.reserve(exprs.size());
   for (auto& expr : exprs) {

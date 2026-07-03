@@ -315,7 +315,7 @@ TEST(OrchestratorTest, MultiRootEvaluate) {
   auto v2 = variable(object(0), container(2), universe, initialAssignment);
 
   ExprPtr sum1 = const_expr(0, universe);
-  inplace_add(sum1, max(0, v0 + v1, universe), universe);
+  inplace_add(sum1, max(0, v0 + v1, universe));
 
   sum1->description = "sum1";
 

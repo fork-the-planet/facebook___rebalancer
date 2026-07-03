@@ -152,7 +152,7 @@ struct BenchmarkFixture {
           folly::F14FastMap<entities::ScopeItemId, double>{},
           1.0,
           GroupScopeItemTransformUtil::TransformFunctionType::STEP);
-      inplace_add(root, expr, *universe);
+      inplace_add(root, expr);
     }
 
     root->fullApply(TopToBottomEvaluator(context), assignment);

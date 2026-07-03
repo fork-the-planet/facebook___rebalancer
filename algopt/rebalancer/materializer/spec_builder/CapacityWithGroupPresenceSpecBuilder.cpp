@@ -565,8 +565,7 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilInMainScopeItem(
               aggregationGroupId,
               aggregationScopeItemId,
               expressionBuilder,
-              makeContinuousPenaltyTerm),
-          *universe_);
+              makeContinuousPenaltyTerm));
     }
   }
   co_return groupUtil;
@@ -636,7 +635,7 @@ ExprPtr CapacityWithGroupPresenceSpecBuilder::getWeightedExpr(
     const std::vector<interface::GroupUtilMultiplierTarget>& targets,
     bool applyCeilAfterEach) const {
   if (applyCeilAfterEach) {
-    expr = ceil(expr, *universe_);
+    expr = ceil(expr);
   }
   auto weightedExpr = 1 * expr;
   for (const auto& target : targets) {
@@ -650,7 +649,7 @@ ExprPtr CapacityWithGroupPresenceSpecBuilder::getWeightedExpr(
 
       weightedExpr *= weight;
       if (applyCeilAfterEach) {
-        weightedExpr = ceil(weightedExpr, *universe_);
+        weightedExpr = ceil(weightedExpr);
       }
     }
   }

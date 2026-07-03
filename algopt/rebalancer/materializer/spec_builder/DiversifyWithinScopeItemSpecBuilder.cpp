@@ -76,8 +76,7 @@ folly::coro::Task<ExprPtr> DiversifyWithinScopeItemSpec::goalCoro(
     inplace_add(
         objective,
         co_await getObjectiveExpr(
-            expressionBuilder, groupId, filteredScopeItemIds),
-        *universe_);
+            expressionBuilder, groupId, filteredScopeItemIds));
   }
 
   co_return objective;
@@ -92,8 +91,7 @@ folly::coro::Task<ExprPtr> DiversifyWithinScopeItemSpec::getObjectiveExpr(
     inplace_add(
         groupObjExpr,
         co_await getDiversificationExpr(
-            expressionBuilder, groupId, scopeItemId),
-        *universe_);
+            expressionBuilder, groupId, scopeItemId));
   }
 
   co_return groupObjExpr;
@@ -136,7 +134,7 @@ folly::coro::Task<ExprPtr> DiversifyWithinScopeItemSpec::getSpreadingFormula(
             partitionId_,
             groupId),
         1.1);
-    inplace_add(spreadingFormula, poweredRelativeUtil, *universe_);
+    inplace_add(spreadingFormula, poweredRelativeUtil);
   }
 
   co_return spreadingFormula;

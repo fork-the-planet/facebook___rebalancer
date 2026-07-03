@@ -74,7 +74,7 @@ folly::coro::Task<ExprPtr> ItemsAffinitySpecBuilder::goalCoro(
           partitionId,
           groupId);
     }
-    inplace_add(objective, max({util1, util2}, *universe_), *universe_);
+    inplace_add(objective, max({util1, util2}, *universe_));
   }
   co_return objective;
 }

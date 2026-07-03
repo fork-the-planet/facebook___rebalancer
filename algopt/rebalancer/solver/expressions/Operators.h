@@ -93,18 +93,11 @@ ExprPtr any_positive(
 void inplace_any_positive(ExprPtr& lhs, ExprPtr rhs);
 void any_positive_add(ExprPtr& lhs, ExprPtr rhs);
 
-std::vector<ExprPtr>
-equals(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe);
-std::vector<ExprPtr>
-equals(ExprPtr lhs, double rhs, const entities::Universe& universe);
-std::vector<ExprPtr>
-equals(double lhs, ExprPtr rhs, const entities::Universe& universe);
+std::vector<ExprPtr> equals(ExprPtr lhs, ExprPtr rhs);
+std::vector<ExprPtr> equals(ExprPtr lhs, double rhs);
+std::vector<ExprPtr> equals(double lhs, ExprPtr rhs);
 /* add rhs as a single node to lhs, do not merge */
-void inplace_add(
-    ExprPtr& lhs,
-    ExprPtr rhs,
-    const entities::Universe& universe,
-    double coef = 1);
+void inplace_add(ExprPtr& lhs, ExprPtr rhs, double coef = 1);
 
 ExprPtr swaps(
     const PackerMap<entities::ObjectId, entities::ContainerId>&
@@ -153,7 +146,6 @@ ExprPtr object_partition_lookup(
     std::shared_ptr<const PackerSet<entities::ContainerId>> lookupContainers,
     entities::ScopeId scopeId,
     entities::ScopeItemId scopeItemId,
-    const entities::Universe& universe,
     const Assignment& initialAssignment,
     PackerMap<entities::GroupId, double> groupLimitOverrides = {},
     PackerSet<entities::ObjectId> initialDuringObjects = {},
@@ -179,7 +171,7 @@ ExprPtr square(ExprPtr expr);
 ExprPtr square(ExprPtr expr, const ApproximationHint& hint);
 ExprPtr step(ExprPtr expr);
 ExprPtr step_mod_k(ExprPtr expr, int k);
-ExprPtr ceil(ExprPtr expr, const entities::Universe& universe);
+ExprPtr ceil(ExprPtr expr);
 ExprPtr log(ExprPtr expr);
 ExprPtr rectangle(ExprPtr expr, const double lb, const double ub);
 ExprPtr sum_over_threshold(

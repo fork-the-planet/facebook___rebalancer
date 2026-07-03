@@ -209,9 +209,7 @@ TEST_F(PackerTests, Ceil) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
-      ceil(
-          variable(object(0), container(0), *universe, assignment) * 10 - 2.9,
-          *universe),
+      ceil(variable(object(0), container(0), *universe, assignment) * 10 - 2.9),
       8,
       -2,
       universe);
@@ -596,9 +594,7 @@ TEST_F(PackerTests, MipCeil) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   mipbasic(
-      ceil(
-          variable(object(0), container(0), *universe, assignment) * 10 - 2.9,
-          *universe),
+      ceil(variable(object(0), container(0), *universe, assignment) * 10 - 2.9),
       8,
       -2,
       universe);
@@ -756,7 +752,6 @@ CO_TEST_F(PackerTests, MipExprObjParLookup) {
           PackerSet<entities::ContainerId>{container(1), container(2)}),
       scope,
       scopeItem0,
-      *universe,
       assignment);
   auto p_ptr =
       createTestProblem(universe, {objective}, const_expr(0, *universe));
@@ -809,7 +804,6 @@ CO_TEST_F(PackerTests, ObjPartitionLookupBrokenConstraint) {
               PackerSet<entities::ContainerId>{container(1), container(2)}),
           scope,
           scopeItem0,
-          *universe,
           assignment,
           {{groupId(partId, "group0"), -1}},
           {},

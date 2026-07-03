@@ -47,7 +47,7 @@ void inplaceAddToVecIndex(
     const ExprPtr& expr,
     const entities::Universe& universe) {
   expandVecToIndex(index, vec, universe);
-  inplace_add(vec.at(index), expr, universe);
+  inplace_add(vec.at(index), expr);
 }
 } // namespace
 
@@ -241,7 +241,7 @@ folly::coro::Task<void> Materializer::materializeConstraintCoro(
       if (softConstraint == nullptr) {
         softConstraint = const_expr(0, *universe_);
       }
-      inplace_add(softConstraint, softComponent, *universe_);
+      inplace_add(softConstraint, softComponent);
     }
 
     if (hardComponent != nullptr) {
@@ -277,9 +277,7 @@ folly::coro::Task<void> Materializer::materializeConstraintCoro(
     any_positive_add(wlockedMaterialized.finalConstraint, hardConstraint);
     wlockedMaterialized.userConstraints.emplace(constraintId, userConstraint);
     inplace_add(
-        wlockedMaterialized.userConstraintSum,
-        std::move(userConstraint),
-        *universe_);
+        wlockedMaterialized.userConstraintSum, std::move(userConstraint));
     wlockedMaterialized.hardConstraints.emplace(constraintId, hardConstraint);
     wlockedMaterialized.fixedObjects.insert(
         std::move_iterator(fixedObjects.begin()),

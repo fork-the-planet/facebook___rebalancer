@@ -856,7 +856,6 @@ ExprPtr ObjectPartitionLookup<Policy>::get_do_not_make_worse_copy(
       lookupContainersPtr_,
       scopeId_,
       scopeItemId_,
-      getUniverse(),
       initialAssignment,
       std::move(newGroupLimitOverrides),
       initialDuringObjects_,

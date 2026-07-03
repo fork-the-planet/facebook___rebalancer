@@ -233,7 +233,7 @@ ExprPtr GroupCapacitySpecBuilder::getAfterUtilForMainGroup(
         /*normalizationConstant=*/1,
         transformData);
 
-    inplace_add(groupUtil, util, *universe_);
+    inplace_add(groupUtil, util);
   }
 
   return groupUtil;

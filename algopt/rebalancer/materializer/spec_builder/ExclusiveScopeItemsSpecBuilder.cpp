@@ -82,9 +82,9 @@ ExclusiveScopeItemsSpecBuilder::getMinimizeInvalidatedScopeItemsCountGoal(
               dimensionId_,
               scopeId_,
               conflictingScopeItemId);
-      inplace_add(conflictSum, conflictingScopeItemUtil, *universe_);
+      inplace_add(conflictSum, conflictingScopeItemUtil);
     }
-    inplace_add(objective, step(conflictSum), *universe_);
+    inplace_add(objective, step(conflictSum));
   }
   co_return objective;
 }
@@ -119,7 +119,7 @@ ExclusiveScopeItemsSpecBuilder::getAggressivePackingGoal(
             UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId));
     const auto scopeItemWeight =
         folly::get_default(scopeItemWeights, scopeItem, 1);
-    inplace_add(conflictSum, mainScopeItemUtil, *universe_, scopeItemWeight);
+    inplace_add(conflictSum, mainScopeItemUtil, scopeItemWeight);
     for (const auto& [conflictingScopeItem, overlap] : conflictingScopeItems) {
       const auto conflictingScopeItemId =
           universe_->getScopeItemId(scopeId_, conflictingScopeItem);
@@ -129,13 +129,13 @@ ExclusiveScopeItemsSpecBuilder::getAggressivePackingGoal(
               dimensionId_,
               scopeId_,
               conflictingScopeItemId));
-      inplace_add(conflictSum, conflictingScopeItemUtil, *universe_, overlap);
+      inplace_add(conflictSum, conflictingScopeItemUtil, overlap);
     }
     auto conflictSumSquared = power(conflictSum, 2);
     // We make the coefficient negative so that minimizing the expression
     // results in maximizing the sum of the conflictSumSquared * scopeItemWeight
     // values.
-    inplace_add(objective, conflictSumSquared, *universe_, -scopeItemWeight);
+    inplace_add(objective, conflictSumSquared, -scopeItemWeight);
   }
   co_return objective;
 }
@@ -240,8 +240,7 @@ ExclusiveScopeItemsSpecBuilder::constraints(
               UtilMetric::AFTER,
               dimensionId_,
               scopeId_,
-              conflictingScopeItemId),
-          *universe_);
+              conflictingScopeItemId));
     }
     inplace_any_positive(
         result,

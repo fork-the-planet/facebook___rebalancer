@@ -52,7 +52,6 @@ CO_TEST_F(ExpressionIteratorTest, GetSortedChildren) {
           PackerSet<entities::ContainerId>{container(1)}),
       scopeId,
       scopeItemId,
-      *universe,
       assignment);
   // val = 2, bound = 2 => potential = 0
   auto b = const_expr(2, *universe);
@@ -110,7 +109,6 @@ CO_TEST_F(ExpressionIteratorTest, PreOrderExpressionTraversal) {
           PackerSet<entities::ContainerId>{container(1), container(2)}),
       scopeId,
       scopeItemId,
-      *universe,
       assignment); // 1
   auto b = object_partition_lookup(
       op,
@@ -118,7 +116,6 @@ CO_TEST_F(ExpressionIteratorTest, PreOrderExpressionTraversal) {
           PackerSet<entities::ContainerId>{container(1), container(3)}),
       scopeId,
       scopeItemId,
-      *universe,
       assignment);
   auto c = rebalancer::max({a, b}, *universe); // 2
   auto d = square(b); // 4

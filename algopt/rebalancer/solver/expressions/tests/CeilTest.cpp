@@ -38,47 +38,47 @@ TEST_F(CeilTest, Constants) {
   buildUniverse();
   const auto& universe = getUniverse();
   {
-    auto expr = ceil(const_expr(-1.01, universe), universe);
+    auto expr = ceil(const_expr(-1.01, universe));
     EXPECT_EQ(-1.0, apply(expr, {}));
   }
   {
-    auto expr = ceil(const_expr(-0.99, universe), universe);
+    auto expr = ceil(const_expr(-0.99, universe));
     EXPECT_EQ(0.0, apply(expr, {}));
   }
   {
-    auto expr = ceil(const_expr(-1e-12, universe), universe);
+    auto expr = ceil(const_expr(-1e-12, universe));
     EXPECT_EQ(0.0, apply(expr, {}));
   }
   {
-    auto expr = ceil(const_expr(0, universe), universe);
+    auto expr = ceil(const_expr(0, universe));
     EXPECT_EQ(0.0, apply(expr, {}));
   }
   {
-    auto expr = ceil(const_expr(1e-12, universe), universe);
+    auto expr = ceil(const_expr(1e-12, universe));
     EXPECT_EQ(0.0, apply(expr, {}));
   }
   {
-    auto expr = ceil(const_expr(1 - 1e-12, universe), universe);
+    auto expr = ceil(const_expr(1 - 1e-12, universe));
     EXPECT_EQ(1.0, apply(expr, {}));
   }
   {
-    auto expr = ceil(const_expr(1, universe), universe);
+    auto expr = ceil(const_expr(1, universe));
     EXPECT_EQ(1.0, apply(expr, {}));
   }
   {
-    auto expr = ceil(const_expr(1 + 1e-12, universe), universe);
+    auto expr = ceil(const_expr(1 + 1e-12, universe));
     EXPECT_EQ(1.0, apply(expr, {}));
   }
   {
-    auto expr = ceil(const_expr(1.01, universe), universe);
+    auto expr = ceil(const_expr(1.01, universe));
     EXPECT_EQ(2.0, apply(expr, {}));
   }
   {
-    auto expr = ceil(const_expr(1.99, universe), universe);
+    auto expr = ceil(const_expr(1.99, universe));
     EXPECT_EQ(2.0, apply(expr, {}));
   }
   {
-    auto expr = ceil(const_expr(2.5, universe), universe);
+    auto expr = ceil(const_expr(2.5, universe));
     EXPECT_EQ(3.0, apply(expr, {}));
   }
 }
@@ -86,7 +86,7 @@ TEST_F(CeilTest, Constants) {
 TEST_F(CeilTest, IsInteger) {
   buildUniverse();
   Context context;
-  auto expr = ceil(const_expr(1.5, getUniverse()), getUniverse());
+  auto expr = ceil(const_expr(1.5, getUniverse()));
   EXPECT_TRUE(expr->is_integer(context));
 }
 
@@ -98,7 +98,7 @@ TEST_F(CeilTest, NonConstant) {
       {container(1), {object(1)}},
   });
   auto expr = 2 * variable(object(1), container(0), universe, assignment) - 1.5;
-  auto ceilExpr = ceil(expr, universe);
+  auto ceilExpr = ceil(expr);
 
   // expr init = 2*0 - 1.5 = -1.5, ceil(-1.5) = -1.
   EXPECT_DOUBLE_EQ(-1, ceilExpr->getInitialValue());
