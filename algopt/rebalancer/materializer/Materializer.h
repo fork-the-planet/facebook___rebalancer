@@ -71,8 +71,7 @@ class Materializer {
 
   static ExprPtr getSoftenedConstraint(
       const ConstraintInfo& constraintInfo,
-      const entities::Constraint& constraint,
-      std::shared_ptr<const entities::Universe> universe);
+      const entities::Constraint& constraint);
 
   static ExprPtr getViolationBeyondInitial(
       ExprPtr constraint,

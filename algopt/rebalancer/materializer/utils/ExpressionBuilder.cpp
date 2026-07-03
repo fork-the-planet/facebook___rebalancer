@@ -382,7 +382,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
           initialFractionOfTrafficToScopeItem * groupValue;
       groupUtil = max(groupUtil, initialGroupUtil, *universe_);
     }
-    groupUtil += step(totalFractionOfTrafficToScopeItem, *universe_) *
+    groupUtil += step(totalFractionOfTrafficToScopeItem) *
         objectPartitionRoutingDimension.getStaticValue(groupId);
     if (metrics_) {
       // we need to create a copy of the descriptor, since we need to set
@@ -1384,9 +1384,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getBoundedAbsoluteUtil(
   auto boundedUtilExpr = [&](const auto& groupUtilExpr, auto boundValue) {
     auto boundedExpr = isUpperBound
         ? min(groupUtilExpr, const_expr(boundValue, *universe_), *universe_)
-        : max(groupUtilExpr,
-              step(groupUtilExpr, *universe_) * boundValue,
-              *universe_);
+        : max(groupUtilExpr, step(groupUtilExpr) * boundValue, *universe_);
     return boundedExpr;
   };
 

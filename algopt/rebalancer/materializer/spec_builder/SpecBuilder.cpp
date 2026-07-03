@@ -74,7 +74,7 @@ ExprPtr SpecBuilder::getConstraintViolation(const ConstraintInfo& constraint) {
   // solver, even if we do, it is fine because the product below can be
   // converted to its lp form since one of the children is binary
   return max(kZero, constraintExpr, universe) +
-      product(step(constraintExpr, universe), additionalPenaltyExpr);
+      product(step(constraintExpr), additionalPenaltyExpr);
 }
 
 } // namespace facebook::rebalancer::materializer

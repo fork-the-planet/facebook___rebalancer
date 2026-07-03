@@ -83,7 +83,7 @@ TEST_F(ProductTest, LhsBinary) {
       universe.getContainers().getInitialAssignment());
   auto m =
       2 * variable(object(1), container(0), universe, initialAssignment) - 1;
-  auto binaryOperation = product(step(m, universe), m - 2);
+  auto binaryOperation = product(step(m), m - 2);
   const Assignment assignment({
       {container(0), {}},
       {container(1), {object(1)}},

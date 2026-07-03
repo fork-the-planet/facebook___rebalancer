@@ -167,9 +167,7 @@ TEST_F(PackerTests, Step) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
-      step(
-          variable(object(0), container(0), *universe, assignment) * 10 - 5,
-          *universe),
+      step(variable(object(0), container(0), *universe, assignment) * 10 - 5),
       1,
       0,
       universe);
@@ -189,8 +187,7 @@ TEST_F(PackerTests, Log) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
-      log(variable(object(0), container(0), *universe, assignment) * 10 + 5,
-          *universe),
+      log(variable(object(0), container(0), *universe, assignment) * 10 + 5),
       std::log(15),
       std::log(5),
       universe);
@@ -251,9 +248,8 @@ TEST_F(PackerTests, Lookup) {
 TEST_F(PackerTests, BrokenConstraintStats) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
-  auto objective = step(
-      variable(object(0), container(0), *universe, assignment) * 10 - 5,
-      *universe);
+  auto objective =
+      step(variable(object(0), container(0), *universe, assignment) * 10 - 5);
   std::vector<ExprPtr> exprs;
   for (const auto i : folly::irange(10)) {
     if (i != 6) {
@@ -578,9 +574,7 @@ TEST_F(PackerTests, MipStep) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   mipbasic(
-      step(
-          variable(object(0), container(0), *universe, assignment) * 10 - 5,
-          *universe),
+      step(variable(object(0), container(0), *universe, assignment) * 10 - 5),
       1,
       0,
       universe);

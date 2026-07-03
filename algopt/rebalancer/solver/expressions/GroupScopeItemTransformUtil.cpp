@@ -618,7 +618,7 @@ ExprPtr GroupScopeItemTransformUtil::getExprForLp(
 
       case TransformFunctionType::STEP: {
         // Formula: sum_{s in S} w(g, s) * STEP(UTIL(g, s))
-        expr += scopeItemWeight * step(scopeItemUtil, getUniverse());
+        expr += scopeItemWeight * step(scopeItemUtil);
         break;
       }
 

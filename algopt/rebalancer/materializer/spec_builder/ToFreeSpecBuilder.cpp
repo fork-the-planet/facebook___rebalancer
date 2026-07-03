@@ -229,8 +229,7 @@ ToFreeSpecBuilder::getMinimizeOccupiedContainersDiscreteFormulaExpr(
         objective,
         step(
             co_await expressionBuilder.getAbsoluteUtil(
-                UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId),
-            *universe_),
+                UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId)),
         *universe_);
   }
 

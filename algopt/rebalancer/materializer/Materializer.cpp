@@ -323,8 +323,8 @@ SplitConstraint Materializer::splitConstraintComponent(
                     constraintExpr,
                     initialValue,
                     expressionBuilder.getInitialAssignment()),
-                .softComponent = getSoftenedConstraint(
-                    constraintInfo, constraint, std::move(universe))};
+                .softComponent =
+                    getSoftenedConstraint(constraintInfo, constraint)};
     }
     case ConstraintPolicy::HARD: {
       return {.hardComponent = constraintExpr, .softComponent = nullptr};
@@ -332,8 +332,7 @@ SplitConstraint Materializer::splitConstraintComponent(
     case ConstraintPolicy::SOFT:
       return {
           .hardComponent = nullptr,
-          .softComponent = getSoftenedConstraint(
-              constraintInfo, constraint, std::move(universe))};
+          .softComponent = getSoftenedConstraint(constraintInfo, constraint)};
     default:
       throw std::runtime_error("Unhandled ConstraintPolicy");
   }
@@ -387,8 +386,7 @@ folly::coro::Task<void> Materializer::materializeGoalCoro(
 
 ExprPtr Materializer::getSoftenedConstraint(
     const ConstraintInfo& constraintInfo,
-    const entities::Constraint& constraint,
-    std::shared_ptr<const entities::Universe> universe) {
+    const entities::Constraint& constraint) {
   auto invalidCost = constraint.getInvalidCost();
   auto invalidState = constraint.getInvalidState();
   auto weightedPenalty =
@@ -400,7 +398,7 @@ ExprPtr Materializer::getSoftenedConstraint(
     return weightedPenalty;
   }
 
-  return invalidState * step(constraintInfo.constraintExpr, *universe) +
+  return invalidState * step(constraintInfo.constraintExpr) +
       std::move(weightedPenalty);
 }
 

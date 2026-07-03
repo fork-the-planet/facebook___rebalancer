@@ -249,7 +249,7 @@ ExprPtr Swaps::getEquivExprForLp(const LpEvaluator& evaluator) const {
     }
   }
 
-  return 1 - step(invalidSwapCount, getUniverse());
+  return 1 - step(invalidSwapCount);
 }
 
 algopt::lp::Expression Swaps::lp(

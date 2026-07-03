@@ -177,10 +177,10 @@ ExprPtr product(ExprPtr lhs, ExprPtr rhs);
 ExprPtr quotient(ExprPtr lhs, ExprPtr rhs);
 ExprPtr square(ExprPtr expr);
 ExprPtr square(ExprPtr expr, const ApproximationHint& hint);
-ExprPtr step(ExprPtr expr, const entities::Universe& universe);
+ExprPtr step(ExprPtr expr);
 ExprPtr step_mod_k(ExprPtr expr, int k);
 ExprPtr ceil(ExprPtr expr, const entities::Universe& universe);
-ExprPtr log(ExprPtr expr, const entities::Universe& universe);
+ExprPtr log(ExprPtr expr);
 ExprPtr rectangle(ExprPtr expr, const double lb, const double ub);
 ExprPtr sum_over_threshold(
     ExprPtr threshold,

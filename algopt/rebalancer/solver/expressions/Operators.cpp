@@ -301,7 +301,7 @@ ExprPtr binary_min(ExprPtr A, ExprPtr B) {
   } else if (B == 1) {
     return A;
   }
-  return step(std::move(A) + std::move(B) - 1, universe);
+  return step(std::move(A) + std::move(B) - 1);
 }
 
 void inplace_binary_max(ExprPtr& A, ExprPtr B) {
@@ -566,12 +566,12 @@ ExprPtr square(ExprPtr expr, const ApproximationHint& hint) {
   return make_shared<Square>(expr, hint, expr->getUniverse());
 }
 
-ExprPtr step(ExprPtr expr, const entities::Universe& universe) {
+ExprPtr step(ExprPtr expr) {
   auto transform = dynamic_pointer_cast<Step>(expr);
   if (transform != nullptr) {
     return transform;
   }
-  return make_shared<Step>(expr, universe);
+  return make_shared<Step>(expr, expr->getUniverse());
 }
 
 ExprPtr ceil(ExprPtr expr, const entities::Universe& universe) {
@@ -589,12 +589,12 @@ ExprPtr step_mod_k(ExprPtr expr, int k) {
     auto nextInt = ceil(quotient, universe);
     // (nextInt - quotient) is not same as expr % k
     // but step(nextInt - quotient) is equivalent to step(expr % k)
-    return step(std::move(nextInt) - std::move(quotient), universe);
+    return step(std::move(nextInt) - std::move(quotient));
   }
 }
 
-ExprPtr log(ExprPtr expr, const entities::Universe& universe) {
-  return make_shared<Log>(expr, universe);
+ExprPtr log(ExprPtr expr) {
+  return make_shared<Log>(expr, expr->getUniverse());
 }
 
 ExprPtr rectangle(ExprPtr expr, const double lb, const double ub) {

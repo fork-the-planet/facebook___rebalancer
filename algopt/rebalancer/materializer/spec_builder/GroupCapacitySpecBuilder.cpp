@@ -250,7 +250,7 @@ folly::coro::Task<ExprPtr> GroupCapacitySpecBuilder::getDuringUtilForMainGroup(
       case GroupCapacitySpecUtilType::LINEAR:
         return util;
       case GroupCapacitySpecUtilType::STEP:
-        return step(util, *universe_);
+        return step(util);
       case GroupCapacitySpecUtilType::STEP_MOD_K:
         assert(perScopeItemBundleSize_.has_value());
         return step_mod_k(util, perScopeItemBundleSize_->getLimit(scopeItemId));

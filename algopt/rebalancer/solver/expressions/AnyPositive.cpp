@@ -175,7 +175,7 @@ static ExprPtr getEquivStepExpr(
   for (auto& child : children) {
     exprs.push_back(child);
   }
-  return step(max(exprs, universe), universe);
+  return step(max(exprs, universe));
 }
 
 void AnyPositive::lpIntent(const LpEvaluator& evaluator, bool minimizing) {

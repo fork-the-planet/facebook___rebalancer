@@ -98,7 +98,7 @@ RoutingLatencySpecBuilder::constraints(
       auto avgGroupLatency = expressionBuilder.getGroupRoutingLatencyLookup(
           routingConfigId, groupId, std::move(metric));
       auto additiveTerm = product(
-          step(groupConstraint, *universe_),
+          step(groupConstraint),
           *spec_.includeWeightedAvgLatencyMetricIfLimitViolated() *
               avgGroupLatency);
 

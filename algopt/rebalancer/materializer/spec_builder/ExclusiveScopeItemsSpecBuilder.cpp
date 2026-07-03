@@ -84,7 +84,7 @@ ExclusiveScopeItemsSpecBuilder::getMinimizeInvalidatedScopeItemsCountGoal(
               conflictingScopeItemId);
       inplace_add(conflictSum, conflictingScopeItemUtil, *universe_);
     }
-    inplace_add(objective, step(conflictSum, *universe_), *universe_);
+    inplace_add(objective, step(conflictSum), *universe_);
   }
   co_return objective;
 }
@@ -116,8 +116,7 @@ ExclusiveScopeItemsSpecBuilder::getAggressivePackingGoal(
     const auto scopeItemId = universe_->getScopeItemId(scopeId_, scopeItem);
     auto mainScopeItemUtil = step(
         co_await expressionBuilder.getAbsoluteUtil(
-            UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId),
-        *universe_);
+            UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId));
     const auto scopeItemWeight =
         folly::get_default(scopeItemWeights, scopeItem, 1);
     inplace_add(conflictSum, mainScopeItemUtil, *universe_, scopeItemWeight);
@@ -129,8 +128,7 @@ ExclusiveScopeItemsSpecBuilder::getAggressivePackingGoal(
               UtilMetric::AFTER,
               dimensionId_,
               scopeId_,
-              conflictingScopeItemId),
-          *universe_);
+              conflictingScopeItemId));
       inplace_add(conflictSum, conflictingScopeItemUtil, *universe_, overlap);
     }
     auto conflictSumSquared = power(conflictSum, 2);
@@ -199,8 +197,7 @@ ExclusiveScopeItemsSpecBuilder::buildConstraintPerGroup(
 
       inplace_any_positive(
           exprForThisGroup,
-          step(mainScopeItemUtil, *universe_) +
-              step(conflictScopeItemsUtilSum, *universe_) - 1);
+          step(mainScopeItemUtil) + step(conflictScopeItemsUtilSum) - 1);
     }
 
     if (atLeastOneConstraint) {
@@ -248,8 +245,7 @@ ExclusiveScopeItemsSpecBuilder::constraints(
     }
     inplace_any_positive(
         result,
-        step(mainScopeItemUtil, *universe_) +
-            step(conflictingScopeItemsUtilSum, *universe_) - 1);
+        step(mainScopeItemUtil) + step(conflictingScopeItemsUtilSum) - 1);
   }
   co_return atLeastOneConstraint
       ? std::vector<ConstraintInfo>{ConstraintInfo(std::move(result))}

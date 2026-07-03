@@ -607,7 +607,7 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilContributionToScopeItemUtil(
   auto minContributionToUtil =
       isGroupAlwaysPresent(aggregationScopeItemId, aggregationGroupId)
       ? const_expr(presenceWeight, *universe_)
-      : presenceWeight * step(actualGroupUtilInScopeItem, *universe_);
+      : presenceWeight * step(actualGroupUtilInScopeItem);
 
   // Apply multipliers which targets to presence weight.
   minContributionToUtil = getWeightedExpr(

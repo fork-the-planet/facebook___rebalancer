@@ -332,9 +332,8 @@ algopt::lp::Expression build_piecewise_linear_function(
       // if expr == currX, then lambda[i] should be 1 (which in turn
       // would make z_expr = points[i].second)
       const auto diff = expr - currX;
-      const auto isEqual = 1 -
-          step(max(diff, -1 * diff, evaluator.getProblem().getUniverse()),
-               evaluator.getProblem().getUniverse());
+      const auto isEqual =
+          1 - step(max(diff, -1 * diff, evaluator.getProblem().getUniverse()));
       PIECEWISE_NEWCTR(
           lambda.at(i) >=
           evaluator.lp(isEqual.get(), /*minimizing=*/false, configs));

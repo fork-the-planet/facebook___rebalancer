@@ -34,15 +34,14 @@ TEST_F(LogTest, InitialValue) {
 
   auto v = variable(object(0), container(0), universe, assignment);
   // v=1, log(1) = 0
-  EXPECT_DOUBLE_EQ(0.0, log(v, universe)->getInitialValue());
+  EXPECT_DOUBLE_EQ(0.0, log(v)->getInitialValue());
 
   // 4*v = 4, log(4)
-  EXPECT_DOUBLE_EQ(std::log(4.0), log(4.0 * v, universe)->getInitialValue());
+  EXPECT_DOUBLE_EQ(std::log(4.0), log(4.0 * v)->getInitialValue());
 
   // Non-positive input falls back to -DBL_MAX (matches Log::perform_transform).
   EXPECT_EQ(
-      -std::numeric_limits<double>::max(),
-      log(0.0 * v, universe)->getInitialValue());
+      -std::numeric_limits<double>::max(), log(0.0 * v)->getInitialValue());
 }
 
 } // namespace facebook::rebalancer::packer::tests

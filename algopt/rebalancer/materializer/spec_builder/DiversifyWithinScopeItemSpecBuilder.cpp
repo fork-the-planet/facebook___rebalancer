@@ -117,7 +117,7 @@ folly::coro::Task<ExprPtr> DiversifyWithinScopeItemSpec::getDiversificationExpr(
       groupId);
 
   co_return product(
-      step(relativeUtil - limit, *universe_),
+      step(relativeUtil - limit),
       co_await getSpreadingFormula(expressionBuilder, groupId, scopeItemId));
 }
 

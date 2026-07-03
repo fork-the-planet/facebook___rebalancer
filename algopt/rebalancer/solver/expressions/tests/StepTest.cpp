@@ -34,7 +34,7 @@ TEST_F(StepTest, Lp) {
 
   const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto var = 0.6 * variable(object(0), container(0), universe, assignment);
-  auto stepExpr = step(var, universe);
+  auto stepExpr = step(var);
 
   // var init = 0.6 * 1 = 0.6 > 0, so step = 1.
   EXPECT_DOUBLE_EQ(1.0, stepExpr->getInitialValue());

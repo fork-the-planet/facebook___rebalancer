@@ -361,8 +361,7 @@ TEST_F(PropertiesTest, Step) {
   buildUniverse();
   const auto& universe = getUniverse();
   const Assignment assignment(universe.getContainers().getInitialAssignment());
-  auto stepExpr =
-      step(variable(object(2), container(3), universe, assignment), universe);
+  auto stepExpr = step(variable(object(2), container(3), universe, assignment));
   ASSERT_EQ("Step", stepExpr->getType());
 }
 

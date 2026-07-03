@@ -54,7 +54,7 @@ folly::coro::Task<ExprPtr> WorkingSetSpecBuilder::goalCoro(
         objectCount += objectWeight *
             expressionBuilder.isAssigned(scopeId, scopeItemId, objectId);
       }
-      workingSetSize += weight * step(objectCount, *universe_);
+      workingSetSize += weight * step(objectCount);
     }
     workingSetSize->description = fmt::format(
         "Working set size of {} {}",

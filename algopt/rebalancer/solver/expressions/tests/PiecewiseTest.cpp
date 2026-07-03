@@ -64,9 +64,7 @@ TEST_F(PiecewiseTest, PiecewiseNonContinuousDecreasing) {
   const Assignment assignment(
       {{container(0), {}}, {container(1), {object(1)}}});
 
-  auto x = 2 *
-          step(variable(object(1), container(0), universe, assignment),
-               universe) +
+  auto x = 2 * step(variable(object(1), container(0), universe, assignment)) +
       variable(object(1), container(1), universe, assignment) - 1;
   auto y = piecewise({{0, 5}, {0, 1}, {5, 1}, {10, 0}}, x, false);
 
@@ -86,10 +84,8 @@ TEST_F(PiecewiseTest, PiecewiseNonMontonic) {
   const Assignment assignment(
       {{container(0), {}}, {container(1), {object(1)}}});
 
-  auto x = 2 *
-          step(variable(object(1), container(0), universe, assignment),
-               universe) +
-      1;
+  auto x =
+      2 * step(variable(object(1), container(0), universe, assignment)) + 1;
   auto y = piecewise({{0, 0}, {1, 1}, {5, 0}}, x);
 
   // x = 1
@@ -105,10 +101,8 @@ TEST_F(PiecewiseTest, PiecewiseNonDecreasing) {
   const Assignment assignment(
       {{container(0), {}}, {container(1), {object(1)}}});
 
-  auto x = 2 *
-          step(variable(object(1), container(0), universe, assignment),
-               universe) +
-      0.5;
+  auto x =
+      2 * step(variable(object(1), container(0), universe, assignment)) + 0.5;
   auto y = piecewise({{0, 0}, {1, 1}, {5, 1}}, x);
 
   // x = 0.5
@@ -124,10 +118,8 @@ TEST_F(PiecewiseTest, PiecewiseDecreasing) {
   const Assignment assignment(
       {{container(0), {}}, {container(1), {object(1)}}});
 
-  auto x = 2 *
-          step(variable(object(1), container(0), universe, assignment),
-               universe) +
-      0.5;
+  auto x =
+      2 * step(variable(object(1), container(0), universe, assignment)) + 0.5;
   auto y = piecewise({{0, 5}, {5, 0}}, x);
 
   // x = 0.5, so y is 5-0.5

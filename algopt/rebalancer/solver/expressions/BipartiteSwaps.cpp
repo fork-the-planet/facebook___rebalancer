@@ -167,7 +167,7 @@ ExprPtr BipartiteSwaps::getExprForLp(const LpEvaluator& evaluator) const {
     }
   }
 
-  return 1 - step(std::move(invalidSwapsCount), getUniverse());
+  return 1 - step(std::move(invalidSwapsCount));
 }
 
 algopt::lp::Expression BipartiteSwaps::lp(

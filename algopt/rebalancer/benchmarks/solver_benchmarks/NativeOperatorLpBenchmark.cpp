@@ -265,7 +265,7 @@ std::unique_ptr<Problem> makeStepProblem(
   std::vector<ExprPtr> excesses;
   for (const auto k : folly::irange(kStepK)) {
     auto load = containerLoad(*uni, assignment, k, kStepN);
-    obj = obj + step(load, *uni);
+    obj = obj + step(load);
     excesses.push_back(load - kStepCap);
   }
   // Hard constraint: every container load ≤ kStepCap, expressed as

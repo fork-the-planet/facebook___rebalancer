@@ -149,8 +149,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
 
     // if absoluteUtil > 0 then step(absoluteUtil) = 1
     // else step(absoluteUtil) = 0
-    inplace_add(
-        occupiedScopeItemsCount, step(absoluteUtil, *universe_), *universe_);
+    inplace_add(occupiedScopeItemsCount, step(absoluteUtil), *universe_);
   }
 
   // create a single lookup expr over all scopeItemIdsToFree
@@ -161,8 +160,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
 
   auto freeScopeItemsCount =
       filteredScopeItemIds.size() - occupiedScopeItemsCount;
-  auto isAboveMaxFreeLimit =
-      step(maxFreeLimit - freeScopeItemsCount, *universe_) /
+  auto isAboveMaxFreeLimit = step(maxFreeLimit - freeScopeItemsCount) /
       (2 * filteredScopeItemIds.size());
 
   // this formula will continue until the number of free scopeItems is equal
@@ -206,8 +204,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersDiscreteFormulaExpr(
         containerCosts_, universe_->getEntityName(scopeItemId), 1.0);
     auto hasObject = step(
         co_await expressionBuilder.getRelativeUtil(
-            UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId),
-        *universe_);
+            UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId));
     result += hasObject * containerCost;
   }
 
