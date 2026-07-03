@@ -542,7 +542,7 @@ std::shared_ptr<ObjectVector> object_vector(
 }
 
 ExprPtr power(ExprPtr base, double exponent) {
-  return make_shared<Power>(base, exponent, base->getUniverse());
+  return make_shared<Power>(base, exponent);
 }
 
 ExprPtr product(ExprPtr lhs, ExprPtr rhs) {
@@ -554,11 +554,11 @@ ExprPtr quotient(ExprPtr lhs, ExprPtr rhs) {
 }
 
 ExprPtr square(ExprPtr expr) {
-  return make_shared<Square>(expr, expr->getUniverse());
+  return make_shared<Square>(expr);
 }
 
 ExprPtr square(ExprPtr expr, const ApproximationHint& hint) {
-  return make_shared<Square>(expr, hint, expr->getUniverse());
+  return make_shared<Square>(expr, hint);
 }
 
 ExprPtr step(ExprPtr expr) {
@@ -566,11 +566,11 @@ ExprPtr step(ExprPtr expr) {
   if (transform != nullptr) {
     return transform;
   }
-  return make_shared<Step>(expr, expr->getUniverse());
+  return make_shared<Step>(expr);
 }
 
 ExprPtr ceil(ExprPtr expr) {
-  return make_shared<Ceil>(expr, expr->getUniverse());
+  return make_shared<Ceil>(expr);
 }
 
 ExprPtr step_mod_k(ExprPtr expr, int k) {
@@ -588,11 +588,11 @@ ExprPtr step_mod_k(ExprPtr expr, int k) {
 }
 
 ExprPtr log(ExprPtr expr) {
-  return make_shared<Log>(expr, expr->getUniverse());
+  return make_shared<Log>(expr);
 }
 
 ExprPtr rectangle(ExprPtr expr, const double lb, const double ub) {
-  return make_shared<Rectangle>(expr, lb, ub, expr->getUniverse());
+  return make_shared<Rectangle>(expr, lb, ub);
 }
 
 ExprPtr sum_over_threshold(

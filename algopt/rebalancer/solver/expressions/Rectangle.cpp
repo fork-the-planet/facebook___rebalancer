@@ -28,9 +28,8 @@ namespace facebook::rebalancer {
 Rectangle::Rectangle(
     std::shared_ptr<Expression> expr,
     double lowerBound,
-    double upperBound,
-    const entities::Universe& universe)
-    : Transform(std::move(expr), universe) {
+    double upperBound)
+    : Transform(std::move(expr)) {
   lowerBound_ = lowerBound;
   upperBound_ = upperBound;
   setInitialValue(perform_transform(getOnlyChildRawPtr()->getInitialValue()));

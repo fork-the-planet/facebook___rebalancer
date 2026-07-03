@@ -411,7 +411,7 @@ TEST_F(DigestTest, Log) {
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
-  auto eLog = std::make_shared<Log>(expr, universe);
+  auto eLog = std::make_shared<Log>(expr);
   auto problem =
       createTestProblem(getUniversePtr(), {eLog}, eLog, {}, {}, false);
   auto digest = eLog->digest(*problem);
@@ -431,7 +431,7 @@ TEST_F(DigestTest, Ceil) {
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
-  auto eCeil = std::make_shared<Ceil>(expr, universe);
+  auto eCeil = std::make_shared<Ceil>(expr);
   auto problem =
       createTestProblem(getUniversePtr(), {eCeil}, eCeil, {}, {}, false);
   auto digest = eCeil->digest(*problem);
@@ -451,7 +451,7 @@ TEST_F(DigestTest, Step) {
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
-  auto eStep = std::make_shared<Step>(expr, universe);
+  auto eStep = std::make_shared<Step>(expr);
   auto problem =
       createTestProblem(getUniversePtr(), {eStep}, eStep, {}, {}, false);
   auto digest = eStep->digest(*problem);
@@ -474,7 +474,7 @@ TEST_F(DigestTest, Square) {
 
   struct ApproximationHint const hint{
       .valid = true, .upper_bound = 1.0, .lower_bound = 2.0, .piece_count = 11};
-  auto eSquare = std::make_shared<Square>(expr, hint, universe);
+  auto eSquare = std::make_shared<Square>(expr, hint);
   auto problem =
       createTestProblem(getUniversePtr(), {eSquare}, eSquare, {}, {}, false);
   auto digest = eSquare->digest(*problem);
@@ -494,7 +494,7 @@ TEST_F(DigestTest, Power) {
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
-  auto ePower = std::make_shared<Power>(expr, 2.5, universe);
+  auto ePower = std::make_shared<Power>(expr, 2.5);
   auto problem =
       createTestProblem(getUniversePtr(), {ePower}, ePower, {}, {}, false);
   auto digest = ePower->digest(*problem);
@@ -514,7 +514,7 @@ TEST_F(DigestTest, Rectangle) {
 
   const ExprPtr expr =
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
-  auto eRectangle = std::make_shared<Rectangle>(expr, 1.3, 2.5, universe);
+  auto eRectangle = std::make_shared<Rectangle>(expr, 1.3, 2.5);
   auto problem = createTestProblem(
       getUniversePtr(), {eRectangle}, eRectangle, {}, {}, false);
   auto digest = eRectangle->digest(*problem);

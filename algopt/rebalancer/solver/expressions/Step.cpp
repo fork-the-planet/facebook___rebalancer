@@ -26,8 +26,7 @@ constexpr std::string_view type = "Step";
 
 namespace facebook::rebalancer {
 
-Step::Step(std::shared_ptr<Expression> expr, const entities::Universe& universe)
-    : Transform(std::move(expr), universe) {
+Step::Step(std::shared_ptr<Expression> expr) : Transform(std::move(expr)) {
   setInitialValue(perform_transform(getOnlyChildRawPtr()->getInitialValue()));
 }
 

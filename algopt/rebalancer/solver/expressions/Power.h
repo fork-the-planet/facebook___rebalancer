@@ -21,10 +21,7 @@ namespace facebook::rebalancer {
 
 class Power : public Transform {
  public:
-  Power(
-      std::shared_ptr<Expression> expr,
-      double exponent,
-      const entities::Universe& universe);
+  Power(std::shared_ptr<Expression> expr, double exponent);
 
   virtual bool inner_is_integer(Context& context) override;
 

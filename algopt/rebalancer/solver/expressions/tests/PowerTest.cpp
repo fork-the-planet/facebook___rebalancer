@@ -47,7 +47,7 @@ TEST_F(PowerTest, CubedBoundsTests) {
   buildUniverse();
   const auto& universe = getUniverse();
   auto vector = makeObjectVector({{object(0), 1}, {object(1), 4}}, universe);
-  Power power(vector, 3, universe);
+  Power power(vector, 3);
   EXPECT_EQ(125, upper_bound(power));
   EXPECT_EQ(0, lower_bound(power));
 }
@@ -59,7 +59,7 @@ TEST_F(PowerTest, NegativeCubedBoundsTests) {
   buildUniverse();
   const auto& universe = getUniverse();
   auto vector = makeObjectVector({{object(0), -1}, {object(1), -4}}, universe);
-  Power power(vector, 3, universe);
+  Power power(vector, 3);
   EXPECT_EQ(0, upper_bound(power));
   EXPECT_EQ(-125, lower_bound(power));
 }
@@ -71,7 +71,7 @@ TEST_F(PowerTest, NegativePowerBoundsTests) {
   buildUniverse();
   const auto& universe = getUniverse();
   auto vector = makeObjectVector({{object(0), .25}, {object(1), -5}}, universe);
-  Power power(vector, -2, universe);
+  Power power(vector, -2);
   EXPECT_EQ(pow(.25, -2), 16);
   EXPECT_EQ(16, upper_bound(power));
   EXPECT_EQ(.04, lower_bound(power));

@@ -20,9 +20,7 @@ namespace facebook::rebalancer {
 
 class Log : public Transform {
  public:
-  explicit Log(
-      std::shared_ptr<Expression> expr,
-      const entities::Universe& universe);
+  explicit Log(std::shared_ptr<Expression> expr);
 
   virtual bool inner_is_integer(Context& context) override;
 

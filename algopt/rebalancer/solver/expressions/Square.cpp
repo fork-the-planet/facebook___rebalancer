@@ -23,21 +23,12 @@ constexpr std::string_view type = "Square";
 
 namespace facebook::rebalancer {
 
-Square::Square(
-    std::shared_ptr<Expression> expr,
-    const ApproximationHint& hint,
-    const entities::Universe& universe)
-    : Transform(
-          std::move(expr),
-          universe,
-          std::optional<ApproximationHint>{hint}) {
+Square::Square(std::shared_ptr<Expression> expr, const ApproximationHint& hint)
+    : Transform(std::move(expr), std::optional<ApproximationHint>{hint}) {
   setInitialValue(perform_transform(getOnlyChildRawPtr()->getInitialValue()));
 }
 
-Square::Square(
-    std::shared_ptr<Expression> expr,
-    const entities::Universe& universe)
-    : Transform(std::move(expr), universe) {
+Square::Square(std::shared_ptr<Expression> expr) : Transform(std::move(expr)) {
   setInitialValue(perform_transform(getOnlyChildRawPtr()->getInitialValue()));
 }
 

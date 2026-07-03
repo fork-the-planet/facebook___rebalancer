@@ -25,8 +25,7 @@ class Rectangle : public Transform {
   Rectangle(
       std::shared_ptr<Expression> expr,
       double lowerBound,
-      double upperBound,
-      const entities::Universe& universe);
+      double upperBound);
 
   virtual bool inner_is_integer(Context& context) override;
 

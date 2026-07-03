@@ -21,9 +21,7 @@ namespace facebook::rebalancer {
 
 class Ceil : public Transform {
  public:
-  explicit Ceil(
-      std::shared_ptr<Expression> expr,
-      const entities::Universe& universe);
+  explicit Ceil(std::shared_ptr<Expression> expr);
 
   virtual bool inner_is_integer(Context& context) override;
 

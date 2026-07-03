@@ -33,7 +33,6 @@ class Transform : public Expression {
  public:
   explicit Transform(
       std::shared_ptr<Expression> expr,
-      const entities::Universe& universe,
       std::optional<ApproximationHint> hint = std::nullopt);
 
   void updateEquivalenceSets(EquivalenceSets& equivSets) const override;

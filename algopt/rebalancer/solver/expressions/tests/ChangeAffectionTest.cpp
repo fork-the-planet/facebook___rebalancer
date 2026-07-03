@@ -85,7 +85,7 @@ TEST_F(ChangeAffectionTest, BipartiteSwaps) {
 TEST_F(ChangeAffectionTest, Ceil) {
   buildUniverse();
   const auto& universe = getUniverse();
-  const Ceil ceil(const_expr(1, universe), universe);
+  const Ceil ceil(const_expr(1, universe));
   EXPECT_FALSE(ceil.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       ceil.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==
@@ -104,7 +104,7 @@ TEST_F(ChangeAffectionTest, LinearSum) {
 TEST_F(ChangeAffectionTest, Log) {
   buildUniverse();
   const auto& universe = getUniverse();
-  const Log log(const_expr(1, universe), universe);
+  const Log log(const_expr(1, universe));
   EXPECT_FALSE(log.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       log.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==
@@ -375,7 +375,7 @@ TEST_F(ChangeAffectionTest, Piecewise) {
 TEST_F(ChangeAffectionTest, Power) {
   buildUniverse();
   const auto& universe = getUniverse();
-  const Power power(const_expr(1, universe), 2, universe);
+  const Power power(const_expr(1, universe), 2);
   EXPECT_FALSE(power.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       power.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==
@@ -407,7 +407,7 @@ TEST_F(ChangeAffectionTest, QuotientOperation) {
 TEST_F(ChangeAffectionTest, Rectangle) {
   buildUniverse();
   const auto& universe = getUniverse();
-  const Rectangle rectangle(const_expr(1, universe), 2, 5, universe);
+  const Rectangle rectangle(const_expr(1, universe), 2, 5);
   EXPECT_FALSE(rectangle.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       rectangle.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==
@@ -417,7 +417,7 @@ TEST_F(ChangeAffectionTest, Rectangle) {
 TEST_F(ChangeAffectionTest, Step) {
   buildUniverse();
   const auto& universe = getUniverse();
-  const Step step(const_expr(1, universe), universe);
+  const Step step(const_expr(1, universe));
   EXPECT_FALSE(step.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       step.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==

@@ -25,11 +25,8 @@ constexpr std::string_view type = "Power";
 
 namespace facebook::rebalancer {
 
-Power::Power(
-    std::shared_ptr<Expression> expr,
-    double exponent,
-    const entities::Universe& universe)
-    : Transform(std::move(expr), universe) {
+Power::Power(std::shared_ptr<Expression> expr, double exponent)
+    : Transform(std::move(expr)) {
   exponent_ = exponent;
   setInitialValue(perform_transform(getOnlyChildRawPtr()->getInitialValue()));
 }

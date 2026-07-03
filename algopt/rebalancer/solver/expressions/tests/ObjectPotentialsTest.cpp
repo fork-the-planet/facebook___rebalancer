@@ -347,7 +347,7 @@ TEST_F(ObjectPotentialsTest, TransformPower) {
           {{.objectId = object(1), .potential = 1},
            {.objectId = object(2), .potential = 2}}),
       10);
-  Power power(child, 2, getUniverse());
+  Power power(child, 2);
   Context context;
   const Assignment assignment;
   power.fullApply(TopToBottomEvaluator(context), assignment);

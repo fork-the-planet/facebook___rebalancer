@@ -21,9 +21,7 @@ namespace facebook::rebalancer {
 
 class Step : public Transform {
  public:
-  explicit Step(
-      std::shared_ptr<Expression> expr,
-      const entities::Universe& universe);
+  explicit Step(std::shared_ptr<Expression> expr);
 
   virtual bool inner_is_integer(Context& context) override;
 

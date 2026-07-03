@@ -32,7 +32,7 @@ TEST_F(SquareTest, BoundsTests) {
   const PackerMap<entities::ObjectId, double> input = {
       {object(0), 4}, {object(1), 3}};
   auto vector = makeObjectVector(input, universe);
-  Square square(vector, universe);
+  Square square(vector);
   EXPECT_EQ(49, upper_bound(square));
   EXPECT_EQ(0, lower_bound(square));
 
@@ -53,7 +53,7 @@ TEST_F(SquareTest, VariableBoundsTests) {
   auto sum = var * 3 + 8;
   EXPECT_EQ(8, lower_bound(*sum));
   EXPECT_EQ(11, upper_bound(*sum));
-  Square square(sum, universe);
+  Square square(sum);
   // var = 1, sum init = 11, square init = 121.
   EXPECT_DOUBLE_EQ(121, square.getInitialValue());
   EXPECT_EQ(64, lower_bound(square));
@@ -62,14 +62,14 @@ TEST_F(SquareTest, VariableBoundsTests) {
   auto negative_sum = var * 2 - 7;
   EXPECT_EQ(-7, lower_bound(*negative_sum));
   EXPECT_EQ(-5, upper_bound(*negative_sum));
-  Square square2(negative_sum, universe);
+  Square square2(negative_sum);
   EXPECT_EQ(25, lower_bound(square2));
   EXPECT_EQ(49, upper_bound(square2));
 
   auto zero_between_sum = var * 2 - 1;
   EXPECT_EQ(-1, lower_bound(*zero_between_sum));
   EXPECT_EQ(1, upper_bound(*zero_between_sum));
-  Square square3(zero_between_sum, universe);
+  Square square3(zero_between_sum);
   EXPECT_EQ(0, lower_bound(square3));
   EXPECT_EQ(1, upper_bound(square3));
 }

@@ -254,8 +254,7 @@ TEST_F(PropertiesTest, Ceil) {
   buildUniverse();
   const auto& universe = getUniverse();
   const Assignment assignment(universe.getContainers().getInitialAssignment());
-  auto ceil =
-      Ceil(variable(object(2), container(3), universe, assignment), universe);
+  auto ceil = Ceil(variable(object(2), container(3), universe, assignment));
   ASSERT_EQ("Ceil", ceil.getType());
 }
 
@@ -263,8 +262,7 @@ TEST_F(PropertiesTest, Log) {
   buildUniverse();
   const auto& universe = getUniverse();
   const Assignment assignment(universe.getContainers().getInitialAssignment());
-  auto log = Log(
-      200 * variable(object(2), container(3), universe, assignment), universe);
+  auto log = Log(200 * variable(object(2), container(3), universe, assignment));
   ASSERT_EQ(log.getType(), "Log");
 }
 
@@ -334,8 +332,7 @@ TEST_F(PropertiesTest, Square) {
   buildUniverse();
   const auto& universe = getUniverse();
   const Assignment assignment(universe.getContainers().getInitialAssignment());
-  auto square =
-      Square(variable(object(3), container(4), universe, assignment), universe);
+  auto square = Square(variable(object(3), container(4), universe, assignment));
   ASSERT_EQ("Square", square.getType());
 }
 

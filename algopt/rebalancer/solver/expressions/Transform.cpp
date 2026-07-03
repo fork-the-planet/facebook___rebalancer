@@ -33,9 +33,8 @@ constexpr size_t kDefaultPieceCount = 100;
 
 Transform::Transform(
     std::shared_ptr<Expression> expr,
-    const entities::Universe& universe,
     std::optional<ApproximationHint> hint)
-    : Expression(universe) {
+    : Expression(expr->getUniverse()) {
   add_child(std::move(expr));
 
   if (hint.has_value() && hint.value().valid) {

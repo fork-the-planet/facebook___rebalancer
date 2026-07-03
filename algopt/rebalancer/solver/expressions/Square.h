@@ -20,13 +20,8 @@ namespace facebook::rebalancer {
 
 class Square : public Transform {
  public:
-  Square(
-      std::shared_ptr<Expression> expr,
-      const ApproximationHint& hint,
-      const entities::Universe& universe);
-  explicit Square(
-      std::shared_ptr<Expression> expr,
-      const entities::Universe& universe);
+  Square(std::shared_ptr<Expression> expr, const ApproximationHint& hint);
+  explicit Square(std::shared_ptr<Expression> expr);
 
   virtual bool inner_is_integer(Context& context) override;
 

@@ -23,8 +23,7 @@ constexpr std::string_view type = "Ceil";
 
 namespace facebook::rebalancer {
 
-Ceil::Ceil(std::shared_ptr<Expression> expr, const entities::Universe& universe)
-    : Transform(std::move(expr), universe) {
+Ceil::Ceil(std::shared_ptr<Expression> expr) : Transform(std::move(expr)) {
   setInitialValue(perform_transform(getOnlyChildRawPtr()->getInitialValue()));
 }
 
