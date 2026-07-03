@@ -67,7 +67,7 @@ algopt::lp::Expression Rectangle::lp(
     auto atMostUb = step((upperBound_ + kEps) - std::move(child));
 
     // if lowerBound_ <= child <= upperBound_, we want the value to be 1, else 0
-    exprForLp_ = min(std::move(atLeastLb), std::move(atMostUb), getUniverse());
+    exprForLp_ = min(std::move(atLeastLb), std::move(atMostUb));
   }
 
   return evaluator.lp(exprForLp_.get(), minimizing, configs);

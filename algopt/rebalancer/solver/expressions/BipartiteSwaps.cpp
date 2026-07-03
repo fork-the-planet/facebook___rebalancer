@@ -131,8 +131,7 @@ ExprPtr BipartiteSwaps::getExprForLp(const LpEvaluator& evaluator) const {
       auto repObject = *equivalenceSets.getSet(eqSetId).begin();
       inplace_max(
           invalidSwapsCount,
-          variable(repObject, container, getUniverse(), lpAssignment),
-          getUniverse());
+          variable(repObject, container, getUniverse(), lpAssignment));
     }
   }
 
@@ -162,8 +161,8 @@ ExprPtr BipartiteSwaps::getExprForLp(const LpEvaluator& evaluator) const {
       // NOTE: This doesn't guarante no moves within same side of the
       // bipartite
       auto diff = movingRightToLeft - movingLeftToRight;
-      inplace_max(invalidSwapsCount, diff, getUniverse());
-      inplace_max(invalidSwapsCount, -1 * diff, getUniverse());
+      inplace_max(invalidSwapsCount, diff);
+      inplace_max(invalidSwapsCount, -1 * diff);
     }
   }
 

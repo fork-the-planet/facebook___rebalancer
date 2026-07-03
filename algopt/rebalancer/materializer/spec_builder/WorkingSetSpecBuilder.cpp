@@ -66,7 +66,7 @@ folly::coro::Task<ExprPtr> WorkingSetSpecBuilder::goalCoro(
           UtilMetric::AFTER, dimensionId, scopeId, scopeItemId);
       result += product(util, workingSetSize);
     } else if (metric == WorkingSetMetric::MAX) {
-      inplace_max(result, workingSetSize, *universe_);
+      inplace_max(result, workingSetSize);
     } else {
       throw std::runtime_error("unknown working set metric");
     }

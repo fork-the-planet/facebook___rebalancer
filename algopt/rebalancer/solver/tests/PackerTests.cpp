@@ -466,9 +466,9 @@ TEST_F(PackerTests, MipExprMax) {
   auto o1c0 = variable(object(1), container(0), *universe, assignment);
   auto o0c1 = variable(object(0), container(1), *universe, assignment);
   auto o1c1 = variable(object(1), container(1), *universe, assignment);
-  auto max1 = rebalancer::max(o0c0, o0c1, *universe);
-  auto max2 = rebalancer::max(o1c0, o1c1, *universe);
-  auto max3 = rebalancer::max(o0c1, o1c1, *universe);
+  auto max1 = rebalancer::max(o0c0, o0c1);
+  auto max2 = rebalancer::max(o1c0, o1c1);
+  auto max3 = rebalancer::max(o0c1, o1c1);
   auto objective = 8 * max1 - 10 * max2 + 5 * max3;
   auto p_ptr =
       createTestProblem(universe, {objective}, const_expr(0, *universe));
@@ -509,7 +509,7 @@ TEST_F(PackerTests, MipExprBinaryMax) {
   auto o0c1 = variable(object(2), container(0), *universe, assignment);
   auto o1c1 = variable(object(3), container(0), *universe, assignment);
   auto max1 = rebalancer::max({o0c0, o0c1, o1c0}, *universe);
-  auto max2 = rebalancer::max(max1, o1c1, *universe);
+  auto max2 = rebalancer::max(max1, o1c1);
   auto objective = max2;
   auto p_ptr =
       createTestProblem(universe, {objective}, const_expr(0, *universe));
@@ -543,7 +543,7 @@ TEST_F(PackerTests, MipExprBinaryMin) {
 
   auto o0c0 = variable(object(0), container(0), *universe, assignment);
   auto o1c0 = variable(object(1), container(0), *universe, assignment);
-  auto expr = rebalancer::min(o0c0, o1c0, *universe); // -max(-v1, -v2)
+  auto expr = rebalancer::min(o0c0, o1c0); // -max(-v1, -v2)
   auto p_ptr = createTestProblem(universe, {const_expr(0, *universe)}, expr);
   auto& p = *p_ptr;
 

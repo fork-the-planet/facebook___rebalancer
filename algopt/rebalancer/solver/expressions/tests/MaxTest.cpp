@@ -172,7 +172,7 @@ TEST_F(MaxTest, MaxInitialValue) {
   auto v0c0 = variable(object(0), container(0), universe, assignment);
   auto v1c0 = variable(object(1), container(0), universe, assignment);
   // v0c0=1, v1c0=0 → max(1, 0) = 1
-  EXPECT_EQ(1.0, rebalancer::max(v0c0, v1c0, universe)->getInitialValue());
+  EXPECT_EQ(1.0, rebalancer::max(v0c0, v1c0)->getInitialValue());
 }
 
 TEST_F(MaxTest, MaxAddClearsSortedValues) {
@@ -188,7 +188,7 @@ TEST_F(MaxTest, MaxAddClearsSortedValues) {
   EXPECT_EQ(1.0, m->getInitialValue());
 
   // add() inserts the new child into the set
-  inplace_max(m, v1c0, universe);
+  inplace_max(m, v1c0);
   EXPECT_EQ(1.0, m->getInitialValue());
 
   auto* maxExpr = dynamic_cast<Max*>(m.get());
@@ -211,7 +211,7 @@ TEST_F(MaxTest, MaxAddStaleSortedValuesBreaksEvaluate) {
   EXPECT_EQ(1.0, apply(m, assignment));
 
   // Add v1c1 via inplace_max — sorted_values now includes both children
-  inplace_max(m, v1c1, universe);
+  inplace_max(m, v1c1);
 
   // Evaluate moving obj0 from c0 → c1.
   // Correct: max(0, 1) = 1 (v0c0 becomes 0, v1c1 unchanged at 1)
@@ -241,7 +241,7 @@ TEST_F(MaxTest, MaxEvaluateAfterAddRequiresSortedOrder) {
   EXPECT_EQ(1.0, apply(m, assignment));
 
   // Add v2c0 (value 0) — sorted_values must place it AFTER entries with value 1
-  inplace_max(m, v2c0, universe);
+  inplace_max(m, v2c0);
 
   // Evaluate: move obj0 from c0 → c2.
   // v0c0 becomes 0 (changed), v1c1 stays 1 (unchanged), v2c0 stays 0

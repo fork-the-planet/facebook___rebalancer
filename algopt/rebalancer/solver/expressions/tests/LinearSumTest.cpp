@@ -345,8 +345,8 @@ TEST_F(LinearSumTest, ContainerOrder) {
   Assignment assignment(
       {{container(1), {object(1)}}, {container(3), {object(0)}}});
 
-  auto child1 = rebalancer::max(v2, v3, *universe);
-  auto child2 = rebalancer::max(v1, v4, *universe);
+  auto child1 = rebalancer::max(v2, v3);
+  auto child2 = rebalancer::max(v1, v4);
   auto child3 = rebalancer::max({v1}, *universe);
   auto linearsum = std::make_shared<LinearSum>(
       *universe,

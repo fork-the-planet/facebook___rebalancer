@@ -60,20 +60,20 @@ bool operator==(ExprPtr lhs, double rhs);
  */
 ExprPtr binary_min(ExprPtr lhs, ExprPtr rhs);
 void inplace_binary_max(ExprPtr& lhs, ExprPtr rhs);
-ExprPtr min(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe);
+ExprPtr min(ExprPtr lhs, ExprPtr rhs);
 ExprPtr min(
     const std::vector<ExprPtr>& exprs,
     const entities::Universe& universe);
-ExprPtr max(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe);
-ExprPtr max(ExprPtr lhs, double rhs, const entities::Universe& universe);
-ExprPtr max(double lhs, ExprPtr rhs, const entities::Universe& universe);
+ExprPtr max(ExprPtr lhs, ExprPtr rhs);
+ExprPtr max(ExprPtr lhs, double rhs);
+ExprPtr max(double lhs, ExprPtr rhs);
 ExprPtr max(
     std::initializer_list<ExprPtr> exprs,
     const entities::Universe& universe);
 ExprPtr max(
     const std::vector<ExprPtr>& exprs,
     const entities::Universe& universe);
-void inplace_max(ExprPtr& lhs, ExprPtr rhs, const entities::Universe& universe);
+void inplace_max(ExprPtr& lhs, ExprPtr rhs);
 
 ExprPtr any_positive(
     std::initializer_list<ExprPtr> exprs,

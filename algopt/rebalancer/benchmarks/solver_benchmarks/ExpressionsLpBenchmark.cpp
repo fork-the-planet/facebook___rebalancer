@@ -147,8 +147,7 @@ static ExprPtr getMaxOfContainers(
             std::make_shared<PackerSet<entities::ContainerId>>(
                 PackerSet<entities::ContainerId>{
                     universe->getContainerId(fmt::format("container{}", i))}),
-            assignment),
-        *universe);
+            assignment));
   }
 
   return maxOfContainers;

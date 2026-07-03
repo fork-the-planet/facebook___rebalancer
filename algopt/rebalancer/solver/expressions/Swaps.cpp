@@ -159,8 +159,10 @@ ExprPtr Swaps::getEquivExprForLp(const LpEvaluator& evaluator) const {
           invalidSwapCount,
           eqSet.size() *
               variable(
-                  representativeObject, container, getUniverse(), lpAssignment),
-          getUniverse());
+                  representativeObject,
+                  container,
+                  getUniverse(),
+                  lpAssignment));
     }
   }
 
@@ -216,8 +218,8 @@ ExprPtr Swaps::getEquivExprForLp(const LpEvaluator& evaluator) const {
       auto src_total = src_subset + src_other;
       auto dst_total = dst_subset + dst_other;
       // Moved in one direction must match moved in the opposite direction.
-      inplace_max(invalidSwapCount, src_total - dst_total, getUniverse());
-      inplace_max(invalidSwapCount, dst_total - src_total, getUniverse());
+      inplace_max(invalidSwapCount, src_total - dst_total);
+      inplace_max(invalidSwapCount, dst_total - src_total);
       if (!subset.has_value()) {
         continue;
       }
@@ -225,8 +227,8 @@ ExprPtr Swaps::getEquivExprForLp(const LpEvaluator& evaluator) const {
       if (subsetDefinition_ == SubsetDefinition::BOTH_SAME_SIDE_OF_SUBSET) {
         // For this definition, the objects should be swapped within the subset.
         // in subset count of both sides should match.
-        inplace_max(invalidSwapCount, src_subset - dst_subset, getUniverse());
-        inplace_max(invalidSwapCount, dst_subset - src_subset, getUniverse());
+        inplace_max(invalidSwapCount, src_subset - dst_subset);
+        inplace_max(invalidSwapCount, dst_subset - src_subset);
         continue;
       }
 
@@ -234,16 +236,16 @@ ExprPtr Swaps::getEquivExprForLp(const LpEvaluator& evaluator) const {
       // must be swapped with subset objects of the other side, so the
       // non-subset object count of one side must not exceed the subset object
       // count of the other side.
-      inplace_max(invalidSwapCount, src_other - dst_subset, getUniverse());
-      inplace_max(invalidSwapCount, dst_other - src_subset, getUniverse());
+      inplace_max(invalidSwapCount, src_other - dst_subset);
+      inplace_max(invalidSwapCount, dst_other - src_subset);
       if (subsetDefinition_ == SubsetDefinition::EXACTLY_ONE_IN_SUBSET) {
         // Definition 2: a valid swap exchanges an object inside the subset with
         // an object outside the subset. This means not only non-subset object
         // count of one side must not exceed the subset object count of the
         // other side, but such counts must match excactly. Here we add the
         // complementary constraint to guarantee that.
-        inplace_max(invalidSwapCount, dst_subset - src_other, getUniverse());
-        inplace_max(invalidSwapCount, src_subset - dst_other, getUniverse());
+        inplace_max(invalidSwapCount, dst_subset - src_other);
+        inplace_max(invalidSwapCount, src_subset - dst_other);
         continue;
       }
     }

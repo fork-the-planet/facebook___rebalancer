@@ -178,7 +178,7 @@ ExprPtr BalanceSpecBuilder::computeIdealPenalty(
     if (applyBound) {
       const auto adjustedBoundSquared =
           power(boundExpr(upperBound), 2) * adjustments[i];
-      penalty = max(0, penalty - adjustedBoundSquared, *universe_);
+      penalty = max(0, penalty - adjustedBoundSquared);
     }
     result += penalty;
   }
@@ -188,12 +188,12 @@ ExprPtr BalanceSpecBuilder::computeIdealPenalty(
 ExprPtr BalanceSpecBuilder::computeVariancePenalty(
     const std::vector<ExprPtr>& allUtils,
     const std::function<ExprPtr(double)>& boundExpr,
-    double upperBound) const {
+    double upperBound) {
   const auto n = allUtils.size();
   ExprPtr sumVal;
   ExprPtr sumValSquared;
   for (const auto i : folly::irange(n)) {
-    const auto val = max(0, allUtils[i] - boundExpr(upperBound), *universe_);
+    const auto val = max(0, allUtils[i] - boundExpr(upperBound));
     sumVal += val;
     sumValSquared += square(val);
   }
@@ -212,8 +212,8 @@ ExprPtr BalanceSpecBuilder::computeLegacyPenalty(
   const double balancedUtil = initialUtil / sumCapacity;
   for (const auto i : folly::irange(n)) {
     const auto imbalance = allUtils[i] / balancedUtil - upperBound;
-    inplace_max(maxImbalance, imbalance, *universe_);
-    const auto positiveImbalance = max(0, imbalance, *universe_);
+    inplace_max(maxImbalance, imbalance);
+    const auto positiveImbalance = max(0, imbalance);
     result += coefficient *
         (continuousExpressions_ ? square(positiveImbalance)
                                 : positiveImbalance);
@@ -302,7 +302,7 @@ folly::coro::Task<ExprPtr> BalanceSpecBuilder::goalCoro(
             metric, dimensionId_, scopeId_, scopeItemId);
         auto numObjects = co_await expressionBuilder.getAbsoluteUtil(
             metric, objectCountDimensionId, scopeId_, scopeItemId);
-        auto capPerItem = quotient(absUtil, max(1, numObjects, *universe_));
+        auto capPerItem = quotient(absUtil, max(1, numObjects));
         allUtils.push_back(std::move(capPerItem));
         sumCapacity += scopeDimension.getValue(scopeItemId);
       }
@@ -367,7 +367,7 @@ folly::coro::Task<ExprPtr> BalanceSpecBuilder::goalCoro(
 
   auto result = const_expr(0, *universe_);
   auto thresholdExpr = spec_.softUpperBound()
-      ? max(*spec_.softUpperBound(), boundExpr(upperBound), *universe_)
+      ? max(*spec_.softUpperBound(), boundExpr(upperBound))
       : boundExpr(upperBound);
 
   if (formula == BalanceSpecFormula::MAX) {

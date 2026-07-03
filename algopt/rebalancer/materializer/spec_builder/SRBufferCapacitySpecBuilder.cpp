@@ -102,9 +102,7 @@ SRBufferCapacitySpecBuilder::constraints(
     // bufferAllocated >= bufferRequired - theta
     for (const auto& bufferRequiredForThisPartition : partitionExprs) {
       bufferDeficitExpr +=
-          max(0,
-              bufferRequiredForThisPartition - bufferAllocated - theta,
-              *universe_);
+          max(0, bufferRequiredForThisPartition - bufferAllocated - theta);
     }
     result.emplace_back(bufferDeficitExpr);
   }

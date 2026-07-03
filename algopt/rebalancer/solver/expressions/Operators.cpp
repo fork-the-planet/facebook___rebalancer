@@ -272,8 +272,8 @@ bool operator==(ExprPtr lhs, double rhs) {
   return *sum == rhs;
 }
 
-ExprPtr min(ExprPtr A, ExprPtr B, const entities::Universe& universe) {
-  return -1 * max(-1 * std::move(A), -1 * std::move(B), universe);
+ExprPtr min(ExprPtr A, ExprPtr B) {
+  return -1 * max(-1 * std::move(A), -1 * std::move(B));
 }
 
 ExprPtr min(
@@ -314,20 +314,22 @@ void inplace_binary_max(ExprPtr& A, ExprPtr B) {
   if (B == 0) {
     return;
   }
-  inplace_max(A, std::move(B), universe);
+  inplace_max(A, std::move(B));
 }
 
-ExprPtr max(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe) {
+ExprPtr max(ExprPtr lhs, ExprPtr rhs) {
+  const auto& universe = lhs->getUniverse();
   return max({std::move(lhs), std::move(rhs)}, universe);
 }
 
-ExprPtr max(ExprPtr lhs, double rhs, const entities::Universe& universe) {
+ExprPtr max(ExprPtr lhs, double rhs) {
+  const auto& universe = lhs->getUniverse();
   auto constRhs = const_expr(rhs, universe);
   return max({std::move(lhs), std::move(constRhs)}, universe);
 }
 
-ExprPtr max(double lhs, ExprPtr rhs, const entities::Universe& universe) {
-  return max(std::move(rhs), lhs, universe);
+ExprPtr max(double lhs, ExprPtr rhs) {
+  return max(std::move(rhs), lhs);
 }
 
 ExprPtr max(
@@ -342,10 +344,7 @@ ExprPtr max(
   return make_shared<Max>(exprs, universe);
 }
 
-void inplace_max(
-    ExprPtr& lhs,
-    ExprPtr rhs,
-    const entities::Universe& universe) {
+void inplace_max(ExprPtr& lhs, ExprPtr rhs) {
   if (rhs == nullptr) {
     return;
   }
@@ -357,7 +356,7 @@ void inplace_max(
     get_max(lhs)->add(rhs);
   } else {
     lhs = make_shared<Max>(
-        initializer_list<ExprPtr>{lhs, std::move(rhs)}, universe);
+        initializer_list<ExprPtr>{lhs, std::move(rhs)}, lhs->getUniverse());
   }
 }
 

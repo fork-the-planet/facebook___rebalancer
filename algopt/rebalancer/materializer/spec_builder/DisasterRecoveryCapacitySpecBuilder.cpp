@@ -327,9 +327,9 @@ DisasterRecoveryCapacitySpecBuilder::getMaxDisasterUsageAtScopeItems(
             disasterGroupIndex,
             dimensionIndex);
       },
-      [&maxDisasterUsage, this](auto&& coroResult, auto /*unused*/) {
+      [&maxDisasterUsage](auto&& coroResult, auto /*unused*/) {
         for (const auto& [scopeItem, excessLoad] : coroResult) {
-          inplace_max(maxDisasterUsage[scopeItem], excessLoad, *universe_);
+          inplace_max(maxDisasterUsage[scopeItem], excessLoad);
         }
       });
 
@@ -383,10 +383,9 @@ DisasterRecoveryCapacitySpecBuilder::constraints(
             scopeItemIds,
             objectsInDisasterGroupExprs);
       },
-      [&totalUsage, this](auto&& coroResult, auto /*unused*/) {
+      [&totalUsage](auto&& coroResult, auto /*unused*/) {
         for (const auto& [scopeItem, usageForDimensionIndex] : coroResult) {
-          inplace_max(
-              totalUsage[scopeItem], usageForDimensionIndex, *universe_);
+          inplace_max(totalUsage[scopeItem], usageForDimensionIndex);
         }
       });
 

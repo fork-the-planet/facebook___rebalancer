@@ -65,14 +65,14 @@ ExprPtr SpecBuilder::getConstraintViolation(const ConstraintInfo& constraint) {
   const auto& universe = constraintExpr->getUniverse();
   const auto kZero = const_expr(0, universe);
   if (!additionalPenaltyExpr) {
-    return max(kZero, constraintExpr, universe);
+    return max(kZero, constraintExpr);
   }
   // If additionalPenalty is specified, then total penalty is
   // = max(0, constraintExpr) + step(constraintExpr) * additionalPenalty
   // Also, while we don't expect additionalPenalty to be used when using optimal
   // solver, even if we do, it is fine because the product below can be
   // converted to its lp form since one of the children is binary
-  return max(kZero, constraintExpr, universe) +
+  return max(kZero, constraintExpr) +
       product(step(constraintExpr), additionalPenaltyExpr);
 }
 

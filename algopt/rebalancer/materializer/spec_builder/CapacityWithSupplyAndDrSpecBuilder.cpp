@@ -141,7 +141,7 @@ CapacityWithSupplyAndDrSpecBuilder::constraints(
         auto& scpoeItemName = universe_->getEntityName(scopeItemId);
         singleDrUsage->description =
             fmt::format("assuming {} down", scpoeItemName);
-        inplace_max(drUsage, singleDrUsage, *universe_);
+        inplace_max(drUsage, singleDrUsage);
       }
     }
     usage += drUsage;

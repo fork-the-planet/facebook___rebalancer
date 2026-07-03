@@ -589,8 +589,7 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilContributionToScopeItemUtil(
     const auto extraAdditivePenalty = groupToExtraAdditivePenalty_.getLimit(
         aggregationScopeItemId, aggregationGroupId);
     if (!universe_->getPrecision().isEqual(extraAdditivePenalty, 0.0)) {
-      unweightedPenalty =
-          max(unweightedPenalty + extraAdditivePenalty, 0.0, *universe_);
+      unweightedPenalty = max(unweightedPenalty + extraAdditivePenalty, 0.0);
     }
     co_return getWeightedExpr(
         unweightedPenalty,
@@ -625,7 +624,7 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilContributionToScopeItemUtil(
        interface::GroupUtilMultiplierTarget::COMMON},
       *spec_.roundUpGroupUtilOnScopeItem());
 
-  co_return max(minContributionToUtil, actualGroupUtilInScopeItem, *universe_);
+  co_return max(minContributionToUtil, actualGroupUtilInScopeItem);
 }
 
 ExprPtr CapacityWithGroupPresenceSpecBuilder::getWeightedExpr(

@@ -97,7 +97,7 @@ AggregatedGroupSpecBuilder::constraints(
           weight *= coefficient;
           if (withinGroupAggregationType ==
               interface::AggregatedGroupSpecAggType::MAX) {
-            inplace_max(groupValue, withinGroupRes * weight, *universe_);
+            inplace_max(groupValue, withinGroupRes * weight);
           } else if (
               withinGroupAggregationType ==
               interface::AggregatedGroupSpecAggType::SUM) {
@@ -111,7 +111,7 @@ AggregatedGroupSpecBuilder::constraints(
         }
         if (groupAggregationType ==
             interface::AggregatedGroupSpecAggType::MAX) {
-          inplace_max(containerValue, groupValue, *universe_);
+          inplace_max(containerValue, groupValue);
         } else if (
             groupAggregationType ==
             interface::AggregatedGroupSpecAggType::SUM) {
@@ -126,7 +126,7 @@ AggregatedGroupSpecBuilder::constraints(
 
       if (containerAggregationType ==
           interface::AggregatedGroupSpecAggType::MAX) {
-        inplace_max(scopeItemValue, containerValue, *universe_);
+        inplace_max(scopeItemValue, containerValue);
       } else if (
           containerAggregationType ==
           interface::AggregatedGroupSpecAggType::SUM) {

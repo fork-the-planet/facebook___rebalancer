@@ -66,10 +66,10 @@ class BalanceSpecBuilder : public SpecBuilder {
       double upperBound,
       bool applyBound) const;
 
-  ExprPtr computeVariancePenalty(
+  static ExprPtr computeVariancePenalty(
       const std::vector<ExprPtr>& allUtils,
       const std::function<ExprPtr(double)>& boundExpr,
-      double upperBound) const;
+      double upperBound);
 
   ExprPtr computeLegacyPenalty(
       const std::vector<ExprPtr>& allUtils,

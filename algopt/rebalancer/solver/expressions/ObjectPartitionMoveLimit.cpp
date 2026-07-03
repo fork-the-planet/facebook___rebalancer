@@ -372,7 +372,7 @@ void ObjectPartitionMoveLimit::updateExprForLp() {
     }
 
     expr -= groupLimits_.at(groupId);
-    inplace_max(lpProvider_, expr, getUniverse());
+    inplace_max(lpProvider_, expr);
   }
 }
 

@@ -380,7 +380,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
           totalFractionOfTrafficToScopeItem->getInitialValue();
       const auto initialGroupUtil =
           initialFractionOfTrafficToScopeItem * groupValue;
-      groupUtil = max(groupUtil, initialGroupUtil, *universe_);
+      groupUtil = max(groupUtil, initialGroupUtil);
     }
     groupUtil += step(totalFractionOfTrafficToScopeItem) *
         objectPartitionRoutingDimension.getStaticValue(groupId);
@@ -1378,8 +1378,8 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getBoundedAbsoluteUtil(
 
   auto boundedUtilExpr = [&](const auto& groupUtilExpr, auto boundValue) {
     auto boundedExpr = isUpperBound
-        ? min(groupUtilExpr, const_expr(boundValue, *universe_), *universe_)
-        : max(groupUtilExpr, step(groupUtilExpr) * boundValue, *universe_);
+        ? min(groupUtilExpr, const_expr(boundValue, *universe_))
+        : max(groupUtilExpr, step(groupUtilExpr) * boundValue);
     return boundedExpr;
   };
 

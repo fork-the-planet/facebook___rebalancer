@@ -232,7 +232,7 @@ folly::coro::Task<void> Materializer::materializeConstraintCoro(
   // components (since they take significant time to initialize, etc.).
   // Parellelize it after making Context thread-safe.
   for (auto& constraintInfo : constraints) {
-    userConstraint += max(0, constraintInfo.constraintExpr, *universe_);
+    userConstraint += max(0, constraintInfo.constraintExpr);
 
     auto [hardComponent, softComponent] = splitConstraintComponent(
         expressionBuilder, constraint, constraintInfo, universe_);

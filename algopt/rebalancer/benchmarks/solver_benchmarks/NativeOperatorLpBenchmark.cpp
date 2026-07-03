@@ -209,8 +209,7 @@ BENCHMARK(MaxLpSolve_baseline) {
     const Assignment assignment(uni->getContainers().getInitialAssignment());
     auto obj =
         max(containerLoad(*uni, assignment, 0, kN),
-            containerLoad(*uni, assignment, 1, kN),
-            *uni);
+            containerLoad(*uni, assignment, 1, kN));
     pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   gMaxBaseline() = buildAndSolve(*pPtr);
@@ -224,8 +223,7 @@ BENCHMARK(MaxLpSolve_native) {
     const Assignment assignment(uni->getContainers().getInitialAssignment());
     auto obj =
         max(containerLoad(*uni, assignment, 0, kN),
-            containerLoad(*uni, assignment, 1, kN),
-            *uni);
+            containerLoad(*uni, assignment, 1, kN));
     pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   SCOPE_EXIT {
