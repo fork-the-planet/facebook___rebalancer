@@ -14,7 +14,6 @@
 
 #include "algopt/rebalancer/solver/moves/InvalidMoveFilter.h"
 
-#include <folly/Range.h>
 #include <gtest/gtest.h>
 
 namespace facebook::rebalancer::tests {
