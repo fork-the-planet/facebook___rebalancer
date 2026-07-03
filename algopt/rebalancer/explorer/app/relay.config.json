@@ -1,0 +1,40 @@
+{
+  "src": ".",
+  "schema": "./graphql/__generated__/used_subschema.graphql",
+  "language": "typescript",
+  "typescriptExcludeUndefinedFromNullableUnion": true,
+  "requireCustomScalarTypes": true,
+  "customScalarTypes": {
+    "Url": "string",
+    "Time": "number"
+  },
+  "excludes": [
+    "**/__generated__/**",
+    "node_modules/**",
+    "scripts/**",
+    "public/**",
+    ".next/**"
+  ],
+  "artifactDirectory": "./lib/components/__generated__/",
+  "persistConfig": {
+    "url": "https://interngraph.intern.facebook.com/graphql/persist",
+    "params": {
+      "app": "155160167952447",
+      "schema": "intern",
+      "token": "AeOj5q69ZRZ4IuYc0CU",
+      "validate": "false"
+    }
+  },
+  "schemaConfig": {
+    "connectionInterface": {
+      "cursor": "cursor",
+      "edges": "edges",
+      "endCursor": "end_cursor",
+      "hasNextPage": "has_next_page",
+      "hasPreviousPage": "has_previous_page",
+      "node": "node",
+      "pageInfo": "page_info",
+      "startCursor": "start_cursor"
+    }
+  }
+}

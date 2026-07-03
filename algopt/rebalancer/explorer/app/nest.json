@@ -1,0 +1,11 @@
+{
+  "$schema": "../../libs/schemas/nest-config.schema.json",
+  "oncall": "algopt",
+  "framework": "nextjs",
+  "commands": {
+    "build": "yarn run build",
+    "install": "yarn install"
+  },
+  "creator": "kvelakur",
+  "template": "nextjs"
+}

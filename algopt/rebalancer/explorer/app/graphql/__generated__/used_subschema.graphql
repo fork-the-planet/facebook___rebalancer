@@ -1,0 +1,17 @@
+# To re-generate this file, cd nest/apps/<your-app> and run yarn relay:full
+# @generated
+
+directive @fb_owner on QUERY | MUTATION | SUBSCRIPTION | FIELD | FRAGMENT_DEFINITION | FRAGMENT_SPREAD | INLINE_FRAGMENT | OBJECT | FIELD_DEFINITION | INTERFACE | UNION | ENUM | INPUT_OBJECT
+
+directive @semanticNonNull on FIELD_DEFINITION
+
+type Query {
+  viewer_intern_user: InternUser
+}
+
+interface InternUser @fb_owner(oncall: "internal_auth") {
+  id: ID @semanticNonNull
+  intern_user: InternUser @semanticNonNull
+  name: String @semanticNonNull
+  unixname: String
+}
