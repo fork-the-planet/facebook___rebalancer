@@ -21,9 +21,8 @@ namespace facebook::rebalancer {
 
 BinaryOperation::BinaryOperation(
     std::shared_ptr<Expression> expr1,
-    std::shared_ptr<Expression> expr2,
-    const entities::Universe& universe)
-    : Expression(universe) {
+    std::shared_ptr<Expression> expr2)
+    : Expression(expr1->getUniverse()) {
   child1st = expr1;
   child2nd = expr2;
   add_child(std::move(expr1));

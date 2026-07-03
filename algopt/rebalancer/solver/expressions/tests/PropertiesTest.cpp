@@ -73,7 +73,7 @@ TEST_F(PropertiesTest, Product) {
   buildUniverse();
   const auto& universe = getUniverse();
   const ProductOperation product(
-      const_expr(1, universe), const_expr(1, universe), universe);
+      const_expr(1, universe), const_expr(1, universe));
   ASSERT_EQ("Product", product.getType());
 
   auto properties = product.getProperties();
@@ -86,7 +86,7 @@ TEST_F(PropertiesTest, Quotient) {
   buildUniverse();
   const auto& universe = getUniverse();
   const QuotientOperation quotient(
-      const_expr(1, universe), const_expr(1, universe), universe);
+      const_expr(1, universe), const_expr(1, universe));
   ASSERT_EQ("Quotient", quotient.getType());
 
   auto properties = quotient.getProperties();

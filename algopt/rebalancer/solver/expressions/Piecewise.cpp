@@ -66,9 +66,8 @@ bool isNonDecreasing(const std::vector<std::pair<double, double>>& points) {
 Piecewise::Piecewise(
     const std::vector<std::pair<double, double>>& points,
     std::shared_ptr<Expression> expr,
-    const entities::Universe& universe,
     bool continuous)
-    : Expression(universe), points_(points) {
+    : Expression(expr->getUniverse()), points_(points) {
   if (points_.size() < 2) {
     throw std::runtime_error("Needs to define at least 2 points for Piecewise");
   }

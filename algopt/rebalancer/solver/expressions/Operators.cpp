@@ -456,9 +456,8 @@ std::shared_ptr<ObjectLookup> object_lookup(
 std::shared_ptr<ObjectLookupDynamic> object_lookup_dynamic(
     ExprPtr sumOfObjectLookups,
     const entities::ObjectScalarDimension& dimension) {
-  const auto& universe = sumOfObjectLookups->getUniverse();
   return make_shared<ObjectLookupDynamic>(
-      std::move(sumOfObjectLookups), dimension, universe);
+      std::move(sumOfObjectLookups), dimension);
 }
 
 std::shared_ptr<StableStayed> stable_stayed(
@@ -546,11 +545,11 @@ ExprPtr power(ExprPtr base, double exponent) {
 }
 
 ExprPtr product(ExprPtr lhs, ExprPtr rhs) {
-  return make_shared<ProductOperation>(lhs, rhs, lhs->getUniverse());
+  return make_shared<ProductOperation>(lhs, rhs);
 }
 
 ExprPtr quotient(ExprPtr lhs, ExprPtr rhs) {
-  return make_shared<QuotientOperation>(lhs, rhs, lhs->getUniverse());
+  return make_shared<QuotientOperation>(lhs, rhs);
 }
 
 ExprPtr square(ExprPtr expr) {
@@ -599,8 +598,7 @@ ExprPtr sum_over_threshold(
     ExprPtr threshold,
     const std::vector<ExprPtr>& values,
     bool square) {
-  return make_shared<SumOverThreshold>(
-      threshold, values, square, threshold->getUniverse());
+  return make_shared<SumOverThreshold>(threshold, values, square);
 }
 
 ExprPtr variable(
@@ -615,7 +613,7 @@ ExprPtr piecewise(
     const std::vector<std::pair<double, double>>& points,
     ExprPtr x,
     bool continuous) {
-  return make_shared<Piecewise>(points, x, x->getUniverse(), continuous);
+  return make_shared<Piecewise>(points, x, continuous);
 }
 
 ExprPtr nth_largest(
@@ -629,7 +627,7 @@ ExprPtr boundsOverride(
     ExprPtr expr,
     std::optional<double> lb,
     std::optional<double> ub) {
-  return make_shared<BoundsOverride>(expr, lb, ub, expr->getUniverse());
+  return make_shared<BoundsOverride>(expr, lb, ub);
 }
 
 } // namespace facebook::rebalancer

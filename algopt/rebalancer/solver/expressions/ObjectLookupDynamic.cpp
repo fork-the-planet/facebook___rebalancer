@@ -27,9 +27,8 @@ namespace facebook::rebalancer {
 
 ObjectLookupDynamic::ObjectLookupDynamic(
     ExprPtr sumOfObjectLookups,
-    const entities::ObjectScalarDimension& dimension,
-    const entities::Universe& universe)
-    : Expression(universe) {
+    const entities::ObjectScalarDimension& dimension)
+    : Expression(sumOfObjectLookups->getUniverse()) {
   // Verify that the dimension is dynamic
   if (!dimension.isDynamic()) {
     throw std::runtime_error(

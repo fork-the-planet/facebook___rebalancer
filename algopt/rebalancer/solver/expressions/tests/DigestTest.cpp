@@ -222,7 +222,7 @@ TEST_F(DigestTest, ProductOperation) {
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
   const ExprPtr e1 =
       std::make_shared<Variable>(object(1), container(0), universe, assignment);
-  auto eProductOperation = std::make_shared<ProductOperation>(e0, e1, universe);
+  auto eProductOperation = std::make_shared<ProductOperation>(e0, e1);
   auto problem = createTestProblem(
       getUniversePtr(), {eProductOperation}, eProductOperation, {}, {}, false);
   auto digest = eProductOperation->digest(*problem);
@@ -246,8 +246,7 @@ TEST_F(DigestTest, QuotientOperation) {
       std::make_shared<Variable>(object(0), container(0), universe, assignment);
   const ExprPtr e1 =
       std::make_shared<Variable>(object(1), container(0), universe, assignment);
-  auto eQuotientOperation =
-      std::make_shared<QuotientOperation>(e0, e1, universe);
+  auto eQuotientOperation = std::make_shared<QuotientOperation>(e0, e1);
   auto problem = createTestProblem(
       getUniversePtr(),
       {eQuotientOperation},
@@ -299,7 +298,7 @@ TEST_F(DigestTest, SumOverThreshold) {
       std::make_shared<Variable>(
           object(1), container(0), universe, assignment));
   auto eSumOverThreshold =
-      std::make_shared<SumOverThreshold>(threshold, values, true, universe);
+      std::make_shared<SumOverThreshold>(threshold, values, true);
   auto problem = createTestProblem(
       getUniversePtr(), {eSumOverThreshold}, eSumOverThreshold, {}, {}, false);
   auto digest = eSumOverThreshold->digest(*problem);
@@ -325,7 +324,7 @@ TEST_F(DigestTest, Piecewise) {
   std::vector<std::pair<double, double>> points;
   points.emplace_back(1.0, 9.0);
   points.emplace_back(2.0, 5.0);
-  auto ePiecewise = std::make_shared<Piecewise>(points, expr, universe);
+  auto ePiecewise = std::make_shared<Piecewise>(points, expr);
   auto problem = createTestProblem(
       getUniversePtr(), {ePiecewise}, ePiecewise, {}, {}, false);
   auto digest = ePiecewise->digest(*problem);

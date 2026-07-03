@@ -364,8 +364,7 @@ CO_TEST_F(ChangeAffectionTestCustom, ObjectPartitionMoveLimit) {
 TEST_F(ChangeAffectionTest, Piecewise) {
   buildUniverse();
   const auto& universe = getUniverse();
-  const Piecewise pw(
-      {{0.0, 10.0}, {10.0, 5.0}}, const_expr(2.5, universe), universe);
+  const Piecewise pw({{0.0, 10.0}, {10.0, 5.0}}, const_expr(2.5, universe));
   EXPECT_FALSE(pw.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       pw.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==
@@ -386,7 +385,7 @@ TEST_F(ChangeAffectionTest, ProductOperation) {
   buildUniverse();
   const auto& universe = getUniverse();
   const ProductOperation product(
-      const_expr(1, universe), const_expr(1, universe), universe);
+      const_expr(1, universe), const_expr(1, universe));
   EXPECT_FALSE(product.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       product.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==
@@ -397,7 +396,7 @@ TEST_F(ChangeAffectionTest, QuotientOperation) {
   buildUniverse();
   const auto& universe = getUniverse();
   const QuotientOperation quotient(
-      const_expr(1, universe), const_expr(1, universe), universe);
+      const_expr(1, universe), const_expr(1, universe));
   EXPECT_FALSE(quotient.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       quotient.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==
@@ -427,7 +426,7 @@ TEST_F(ChangeAffectionTest, Step) {
 TEST_F(ChangeAffectionTest, SumOverThreshold) {
   buildUniverse();
   const auto& universe = getUniverse();
-  const SumOverThreshold sot(const_expr(1, universe), {}, false, universe);
+  const SumOverThreshold sot(const_expr(1, universe), {}, false);
   EXPECT_FALSE(sot.getDirectlyAffectedContainers().exists());
   EXPECT_TRUE(
       sot.isAffectedByChange(AffectedByChangeDecisionData(0, 0)) ==

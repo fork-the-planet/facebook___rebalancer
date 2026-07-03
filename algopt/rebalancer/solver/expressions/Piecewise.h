@@ -42,7 +42,6 @@ class Piecewise : public Expression {
   explicit Piecewise(
       const std::vector<std::pair<double, double>>& points,
       std::shared_ptr<Expression> expr,
-      const entities::Universe& universe,
       bool continuous = true);
 
   std::string innerDigest(size_t maxChildren = 10) const override;

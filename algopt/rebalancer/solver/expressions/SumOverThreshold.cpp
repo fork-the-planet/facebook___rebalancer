@@ -38,9 +38,8 @@ namespace facebook::rebalancer {
 SumOverThreshold::SumOverThreshold(
     std::shared_ptr<Expression> threshold,
     const std::vector<std::shared_ptr<Expression>>& values,
-    bool square,
-    const entities::Universe& universe)
-    : Expression(universe),
+    bool square)
+    : Expression(threshold->getUniverse()),
       squares(square),
       collection(
           [](Node n1, Node n2) {

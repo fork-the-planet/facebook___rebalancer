@@ -24,8 +24,7 @@ class ProductOperation : public BinaryOperation {
  public:
   explicit ProductOperation(
       std::shared_ptr<Expression> expr1,
-      std::shared_ptr<Expression> expr2,
-      const entities::Universe& universe);
+      std::shared_ptr<Expression> expr2);
 
   ExpressionProperties getProperties() const override;
 

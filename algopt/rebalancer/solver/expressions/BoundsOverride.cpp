@@ -25,12 +25,10 @@ namespace facebook::rebalancer {
 BoundsOverride::BoundsOverride(
     std::shared_ptr<Expression> child,
     std::optional<double> lowerBound,
-    std::optional<double> upperBound,
-    const entities::Universe& universe)
-    : Expression(universe), lowerBound_(lowerBound), upperBound_(upperBound) {
-  if (child == nullptr) {
-    throw std::runtime_error("Child cannot be null");
-  }
+    std::optional<double> upperBound)
+    : Expression(child->getUniverse()),
+      lowerBound_(lowerBound),
+      upperBound_(upperBound) {
   if (lowerBound == std::nullopt && upperBound == std::nullopt) {
     throw std::runtime_error("Must at least override 1 bound");
   }

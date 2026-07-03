@@ -291,7 +291,7 @@ TEST_F(ObjectPotentialsTest, SumOverThreshold) {
           {{.objectId = object(4), .potential = 10},
            {.objectId = object(5), .potential = 20}}),
       45);
-  SumOverThreshold sot(threshold, {child1, child2}, false, getUniverse());
+  SumOverThreshold sot(threshold, {child1, child2}, false);
   Context context;
   const Assignment assignment;
   sot.fullApply(TopToBottomEvaluator(context), assignment);
@@ -322,7 +322,7 @@ TEST_F(ObjectPotentialsTest, SumOverThresholdWithSquares) {
           {{.objectId = object(3), .potential = 1},
            {.objectId = object(4), .potential = 2}}),
       14);
-  SumOverThreshold sot(threshold, {child1, child2}, true, getUniverse());
+  SumOverThreshold sot(threshold, {child1, child2}, true);
   Context context;
   const Assignment assignment;
   sot.fullApply(TopToBottomEvaluator(context), assignment);
