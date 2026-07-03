@@ -195,9 +195,9 @@ ExprPtr BalanceSpecBuilder::computeVariancePenalty(
   for (const auto i : folly::irange(n)) {
     const auto val = max(0, allUtils[i] - boundExpr(upperBound), *universe_);
     sumVal += val;
-    sumValSquared += square(val, *universe_);
+    sumValSquared += square(val);
   }
-  return std::move(sumValSquared) - square(std::move(sumVal), *universe_) / n;
+  return std::move(sumValSquared) - square(std::move(sumVal)) / n;
 }
 
 ExprPtr BalanceSpecBuilder::computeLegacyPenalty(
@@ -215,7 +215,7 @@ ExprPtr BalanceSpecBuilder::computeLegacyPenalty(
     inplace_max(maxImbalance, imbalance, *universe_);
     const auto positiveImbalance = max(0, imbalance, *universe_);
     result += coefficient *
-        (continuousExpressions_ ? square(positiveImbalance, *universe_)
+        (continuousExpressions_ ? square(positiveImbalance)
                                 : positiveImbalance);
   }
   result += std::move(maxImbalance);

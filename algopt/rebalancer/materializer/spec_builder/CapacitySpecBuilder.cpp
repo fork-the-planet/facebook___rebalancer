@@ -184,13 +184,9 @@ folly::coro::Task<std::optional<ExprPtr>> CapacitySpecBuilder::getExpression(
       //          { 0                    util > threshold }
       if (ub > threshold) {
         expr = piecewise(
-            {{0, 0}, {0, threshold}, {threshold, 0}, {ub, 0}},
-            util,
-            *universe_,
-            false);
+            {{0, 0}, {0, threshold}, {threshold, 0}, {ub, 0}}, util, false);
       } else {
-        expr = piecewise(
-            {{0, 0}, {0, threshold}, {threshold, 0}}, util, *universe_, false);
+        expr = piecewise({{0, 0}, {0, threshold}, {threshold, 0}}, util, false);
       }
     } else {
       expr = threshold - util;

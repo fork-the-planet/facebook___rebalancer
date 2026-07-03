@@ -179,9 +179,7 @@ TEST_F(PackerTests, Square) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   basic(
-      square(
-          variable(object(0), container(0), *universe, assignment) * 10 + 5,
-          *universe),
+      square(variable(object(0), container(0), *universe, assignment) * 10 + 5),
       225,
       25,
       universe);
@@ -593,9 +591,7 @@ TEST_F(PackerTests, MipSquare) {
   const auto universe = setupUniverse(/*numObjects=*/10, /*numContainers=*/10);
   const Assignment assignment(universe->getContainers().getInitialAssignment());
   mipbasic(
-      square(
-          variable(object(0), container(0), *universe, assignment) * 10 + 5,
-          *universe),
+      square(variable(object(0), container(0), *universe, assignment) * 10 + 5),
       225,
       25,
       universe);
@@ -622,8 +618,7 @@ TEST_F(PackerTests, MipRectangle) {
       rectangle(
           variable(object(0), container(0), *universe, assignment) * 10 - 10,
           -1,
-          1,
-          *universe),
+          1),
       1,
       0,
       universe);

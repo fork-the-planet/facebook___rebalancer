@@ -85,7 +85,7 @@ TEST_F(SquareTest, EquivalenceSets) {
   const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto var = variable(object(1), container(1), universe, assignment);
   auto sum = 10 * var + 5;
-  auto b = square(sum, universe);
+  auto b = square(sum);
 
   EquivalenceSets equivalenceSets(universe);
   equivalenceSets.combine(allObjectIds);

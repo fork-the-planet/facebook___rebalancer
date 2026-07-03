@@ -38,31 +38,31 @@ TEST_F(RectangleTest, Constants) {
   buildUniverse();
   const auto& universe = getUniverse();
   {
-    auto expr = rectangle(const_expr(-1.01, universe), 0, 1, universe);
+    auto expr = rectangle(const_expr(-1.01, universe), 0, 1);
     EXPECT_EQ(0, apply(expr, {}));
   }
   {
-    auto expr = rectangle(const_expr(-0.99, universe), -1, 0, universe);
+    auto expr = rectangle(const_expr(-0.99, universe), -1, 0);
     EXPECT_EQ(1.0, apply(expr, {}));
   }
   {
-    auto expr = rectangle(const_expr(0, universe), 0, 1, universe);
+    auto expr = rectangle(const_expr(0, universe), 0, 1);
     EXPECT_EQ(1.0, apply(expr, {}));
   }
   {
-    auto expr = rectangle(const_expr(1e-12, universe), -1, 1, universe);
+    auto expr = rectangle(const_expr(1e-12, universe), -1, 1);
     EXPECT_EQ(1.0, apply(expr, {}));
   }
   {
-    auto expr = rectangle(const_expr(1 - 1e-12, universe), -1, 0.9, universe);
+    auto expr = rectangle(const_expr(1 - 1e-12, universe), -1, 0.9);
     EXPECT_EQ(0.0, apply(expr, {}));
   }
   {
-    auto expr = rectangle(const_expr(1, universe), -1, 1, universe);
+    auto expr = rectangle(const_expr(1, universe), -1, 1);
     EXPECT_EQ(1.0, apply(expr, {}));
   }
   {
-    auto expr = rectangle(const_expr(1.01, universe), 0, 1, universe);
+    auto expr = rectangle(const_expr(1.01, universe), 0, 1);
     EXPECT_EQ(0.0, apply(expr, {}));
   }
 }
@@ -79,7 +79,7 @@ TEST_F(RectangleTest, NonConstant) {
       {container(1), {object(1)}},
   });
 
-  auto rectangleExpr = rectangle(expr, -1, 1, universe);
+  auto rectangleExpr = rectangle(expr, -1, 1);
 
   EXPECT_EQ(0.0, apply(rectangleExpr, assignment));
 

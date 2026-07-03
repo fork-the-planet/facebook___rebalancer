@@ -44,17 +44,17 @@ TEST_F(PiecewiseTest, PiecewiseNonContinuous) {
   auto x = 6 * variable(object(1), container(0), universe, assignment) +
       variable(object(2), container(0), universe, assignment) - 1;
   REBALANCER_EXPECT_RUNTIME_ERROR_CONTAINS(
-      piecewise({{0, 0}, {0, 5}, {5, 0}}, x, universe, false),
+      piecewise({{0, 0}, {0, 5}, {5, 0}}, x, false),
       "cannot be smaller than first point");
 
   // x2 has initial value 6*1 + 0 - 1 = 5 (in domain).
   auto x2 = 6 * variable(object(0), container(0), universe, assignment) +
       variable(object(2), container(0), universe, assignment) - 1;
-  auto y = piecewise({{0, 0}, {0, 5}, {5, 0}}, x2, universe, false);
+  auto y = piecewise({{0, 0}, {0, 5}, {5, 0}}, x2, false);
   EXPECT_DOUBLE_EQ(0, apply(y, assignment));
 
   // x2/5 = 1, so piecewise interpolates to 4 between (0, 5) and (5, 0).
-  auto z = piecewise({{0, 0}, {0, 5}, {5, 0}}, x2 / 5, universe, false);
+  auto z = piecewise({{0, 0}, {0, 5}, {5, 0}}, x2 / 5, false);
   EXPECT_DOUBLE_EQ(4, apply(z, assignment));
 }
 
@@ -68,7 +68,7 @@ TEST_F(PiecewiseTest, PiecewiseNonContinuousDecreasing) {
           step(variable(object(1), container(0), universe, assignment),
                universe) +
       variable(object(1), container(1), universe, assignment) - 1;
-  auto y = piecewise({{0, 5}, {0, 1}, {5, 1}, {10, 0}}, x, universe, false);
+  auto y = piecewise({{0, 5}, {0, 1}, {5, 1}, {10, 0}}, x, false);
 
   // x = 0
   EXPECT_EQ(5, apply(y, assignment));
@@ -90,7 +90,7 @@ TEST_F(PiecewiseTest, PiecewiseNonMontonic) {
           step(variable(object(1), container(0), universe, assignment),
                universe) +
       1;
-  auto y = piecewise({{0, 0}, {1, 1}, {5, 0}}, x, universe);
+  auto y = piecewise({{0, 0}, {1, 1}, {5, 0}}, x);
 
   // x = 1
   EXPECT_EQ(1.0, apply(y, assignment));
@@ -109,7 +109,7 @@ TEST_F(PiecewiseTest, PiecewiseNonDecreasing) {
           step(variable(object(1), container(0), universe, assignment),
                universe) +
       0.5;
-  auto y = piecewise({{0, 0}, {1, 1}, {5, 1}}, x, universe);
+  auto y = piecewise({{0, 0}, {1, 1}, {5, 1}}, x);
 
   // x = 0.5
   EXPECT_EQ(0.5, apply(y, assignment));
@@ -128,7 +128,7 @@ TEST_F(PiecewiseTest, PiecewiseDecreasing) {
           step(variable(object(1), container(0), universe, assignment),
                universe) +
       0.5;
-  auto y = piecewise({{0, 5}, {5, 0}}, x, universe);
+  auto y = piecewise({{0, 5}, {5, 0}}, x);
 
   // x = 0.5, so y is 5-0.5
   EXPECT_EQ(4.5, apply(y, assignment));
@@ -145,7 +145,7 @@ TEST_F(PiecewiseTest, PiecewiseInitialValue) {
   auto v = variable(object(0), container(0), universe, assignment);
   // v = 1, so piecewise({(1, 9), (2, 5)})(1) = 9.
   EXPECT_DOUBLE_EQ(
-      9.0, piecewise({{1.0, 9.0}, {2.0, 5.0}}, v, universe)->getInitialValue());
+      9.0, piecewise({{1.0, 9.0}, {2.0, 5.0}}, v)->getInitialValue());
 }
 
 } // namespace facebook::rebalancer::packer::tests

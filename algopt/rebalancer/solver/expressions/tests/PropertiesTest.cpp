@@ -194,8 +194,7 @@ TEST_F(PropertiesTest, ObjectVector) {
 TEST_F(PropertiesTest, Piecewise) {
   buildUniverse();
   const auto& universe = getUniverse();
-  auto pw = piecewise(
-      {{0.0, 10.0}, {10.0, 5.0}}, const_expr(2.5, universe), universe);
+  auto pw = piecewise({{0.0, 10.0}, {10.0, 5.0}}, const_expr(2.5, universe));
   ASSERT_EQ("Piecewise", pw->getType());
 
   auto properties = pw->getProperties();
@@ -224,7 +223,7 @@ TEST_F(PropertiesTest, TransformPower) {
 TEST_F(PropertiesTest, TransformRectangle) {
   buildUniverse();
   const auto& universe = getUniverse();
-  auto transform = rectangle(const_expr(1.0, universe), 2.0, 3.0, universe);
+  auto transform = rectangle(const_expr(1.0, universe), 2.0, 3.0);
   ASSERT_EQ("Rectangle", transform->getType());
 
   auto properties = transform->getProperties();

@@ -121,7 +121,7 @@ CO_TEST_F(ExpressionIteratorTest, PreOrderExpressionTraversal) {
       *universe,
       assignment);
   auto c = rebalancer::max({a, b}, *universe); // 2
-  auto d = square(b, *universe); // 4
+  auto d = square(b); // 4
   auto e = c + d; // 6
   Context context;
   e->fullApply(

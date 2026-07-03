@@ -331,8 +331,7 @@ folly::coro::Task<ExprPtr> GroupCountSpecBuilder::buildSingleRequirement(
                    universe_->getPartition(partitionId_)
                        .getObjectIds(groupId)
                        .size()},
-              *universe_),
-          *universe_);
+              *universe_));
     }
   } else {
     if (zeroAllowed) {
@@ -341,8 +340,7 @@ folly::coro::Task<ExprPtr> GroupCountSpecBuilder::buildSingleRequirement(
       expr = rectangle(
           expr,
           *spec_.minimumLimit() + kRectangleTolerance,
-          limitConstant - kRectangleTolerance,
-          *universe_);
+          limitConstant - kRectangleTolerance);
     } else {
       expr = limitExpr - expr;
     }

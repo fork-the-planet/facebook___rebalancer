@@ -118,7 +118,7 @@ BENCHMARK(SquareLpSolve_baseline) {
     algopt::useXpressNativeQuadratic() = false;
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
-    auto obj = square(containerLoad(*uni, assignment, 0, kN), *uni);
+    auto obj = square(containerLoad(*uni, assignment, 0, kN));
     pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   gSquareBaseline() = buildAndSolve(*pPtr);
@@ -130,7 +130,7 @@ BENCHMARK(SquareLpSolve_native) {
     algopt::useXpressNativeQuadratic() = true;
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
-    auto obj = square(containerLoad(*uni, assignment, 0, kN), *uni);
+    auto obj = square(containerLoad(*uni, assignment, 0, kN));
     pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   SCOPE_EXIT {
@@ -167,8 +167,8 @@ BENCHMARK(PiecewiseLpSolve_baseline) {
     algopt::useXpressNativePwl() = false;
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
-    auto obj = piecewise(
-        makePwlPoints(), containerLoad(*uni, assignment, 0, kN), *uni);
+    auto obj =
+        piecewise(makePwlPoints(), containerLoad(*uni, assignment, 0, kN));
     pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   gPwlBaseline() = buildAndSolve(*pPtr);
@@ -180,8 +180,8 @@ BENCHMARK(PiecewiseLpSolve_native) {
     algopt::useXpressNativePwl() = true;
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
-    auto obj = piecewise(
-        makePwlPoints(), containerLoad(*uni, assignment, 0, kN), *uni);
+    auto obj =
+        piecewise(makePwlPoints(), containerLoad(*uni, assignment, 0, kN));
     pPtr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   SCOPE_EXIT {

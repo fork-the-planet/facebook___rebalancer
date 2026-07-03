@@ -175,20 +175,13 @@ std::shared_ptr<ObjectVector> object_vector(
 ExprPtr power(ExprPtr base, double exponent);
 ExprPtr product(ExprPtr lhs, ExprPtr rhs);
 ExprPtr quotient(ExprPtr lhs, ExprPtr rhs);
-ExprPtr square(ExprPtr expr, const entities::Universe& universe);
-ExprPtr square(
-    ExprPtr expr,
-    const ApproximationHint& hint,
-    const entities::Universe& universe);
+ExprPtr square(ExprPtr expr);
+ExprPtr square(ExprPtr expr, const ApproximationHint& hint);
 ExprPtr step(ExprPtr expr, const entities::Universe& universe);
 ExprPtr step_mod_k(ExprPtr expr, int k);
 ExprPtr ceil(ExprPtr expr, const entities::Universe& universe);
 ExprPtr log(ExprPtr expr, const entities::Universe& universe);
-ExprPtr rectangle(
-    ExprPtr expr,
-    const double lb,
-    const double ub,
-    const entities::Universe& universe);
+ExprPtr rectangle(ExprPtr expr, const double lb, const double ub);
 ExprPtr sum_over_threshold(
     ExprPtr threshold,
     const std::vector<ExprPtr>& values,
@@ -203,7 +196,6 @@ ExprPtr variable(
 ExprPtr piecewise(
     const std::vector<std::pair<double, double>>& points,
     ExprPtr x,
-    const entities::Universe& universe,
     bool continuous = true);
 ExprPtr nth_largest(
     const std::vector<ExprPtr>& values,

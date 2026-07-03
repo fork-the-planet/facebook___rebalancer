@@ -558,15 +558,12 @@ ExprPtr quotient(ExprPtr lhs, ExprPtr rhs) {
   return make_shared<QuotientOperation>(lhs, rhs, lhs->getUniverse());
 }
 
-ExprPtr square(ExprPtr expr, const entities::Universe& universe) {
-  return make_shared<Square>(expr, universe);
+ExprPtr square(ExprPtr expr) {
+  return make_shared<Square>(expr, expr->getUniverse());
 }
 
-ExprPtr square(
-    ExprPtr expr,
-    const ApproximationHint& hint,
-    const entities::Universe& universe) {
-  return make_shared<Square>(expr, hint, universe);
+ExprPtr square(ExprPtr expr, const ApproximationHint& hint) {
+  return make_shared<Square>(expr, hint, expr->getUniverse());
 }
 
 ExprPtr step(ExprPtr expr, const entities::Universe& universe) {
@@ -600,12 +597,8 @@ ExprPtr log(ExprPtr expr, const entities::Universe& universe) {
   return make_shared<Log>(expr, universe);
 }
 
-ExprPtr rectangle(
-    ExprPtr expr,
-    const double lb,
-    const double ub,
-    const entities::Universe& universe) {
-  return make_shared<Rectangle>(expr, lb, ub, universe);
+ExprPtr rectangle(ExprPtr expr, const double lb, const double ub) {
+  return make_shared<Rectangle>(expr, lb, ub, expr->getUniverse());
 }
 
 ExprPtr sum_over_threshold(
@@ -627,9 +620,8 @@ ExprPtr variable(
 ExprPtr piecewise(
     const std::vector<std::pair<double, double>>& points,
     ExprPtr x,
-    const entities::Universe& universe,
     bool continuous) {
-  return make_shared<Piecewise>(points, x, universe, continuous);
+  return make_shared<Piecewise>(points, x, x->getUniverse(), continuous);
 }
 
 ExprPtr nth_largest(

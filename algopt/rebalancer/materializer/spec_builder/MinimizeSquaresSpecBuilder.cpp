@@ -56,7 +56,7 @@ folly::coro::Task<ExprPtr> MinimizeSquaresSpecBuilder::goalCoro(
     auto relUtil = co_await expressionBuilder.getRelativeUtil(
         UtilMetric::AFTER, dimensionId, scopeId, scopeItemId);
     auto after_expr = max({const_expr(0, *universe_), relUtil}, *universe_);
-    goal += (coef * square(after_expr, hint, *universe_));
+    goal += (coef * square(after_expr, hint));
   }
   co_return goal;
 }

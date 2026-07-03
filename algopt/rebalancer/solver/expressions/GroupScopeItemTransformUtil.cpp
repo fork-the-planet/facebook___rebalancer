@@ -623,7 +623,7 @@ ExprPtr GroupScopeItemTransformUtil::getExprForLp(
       }
 
       case TransformFunctionType::SQUARE: {
-        expr += scopeItemWeight * square(scopeItemUtil, getUniverse());
+        expr += scopeItemWeight * square(scopeItemUtil);
         break;
       }
 
