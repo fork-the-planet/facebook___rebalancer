@@ -418,12 +418,9 @@ std::shared_ptr<ConstraintImpl> GurobiProblem::newConstraint(
 
 void GurobiProblem::deleteConstraint(
     std::shared_ptr<ConstraintImpl> constraint) {
-  auto grbConstr = dynamic_cast<GurobiConstraint&>(*constraint).get();
-  if (std::holds_alternative<GRBConstr>(grbConstr)) {
-    model_.remove(std::get<GRBConstr>(grbConstr));
-  } else {
-    model_.remove(std::get<GRBQConstr>(grbConstr));
-  }
+  std::visit(
+      [this](auto& c) { model_.remove(c); },
+      dynamic_cast<GurobiConstraint&>(*constraint).get());
 }
 
 int GurobiProblem::getObjectiveSize() const {
@@ -1435,6 +1432,179 @@ std::optional<IIS> GurobiProblem::getIIS() {
 void GurobiProblem::replay(const std::string& fileName) const {
   GRBModel model(model_.getEnv(), fileName);
   model.optimize();
+}
+
+bool GurobiProblem::supportsNativeQuadratic() const {
+  return algopt::useGurobiNativeQuadratic();
+}
+
+bool GurobiProblem::supportsNativePwl() const {
+  return algopt::useGurobiNativePwl();
+}
+
+bool GurobiProblem::supportsNativeMax() const {
+  return algopt::useGurobiNativeMax();
+}
+
+bool GurobiProblem::supportsIndicatorConstraints() const {
+  return algopt::useGurobiNativeStep();
+}
+
+bool GurobiProblem::setIndicatorOnConstraint(
+    Constraint& ctr,
+    const Variable& binaryVar,
+    int dir) {
+  // Validate arguments before mutating the model so an invalid dir cannot
+  // leave the model inconsistent (linear constraint removed, no indicator
+  // added, caller's Constraint holding a stale handle).
+  if (dir != 0 && dir != 1) {
+    throw std::invalid_argument(
+        fmt::format(
+            "setIndicatorOnConstraint: dir must be 0 or 1, got {}", dir));
+  }
+  auto* gurobiCtr = dynamic_cast<GurobiConstraint*>(ctr.get().get());
+  const auto* gurobiVar =
+      dynamic_cast<const GurobiVariable*>(binaryVar.get().get());
+  if (!gurobiCtr || !gurobiVar) {
+    return false;
+  }
+  auto& variant = gurobiCtr->get();
+  if (!std::holds_alternative<GRBConstr>(variant)) {
+    return false; // only linear constraints can be converted to indicators
+  }
+  auto linCtr = std::get<GRBConstr>(variant);
+  // Gurobi batches model changes and requires update() before attributes of
+  // a newly-added constraint (getRow, Sense, RHS) become readable.
+  model_.update();
+  // Capture row, sense, and RHS before touching the model.
+  const GRBLinExpr linExpr = model_.getRow(linCtr);
+  const char sense = linCtr.get(GRB_CharAttr_Sense);
+  const double rhs = linCtr.get(GRB_DoubleAttr_RHS);
+  // Add the indicator before removing the original linear constraint. If
+  // addGenConstrIndicator throws (e.g. the variable is not actually binary, or
+  // Gurobi rejects the sense/rhs combination), the model still holds the
+  // original constraint and the caller's GurobiConstraint keeps its valid
+  // GRBConstr handle, so both stay consistent (basic exception guarantee).
+  const GRBGenConstr gc =
+      model_.addGenConstrIndicator(gurobiVar->get(), dir, linExpr, sense, rhs);
+  model_.remove(linCtr);
+  gurobiCtr->setGenConstr(gc);
+  return true;
+}
+
+std::optional<algopt::lp::Expression> GurobiProblem::addNativePwlConstraint(
+    const algopt::lp::Expression& x,
+    const std::vector<std::pair<double, double>>& points) {
+  if (points.size() < 2) {
+    throw std::invalid_argument(
+        fmt::format(
+            "PWL breakpoints must have at least 2 points, got {}",
+            points.size()));
+  }
+  for (const auto i : folly::irange(size_t{1}, points.size())) {
+    if (points[i].first <= points[i - 1].first) {
+      throw std::invalid_argument(
+          fmt::format(
+              "PWL breakpoints must be strictly increasing by x: "
+              "x[{}]={} <= x[{}]={}",
+              i,
+              points[i].first,
+              i - 1,
+              points[i - 1].first));
+    }
+  }
+  const auto* grbExpr = dynamic_cast<const GurobiExpression*>(x.get().get());
+  if (!grbExpr || !std::holds_alternative<GRBLinExpr>(grbExpr->get())) {
+    return std::nullopt; // quadratic or non-Gurobi inputs unsupported
+  }
+  const auto& xLinExpr = std::get<GRBLinExpr>(grbExpr->get());
+
+  const double xMin = points.front().first;
+  const double xMax = points.back().first;
+  double yMin = points.front().second;
+  double yMax = points.front().second;
+  for (const auto i : folly::irange(size_t{1}, points.size())) {
+    yMin = std::min(yMin, points[i].second);
+    yMax = std::max(yMax, points[i].second);
+  }
+
+  // Bound xAux to the PWL breakpoint domain. The linking equality
+  // (xAux == xLinExpr) propagates this bound back to the caller's expression,
+  // so the caller must guarantee xLinExpr stays within [xMin, xMax] at every
+  // feasible solution. Piecewise::lp() enforces this via a proven-bounds gate
+  // (childLb >= xMin && childUb <= xMax) before calling this method.
+  const GRBVar xAux = addVar(xMin, xMax, 0, GRB_CONTINUOUS, "pwl_x");
+  const GRBVar yVar = addVar(yMin, yMax, 0, GRB_CONTINUOUS, "pwl_y");
+
+  // Link xAux to the input expression: xAux - xLinExpr == 0.
+  GRBLinExpr linkExpr(xAux);
+  linkExpr -= xLinExpr;
+  model_.addConstr(linkExpr == 0, "pwl_x_link");
+
+  // addGenConstrPWL requires x-coordinates to be strictly increasing; the
+  // validation above guarantees this.
+  const int npts = static_cast<int>(points.size());
+  std::vector<double> xpts, ypts;
+  xpts.reserve(npts);
+  ypts.reserve(npts);
+  for (const auto& [xi, yi] : points) {
+    xpts.push_back(xi);
+    ypts.push_back(yi);
+  }
+  model_.addGenConstrPWL(xAux, yVar, npts, xpts.data(), ypts.data(), "pwl");
+
+  return algopt::lp::Expression(
+      std::make_shared<GurobiExpression>(GRBLinExpr(yVar)));
+}
+
+std::optional<algopt::lp::Expression> GurobiProblem::addNativeMaxConstraint(
+    const std::vector<algopt::lp::Expression>& inputs) {
+  if (inputs.empty()) {
+    throw std::invalid_argument(
+        "MAX constraint requires at least 1 input expression");
+  }
+
+  // Validate all inputs before mutating the model. A failed cast on a later
+  // input must not leave orphan auxiliary vars/constraints behind, since the
+  // caller falls back to the approximation path on std::nullopt.
+  std::vector<GRBLinExpr> inputLinExprs;
+  inputLinExprs.reserve(inputs.size());
+  for (const auto& input : inputs) {
+    const auto* grbExpr =
+        dynamic_cast<const GurobiExpression*>(input.get().get());
+    if (!grbExpr || !std::holds_alternative<GRBLinExpr>(grbExpr->get())) {
+      return std::nullopt;
+    }
+    inputLinExprs.push_back(std::get<GRBLinExpr>(grbExpr->get()));
+  }
+
+  const GRBVar resultVar =
+      addVar(-GRB_INFINITY, GRB_INFINITY, 0, GRB_CONTINUOUS, "max_result");
+
+  std::vector<GRBVar> inputAuxVars;
+  inputAuxVars.reserve(inputs.size());
+  for (const auto i : folly::irange(inputLinExprs.size())) {
+    const auto& linExpr = inputLinExprs.at(i);
+    const GRBVar inputAux = addVar(
+        -GRB_INFINITY,
+        GRB_INFINITY,
+        0,
+        GRB_CONTINUOUS,
+        fmt::format("max_input_{}", i));
+    GRBLinExpr linkExpr(inputAux);
+    linkExpr -= linExpr;
+    model_.addConstr(linkExpr == 0, fmt::format("max_input_link_{}", i));
+    inputAuxVars.push_back(inputAux);
+  }
+  model_.addGenConstrMax(
+      resultVar,
+      inputAuxVars.data(),
+      static_cast<int>(inputAuxVars.size()),
+      -GRB_INFINITY,
+      "max_gencons");
+
+  return algopt::lp::Expression(
+      std::make_shared<GurobiExpression>(GRBLinExpr(resultVar)));
 }
 
 namespace {

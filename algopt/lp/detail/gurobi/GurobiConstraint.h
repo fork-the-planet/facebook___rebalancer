@@ -27,12 +27,18 @@ namespace facebook::algopt::lp::detail {
 
 class GurobiConstraint : public ConstraintImpl {
  public:
-  explicit GurobiConstraint(std::variant<GRBConstr, GRBQConstr> constraint);
+  explicit GurobiConstraint(
+      const std::variant<GRBConstr, GRBQConstr>& constraint);
 
-  const std::variant<GRBConstr, GRBQConstr>& get() const;
+  const std::variant<GRBConstr, GRBQConstr, GRBGenConstr>& get() const;
+  std::variant<GRBConstr, GRBQConstr, GRBGenConstr>& get();
+
+  // Replaces the stored handle with a general constraint (used by
+  // setIndicatorOnConstraint to swap a linear constraint for an indicator).
+  void setGenConstr(GRBGenConstr gc);
 
  private:
-  std::variant<GRBConstr, GRBQConstr> constraint_;
+  std::variant<GRBConstr, GRBQConstr, GRBGenConstr> constraint_;
 };
 
 } // namespace facebook::algopt::lp::detail

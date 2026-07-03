@@ -90,6 +90,20 @@ class GurobiProblem : public ProblemImpl {
   std::optional<IIS> getIIS() override;
   void replay(const std::string& fileName) const override;
 
+  bool supportsNativeQuadratic() const override;
+  bool supportsNativePwl() const override;
+  bool supportsNativeMax() const override;
+  bool supportsIndicatorConstraints() const override;
+  bool setIndicatorOnConstraint(
+      Constraint& ctr,
+      const Variable& binaryVar,
+      int dir) override;
+  std::optional<Expression> addNativePwlConstraint(
+      const Expression& x,
+      const std::vector<std::pair<double, double>>& points) override;
+  std::optional<Expression> addNativeMaxConstraint(
+      const std::vector<Expression>& inputs) override;
+
   // Extracts the model directly from Gurobi's native representation into thrift
   // format, avoiding the intermediate GenericProblemImpl layer.
   lp::thrift::GenericProblem toThrift() const;

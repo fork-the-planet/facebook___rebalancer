@@ -101,4 +101,24 @@ FOLLY_EXPORT inline bool& useXpressIndicatorConstraints() {
   return value;
 }
 
+// Runtime flags controlling native Gurobi operator paths. Parallel to the
+// Xpress flags above. Only meaningful when isGurobiAvailable() returns true.
+// Default false preserves existing approximation behavior.
+FOLLY_EXPORT inline bool& useGurobiNativeQuadratic() {
+  static bool value = false;
+  return value;
+}
+FOLLY_EXPORT inline bool& useGurobiNativePwl() {
+  static bool value = false;
+  return value;
+}
+FOLLY_EXPORT inline bool& useGurobiNativeMax() {
+  static bool value = false;
+  return value;
+}
+FOLLY_EXPORT inline bool& useGurobiNativeStep() {
+  static bool value = false;
+  return value;
+}
+
 } // namespace facebook::algopt

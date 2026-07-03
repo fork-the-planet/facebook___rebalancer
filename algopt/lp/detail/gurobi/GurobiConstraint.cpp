@@ -19,11 +19,25 @@
 namespace facebook::algopt::lp::detail {
 
 GurobiConstraint::GurobiConstraint(
-    std::variant<GRBConstr, GRBQConstr> constraint)
-    : constraint_(constraint) {}
+    const std::variant<GRBConstr, GRBQConstr>& constraint)
+    : constraint_(
+          std::visit(
+              [](auto c) -> std::variant<GRBConstr, GRBQConstr, GRBGenConstr> {
+                return c;
+              },
+              constraint)) {}
 
-const std::variant<GRBConstr, GRBQConstr>& GurobiConstraint::get() const {
+const std::variant<GRBConstr, GRBQConstr, GRBGenConstr>& GurobiConstraint::get()
+    const {
   return constraint_;
+}
+
+std::variant<GRBConstr, GRBQConstr, GRBGenConstr>& GurobiConstraint::get() {
+  return constraint_;
+}
+
+void GurobiConstraint::setGenConstr(GRBGenConstr gc) {
+  constraint_ = gc;
 }
 
 } // namespace facebook::algopt::lp::detail
