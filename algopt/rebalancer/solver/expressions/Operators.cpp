@@ -292,7 +292,8 @@ ExprPtr min(
 
 // caller needs to make sure that A and B are binary
 // so indeed this is the optimization they want to apply
-ExprPtr binary_min(ExprPtr A, ExprPtr B, const entities::Universe& universe) {
+ExprPtr binary_min(ExprPtr A, ExprPtr B) {
+  const auto& universe = A->getUniverse();
   if (A == 0 || B == 0) {
     return const_expr(0, universe);
   } else if (A == 1) {
@@ -303,10 +304,8 @@ ExprPtr binary_min(ExprPtr A, ExprPtr B, const entities::Universe& universe) {
   return step(std::move(A) + std::move(B) - 1, universe);
 }
 
-void inplace_binary_max(
-    ExprPtr& A,
-    ExprPtr B,
-    const entities::Universe& universe) {
+void inplace_binary_max(ExprPtr& A, ExprPtr B) {
+  const auto& universe = A->getUniverse();
   if (A == 1 || B == 1) {
     A = const_expr(1, universe);
     return;
@@ -461,8 +460,8 @@ std::shared_ptr<ObjectLookup> object_lookup(
 
 std::shared_ptr<ObjectLookupDynamic> object_lookup_dynamic(
     ExprPtr sumOfObjectLookups,
-    const entities::ObjectScalarDimension& dimension,
-    const entities::Universe& universe) {
+    const entities::ObjectScalarDimension& dimension) {
+  const auto& universe = sumOfObjectLookups->getUniverse();
   return make_shared<ObjectLookupDynamic>(
       std::move(sumOfObjectLookups), dimension, universe);
 }
@@ -547,17 +546,16 @@ std::shared_ptr<ObjectVector> object_vector(
       entities::ObjectValues(std::move(objectToNonDefaultValue)), universe);
 }
 
-ExprPtr
-power(ExprPtr base, double exponent, const entities::Universe& universe) {
-  return make_shared<Power>(base, exponent, universe);
+ExprPtr power(ExprPtr base, double exponent) {
+  return make_shared<Power>(base, exponent, base->getUniverse());
 }
 
-ExprPtr product(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe) {
-  return make_shared<ProductOperation>(lhs, rhs, universe);
+ExprPtr product(ExprPtr lhs, ExprPtr rhs) {
+  return make_shared<ProductOperation>(lhs, rhs, lhs->getUniverse());
 }
 
-ExprPtr quotient(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe) {
-  return make_shared<QuotientOperation>(lhs, rhs, universe);
+ExprPtr quotient(ExprPtr lhs, ExprPtr rhs) {
+  return make_shared<QuotientOperation>(lhs, rhs, lhs->getUniverse());
 }
 
 ExprPtr square(ExprPtr expr, const entities::Universe& universe) {
@@ -583,12 +581,13 @@ ExprPtr ceil(ExprPtr expr, const entities::Universe& universe) {
   return make_shared<Ceil>(expr, universe);
 }
 
-ExprPtr step_mod_k(ExprPtr expr, int k, const entities::Universe& universe) {
+ExprPtr step_mod_k(ExprPtr expr, int k) {
   if (k == 0) {
     throw std::runtime_error("step_mod_k with k=0 is not supported");
   } else if (k == 1) {
     return expr;
   } else {
+    const auto& universe = expr->getUniverse();
     auto quotient = std::move(expr) / k;
     auto nextInt = ceil(quotient, universe);
     // (nextInt - quotient) is not same as expr % k
@@ -612,9 +611,9 @@ ExprPtr rectangle(
 ExprPtr sum_over_threshold(
     ExprPtr threshold,
     const std::vector<ExprPtr>& values,
-    bool square,
-    const entities::Universe& universe) {
-  return make_shared<SumOverThreshold>(threshold, values, square, universe);
+    bool square) {
+  return make_shared<SumOverThreshold>(
+      threshold, values, square, threshold->getUniverse());
 }
 
 ExprPtr variable(
@@ -643,9 +642,8 @@ ExprPtr nth_largest(
 ExprPtr boundsOverride(
     ExprPtr expr,
     std::optional<double> lb,
-    std::optional<double> ub,
-    const entities::Universe& universe) {
-  return make_shared<BoundsOverride>(expr, lb, ub, universe);
+    std::optional<double> ub) {
+  return make_shared<BoundsOverride>(expr, lb, ub, expr->getUniverse());
 }
 
 } // namespace facebook::rebalancer

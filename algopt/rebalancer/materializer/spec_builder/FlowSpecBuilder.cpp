@@ -71,7 +71,7 @@ folly::coro::Task<std::vector<ConstraintInfo>> FlowSpecBuilder::constraints(
             expressionBuilder.isAssigned(scopeId, sourceItemId, objectId1);
         auto assigned2 =
             expressionBuilder.isAssigned(scopeId, destinationItemId, objectId2);
-        expr += weight * binary_min(assigned1, assigned2, *universe_);
+        expr += weight * binary_min(assigned1, assigned2);
       }
 
       auto& destinationItemName = universe_->getEntityName(destinationItemId);

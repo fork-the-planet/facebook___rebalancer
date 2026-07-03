@@ -631,7 +631,7 @@ ExprPtr GroupScopeItemTransformUtil::getExprForLp(
         assert(transformFunctionData_.kForModKTransform);
         const auto k =
             transformFunctionData_.kForModKTransform->get(scopeItemId);
-        expr += scopeItemWeight * step_mod_k(scopeItemUtil, k, getUniverse());
+        expr += scopeItemWeight * step_mod_k(scopeItemUtil, k);
       }
     }
   }

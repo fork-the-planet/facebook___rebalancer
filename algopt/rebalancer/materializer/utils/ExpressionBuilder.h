@@ -549,10 +549,9 @@ class ExpressionBuilder {
   // source and destination containers, so if all dimension values are positive,
   // the value of duringExpr can only increase. In that case, we can override
   // the lower bound with the initial value of duringExpr
-  ExprPtr maybeApplyBoundsOverrideForDuringExpr(
+  static ExprPtr maybeApplyBoundsOverrideForDuringExpr(
       ExprPtr duringExpr,
-      const entities::ObjectScalarDimension& dimension)
-      FOLLY_TS_REQUIRES(!applyfunc);
+      const entities::ObjectScalarDimension& dimension);
 
  private:
   std::shared_ptr<const entities::Universe> universe_;

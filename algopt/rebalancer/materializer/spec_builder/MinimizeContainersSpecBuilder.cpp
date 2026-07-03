@@ -145,9 +145,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
         UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId);
 
     inplace_add(
-        sumOverUtilSquared,
-        (1 / cost) * power(absoluteUtil, 1.1, *universe_),
-        *universe_);
+        sumOverUtilSquared, (1 / cost) * power(absoluteUtil, 1.1), *universe_);
 
     // if absoluteUtil > 0 then step(absoluteUtil) = 1
     // else step(absoluteUtil) = 0
@@ -171,8 +169,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
   // to maxFreeLimit or until all objects are in 1 scopeItem
   co_return product(
       coeff1 * totalAfterUtil - coeff2 * sumOverUtilSquared,
-      isAboveMaxFreeLimit,
-      *universe_);
+      isAboveMaxFreeLimit);
 }
 
 folly::coro::Task<ExprPtr> MinimizeContainersSpecBuilder::getObjectiveExpr(
@@ -254,8 +251,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainerLegacyFormulaExpr(
     auto expr = coeff *
         power(co_await expressionBuilder.getRelativeUtil(
                   UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId),
-              1.25,
-              *universe_);
+              1.25);
     result += expr;
   }
 

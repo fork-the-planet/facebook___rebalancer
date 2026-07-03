@@ -128,7 +128,7 @@ ConstraintInfo ColocateGroupsSpecBuilder::getConstraint(
   }
 
   return {
-      *spec_.squares() ? power(std::move(howManyWeightedItems), 1.1, *universe_)
+      *spec_.squares() ? power(std::move(howManyWeightedItems), 1.1)
                        : std::move(howManyWeightedItems),
       getContinuousPenaltyExpr(groupId, groupWeight, initialAssignment)};
 }

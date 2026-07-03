@@ -133,7 +133,7 @@ ExclusiveScopeItemsSpecBuilder::getAggressivePackingGoal(
           *universe_);
       inplace_add(conflictSum, conflictingScopeItemUtil, *universe_, overlap);
     }
-    auto conflictSumSquared = power(conflictSum, 2, *universe_);
+    auto conflictSumSquared = power(conflictSum, 2);
     // We make the coefficient negative so that minimizing the expression
     // results in maximizing the sum of the conflictSumSquared * scopeItemWeight
     // values.

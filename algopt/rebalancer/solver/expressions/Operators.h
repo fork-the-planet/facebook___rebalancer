@@ -58,12 +58,8 @@ bool operator==(ExprPtr lhs, double rhs);
  * result in a large reduction in materialization time due to not creating extra
  * expressions
  */
-ExprPtr
-binary_min(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe);
-void inplace_binary_max(
-    ExprPtr& lhs,
-    ExprPtr rhs,
-    const entities::Universe& universe);
+ExprPtr binary_min(ExprPtr lhs, ExprPtr rhs);
+void inplace_binary_max(ExprPtr& lhs, ExprPtr rhs);
 ExprPtr min(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe);
 ExprPtr min(
     const std::vector<ExprPtr>& exprs,
@@ -132,8 +128,7 @@ std::shared_ptr<ObjectLookup> object_lookup(
 
 std::shared_ptr<ObjectLookupDynamic> object_lookup_dynamic(
     ExprPtr sumOfObjectLookups,
-    const entities::ObjectScalarDimension& dimension,
-    const entities::Universe& universe);
+    const entities::ObjectScalarDimension& dimension);
 
 std::shared_ptr<StableStayed> stable_stayed(
     std::shared_ptr<ObjectVector> initialObjectVector,
@@ -177,17 +172,16 @@ std::shared_ptr<ObjectVector> object_vector(
         objectToNonDefaultValue,
     const entities::Universe& universe);
 
-ExprPtr
-power(ExprPtr base, double exponent, const entities::Universe& universe);
-ExprPtr product(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe);
-ExprPtr quotient(ExprPtr lhs, ExprPtr rhs, const entities::Universe& universe);
+ExprPtr power(ExprPtr base, double exponent);
+ExprPtr product(ExprPtr lhs, ExprPtr rhs);
+ExprPtr quotient(ExprPtr lhs, ExprPtr rhs);
 ExprPtr square(ExprPtr expr, const entities::Universe& universe);
 ExprPtr square(
     ExprPtr expr,
     const ApproximationHint& hint,
     const entities::Universe& universe);
 ExprPtr step(ExprPtr expr, const entities::Universe& universe);
-ExprPtr step_mod_k(ExprPtr expr, int k, const entities::Universe& universe);
+ExprPtr step_mod_k(ExprPtr expr, int k);
 ExprPtr ceil(ExprPtr expr, const entities::Universe& universe);
 ExprPtr log(ExprPtr expr, const entities::Universe& universe);
 ExprPtr rectangle(
@@ -198,8 +192,7 @@ ExprPtr rectangle(
 ExprPtr sum_over_threshold(
     ExprPtr threshold,
     const std::vector<ExprPtr>& values,
-    bool square,
-    const entities::Universe& universe);
+    bool square);
 
 ExprPtr variable(
     entities::ObjectId obj,
@@ -220,6 +213,5 @@ ExprPtr nth_largest(
 ExprPtr boundsOverride(
     ExprPtr expr,
     std::optional<double> lb,
-    std::optional<double> ub,
-    const entities::Universe& universe);
+    std::optional<double> ub);
 } // namespace facebook::rebalancer

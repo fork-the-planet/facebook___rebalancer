@@ -35,9 +35,9 @@ TEST_F(PowerTest, InitialValue) {
 
   auto v = variable(object(0), container(0), universe, assignment);
   // v=1, 2*v + 1 = 3, 3^3 = 27.
-  EXPECT_DOUBLE_EQ(27.0, power(2.0 * v + 1.0, 3, universe)->getInitialValue());
+  EXPECT_DOUBLE_EQ(27.0, power(2.0 * v + 1.0, 3)->getInitialValue());
   // v=1, 0.5*v = 0.5, 0.5^-2 = 4.
-  EXPECT_DOUBLE_EQ(4.0, power(0.5 * v, -2, universe)->getInitialValue());
+  EXPECT_DOUBLE_EQ(4.0, power(0.5 * v, -2)->getInitialValue());
 }
 
 TEST_F(PowerTest, CubedBoundsTests) {

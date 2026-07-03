@@ -71,8 +71,7 @@ CO_TEST_F(ObjectLookupDynamicTest, Basic) {
       object_lookup(objVec, containers, universe, initialAssignment);
 
   // Create ObjectLookupDynamic for scopeItem0
-  auto lookupDynamic =
-      object_lookup_dynamic(sumOfLookups, dynamicDimension, universe);
+  auto lookupDynamic = object_lookup_dynamic(sumOfLookups, dynamicDimension);
 
   EXPECT_EQ("ObjectLookupDynamic", lookupDynamic->getType());
 
@@ -110,7 +109,7 @@ CO_TEST_F(ObjectLookupDynamicTest, ThrowsOnNonDynamicDimension) {
   auto lookup = object_lookup(objVec, containers, universe, initialAssignment);
 
   REBALANCER_EXPECT_RUNTIME_ERROR(
-      object_lookup_dynamic({lookup}, staticDimension, universe),
+      object_lookup_dynamic({lookup}, staticDimension),
       "ObjectLookupDynamic can only be used with dynamic dimensions");
 }
 
@@ -177,7 +176,7 @@ CO_TEST_F(ObjectLookupDynamicTest, ContainerCoverage) {
   auto sumOfLookups01 = const_expr(0, universe);
   sumOfLookups01 += lookup01;
   REBALANCER_EXPECT_RUNTIME_ERROR(
-      object_lookup_dynamic(sumOfLookups01, dynamicDimension, universe),
+      object_lookup_dynamic(sumOfLookups01, dynamicDimension),
       "container set not consistent with dimension's scope dynamic_dim_scope");
 
   auto sumOfLookups = const_expr(0, universe);
@@ -198,7 +197,7 @@ CO_TEST_F(ObjectLookupDynamicTest, ContainerCoverage) {
       initialAssignment);
 
   auto dynamicObjLookupExpr =
-      object_lookup_dynamic(sumOfLookups, dynamicDimension, universe);
+      object_lookup_dynamic(sumOfLookups, dynamicDimension);
 
   EXPECT_EQ(2, dynamicObjLookupExpr->getDirectlyAffectedContainers().size());
   EXPECT_TRUE(dynamicObjLookupExpr->getDirectlyAffectedContainers()
@@ -296,8 +295,7 @@ CO_TEST_F(ObjectLookupDynamicTest, EvaluateAndPartialApply) {
   sumOfLookups += object_lookup(
       objVecScopeItem1, scopeItem1Containers, universe, initialAssignment);
 
-  auto lookupDynamic =
-      object_lookup_dynamic(sumOfLookups, dynamicDimension, universe);
+  auto lookupDynamic = object_lookup_dynamic(sumOfLookups, dynamicDimension);
 
   const Assignment assignment(
       {{container(0), {object(0), object(1)}},

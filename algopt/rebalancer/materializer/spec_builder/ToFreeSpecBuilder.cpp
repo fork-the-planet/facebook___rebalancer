@@ -205,8 +205,7 @@ ToFreeSpecBuilder::getMinimizeOccupiedContainersContinuousFormulaExpr(
     scopeItemIdsToFree.emplace_back(scopeItemId);
     auto absoluteUtil = co_await expressionBuilder.getAbsoluteUtil(
         UtilMetric::AFTER, dimensionId_, scopeId_, scopeItemId);
-    inplace_add(
-        sumOverUtilSquared, power(absoluteUtil, 2, *universe_), *universe_);
+    inplace_add(sumOverUtilSquared, power(absoluteUtil, 2), *universe_);
   }
 
   // create a single lookup expr over all scopeItemIdsToFree

@@ -47,8 +47,7 @@ TEST_F(ProductTest, NeitherBinary) {
   // so variable(1, 0) = variable(2, 0) = 0
   auto binaryOperation = product(
       4 * variable(object(1), container(0), universe, initialAssignment) - 2,
-      2 * variable(object(2), container(0), universe, initialAssignment) + 1,
-      universe);
+      2 * variable(object(2), container(0), universe, initialAssignment) + 1);
   const Assignment assignment(
       {{container(0), {}}, {container(1), {object(1), object(2)}}});
 
@@ -84,7 +83,7 @@ TEST_F(ProductTest, LhsBinary) {
       universe.getContainers().getInitialAssignment());
   auto m =
       2 * variable(object(1), container(0), universe, initialAssignment) - 1;
-  auto binaryOperation = product(step(m, universe), m - 2, universe);
+  auto binaryOperation = product(step(m, universe), m - 2);
   const Assignment assignment({
       {container(0), {}},
       {container(1), {object(1)}},
@@ -112,7 +111,7 @@ TEST_F(ProductTest, EquivalenceSets) {
   const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto o1c1 = variable(object(1), container(1), universe, assignment);
   auto o3c2 = variable(object(3), container(2), universe, assignment);
-  auto b = product(o1c1, o3c2, universe);
+  auto b = product(o1c1, o3c2);
   // o1c1 init = 1, o3c2 init = 1, so product init = 1.
   EXPECT_DOUBLE_EQ(1.0, b->getInitialValue());
 

@@ -204,8 +204,7 @@ TEST_F(PackerTests, Power) {
   basic(
       power(
           variable(object(0), container(0), *universe, assignment) * 10 + 5,
-          0.5,
-          *universe),
+          0.5),
       pow(15, 0.5),
       pow(5, 0.5),
       universe);
@@ -656,8 +655,7 @@ TEST_F(PackerTests, MipExprBinary) {
 
   auto objective = product(
       variable(object(0), container(1), *universe, assignment),
-      variable(object(1), container(0), *universe, assignment),
-      *universe);
+      variable(object(1), container(0), *universe, assignment));
   auto p_ptr =
       createTestProblem(universe, {objective}, const_expr(0, *universe));
   auto& p = *p_ptr;
@@ -717,9 +715,8 @@ TEST_F(PackerTests, MipQuotient) {
   auto sw =
       swaps({{object(1), container(1)}, {object(2), container(2)}}, *universe);
 
-  auto objective = quotient(x11 + x12, x11 + x12 + x21 + x22, *universe) +
-      quotient(x21 + x12, x11 + x12 + x21 + x22, *universe);
-
+  auto objective = quotient(x11 + x12, x11 + x12 + x21 + x22) +
+      quotient(x21 + x12, x11 + x12 + x21 + x22);
   auto p_ptr =
       createTestProblem(universe, {objective}, const_expr(0, *universe));
   auto& p = *p_ptr;

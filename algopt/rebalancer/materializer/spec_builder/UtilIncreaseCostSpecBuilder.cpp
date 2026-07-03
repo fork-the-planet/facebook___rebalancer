@@ -34,8 +34,8 @@ folly::coro::Task<ExprPtr> UtilIncreaseCostSpecBuilder::goalCoro(
   auto squares = *spec_.squares();
   auto lb = *spec_.lowerBound();
 
-  auto transform = [squares, this](ExprPtr expr) {
-    return squares ? power(std::move(expr), 1.1, *universe_) : std::move(expr);
+  auto transform = [squares](ExprPtr expr) {
+    return squares ? power(std::move(expr), 1.1) : std::move(expr);
   };
 
   auto goalExpr = const_expr(0, *universe_);

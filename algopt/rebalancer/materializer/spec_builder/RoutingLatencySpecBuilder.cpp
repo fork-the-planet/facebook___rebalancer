@@ -100,8 +100,7 @@ RoutingLatencySpecBuilder::constraints(
       auto additiveTerm = product(
           step(groupConstraint, *universe_),
           *spec_.includeWeightedAvgLatencyMetricIfLimitViolated() *
-              avgGroupLatency,
-          *universe_);
+              avgGroupLatency);
 
       components.emplace_back(groupConstraint + additiveTerm);
     } else {

@@ -147,11 +147,10 @@ ExprPtr BalanceSpecBuilder::computeMaxPenalty(
 ExprPtr BalanceSpecBuilder::computeLinearOrSquaresPenalty(
     const std::vector<ExprPtr>& allUtils,
     const ExprPtr& thresholdExpr,
-    BalanceSpecFormula formula) const {
+    BalanceSpecFormula formula) {
   const auto n = allUtils.size();
-  const auto transform = [&formula, this](const ExprPtr& expr) {
-    return formula == BalanceSpecFormula::SQUARES ? power(expr, 1.1, *universe_)
-                                                  : expr;
+  const auto transform = [&formula](const ExprPtr& expr) {
+    return formula == BalanceSpecFormula::SQUARES ? power(expr, 1.1) : expr;
   };
 
   std::vector<ExprPtr> transformedUtils;
@@ -159,8 +158,7 @@ ExprPtr BalanceSpecBuilder::computeLinearOrSquaresPenalty(
   for (const auto& util : allUtils) {
     transformedUtils.push_back(transform(util));
   }
-  return sum_over_threshold(
-             transform(thresholdExpr), transformedUtils, false, *universe_) /
+  return sum_over_threshold(transform(thresholdExpr), transformedUtils, false) /
       n;
 }
 
@@ -176,10 +174,10 @@ ExprPtr BalanceSpecBuilder::computeIdealPenalty(
     // We want to model: penalty = (absUtil ^ 2) / (capacity * avgCapacity)
     // = power(absUtil/capacity, 2) * (capacity/avgCapacity)
     // = power(relUtil, 2) * adjustment
-    auto penalty = power(allUtils[i], 2, *universe_) * adjustments[i];
+    auto penalty = power(allUtils[i], 2) * adjustments[i];
     if (applyBound) {
       const auto adjustedBoundSquared =
-          power(boundExpr(upperBound), 2, *universe_) * adjustments[i];
+          power(boundExpr(upperBound), 2) * adjustments[i];
       penalty = max(0, penalty - adjustedBoundSquared, *universe_);
     }
     result += penalty;
@@ -304,8 +302,7 @@ folly::coro::Task<ExprPtr> BalanceSpecBuilder::goalCoro(
             metric, dimensionId_, scopeId_, scopeItemId);
         auto numObjects = co_await expressionBuilder.getAbsoluteUtil(
             metric, objectCountDimensionId, scopeId_, scopeItemId);
-        auto capPerItem =
-            quotient(absUtil, max(1, numObjects, *universe_), *universe_);
+        auto capPerItem = quotient(absUtil, max(1, numObjects, *universe_));
         allUtils.push_back(std::move(capPerItem));
         sumCapacity += scopeDimension.getValue(scopeItemId);
       }

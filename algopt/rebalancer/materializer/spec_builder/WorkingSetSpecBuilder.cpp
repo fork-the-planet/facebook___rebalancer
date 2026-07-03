@@ -64,7 +64,7 @@ folly::coro::Task<ExprPtr> WorkingSetSpecBuilder::goalCoro(
     if (metric == WorkingSetMetric::AVG) {
       auto util = co_await expressionBuilder.getAbsoluteUtil(
           UtilMetric::AFTER, dimensionId, scopeId, scopeItemId);
-      result += product(util, workingSetSize, *universe_);
+      result += product(util, workingSetSize);
     } else if (metric == WorkingSetMetric::MAX) {
       inplace_max(result, workingSetSize, *universe_);
     } else {

@@ -325,14 +325,12 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getRelativeUtil(
 
 ExprPtr ExpressionBuilder::maybeApplyBoundsOverrideForDuringExpr(
     ExprPtr duringExpr,
-    const entities::ObjectScalarDimension& dimension)
-    FOLLY_TS_REQUIRES(!applyfunc) {
+    const entities::ObjectScalarDimension& dimension) {
   if (dimension.hasNegativeValues()) {
     return duringExpr;
   } else {
     const auto duringLb = duringExpr->getInitialValue();
-    return boundsOverride(
-        std::move(duringExpr), duringLb, /*ub=*/std::nullopt, *universe_);
+    return boundsOverride(std::move(duringExpr), duringLb, /*ub=*/std::nullopt);
   }
 }
 
@@ -527,7 +525,7 @@ folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtilAfterDynamic(
     co_return const_expr(0, *universe_);
   }
 
-  co_return object_lookup_dynamic(result, objectDimension, *universe_);
+  co_return object_lookup_dynamic(result, objectDimension);
 }
 
 folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtilInitial(
@@ -1043,7 +1041,7 @@ std::shared_ptr<Expression> ExpressionBuilder::isAssigned(
     std::shared_ptr<Expression> expr = const_expr(0, *universe_);
     auto& scope = universe_->getScope(scopeId);
     for (auto containerId : scope.getContainerIds(scopeItemId)) {
-      inplace_binary_max(expr, isAssigned(containerId, objectId), *universe_);
+      inplace_binary_max(expr, isAssigned(containerId, objectId));
     }
     return expr;
   });
@@ -1344,7 +1342,7 @@ cached operations on ExprPtr
 */
 ExprPtr ExpressionBuilder::binaryMin(ExprPtr A, ExprPtr B) {
   return binaryMinCache_.getSavedOrCompute(std::make_pair(A, B), [&]() {
-    return binary_min(std::move(A), std::move(B), *universe_);
+    return binary_min(std::move(A), std::move(B));
   });
 }
 

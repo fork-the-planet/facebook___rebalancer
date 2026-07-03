@@ -41,7 +41,7 @@ TEST_F(QuotientOperationTest, LpExactWhenQuotientInUnitInterval) {
   const auto& universe = getUniverse();
   const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto x = variable(object(1), container(0), universe, assignment);
-  auto q = quotient(const_expr(1, universe), x + 2, universe);
+  auto q = quotient(const_expr(1, universe), x + 2);
 
   // No `apply` needed for `getInitialValue()`: the constructor seeds it.
   EXPECT_NEAR(0.5, q->getInitialValue(), 1e-8);
@@ -58,7 +58,7 @@ TEST_F(QuotientOperationTest, LpInfeasibleWhenQuotientExceedsOne) {
   const auto& universe = getUniverse();
   const Assignment assignment(universe.getContainers().getInitialAssignment());
   auto x = variable(object(1), container(0), universe, assignment);
-  auto q = quotient(const_expr(3, universe), x + 2, universe);
+  auto q = quotient(const_expr(3, universe), x + 2);
 
   LpAssertOptions lpAssertOptions{
       .exceptionForLpExpr =
@@ -93,8 +93,7 @@ TEST_F(QuotientOperationTest, Bounds) {
             v1const[i],
         v2coeff[i] *
                 variable(object(2), container(0), universe, initialAssignment) +
-            v2const[i],
-        universe);
+            v2const[i]);
 
     const Assignment assignment({{container(1), {object(1), object(2)}}});
     // we have variable(1, 0) = variable(2, 0) = 0

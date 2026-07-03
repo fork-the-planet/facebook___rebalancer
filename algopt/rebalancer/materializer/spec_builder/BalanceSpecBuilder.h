@@ -54,10 +54,10 @@ class BalanceSpecBuilder : public SpecBuilder {
       const std::vector<ExprPtr>& allUtils,
       const ExprPtr& thresholdExpr) const;
 
-  ExprPtr computeLinearOrSquaresPenalty(
+  static ExprPtr computeLinearOrSquaresPenalty(
       const std::vector<ExprPtr>& allUtils,
       const ExprPtr& thresholdExpr,
-      interface::BalanceSpecFormula formula) const;
+      interface::BalanceSpecFormula formula);
 
   ExprPtr computeIdealPenalty(
       const std::vector<ExprPtr>& allUtils,

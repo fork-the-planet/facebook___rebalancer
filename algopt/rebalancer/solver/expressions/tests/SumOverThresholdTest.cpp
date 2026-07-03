@@ -50,8 +50,7 @@ TEST_F(SumOverThresholdTest, SumOverThreshold) {
   auto sum_t2 = 0.8 * var_t2;
 
   auto threshold = 0.5 + 0.1 * var_t3;
-  auto sot =
-      sum_over_threshold(threshold, {sum_t0, sum_t1, sum_t2}, false, universe);
+  auto sot = sum_over_threshold(threshold, {sum_t0, sum_t1, sum_t2}, false);
   // only var_t1 (= var(o1, c1)) is 1; the others are 0, so sum_t1 = 0.6 and the
   // rest are 0. With threshold = 0.5, sum = max(0, 0.6 - 0.5) + 0 + 0 = 0.1.
   EXPECT_NEAR(0.1, sot->getInitialValue(), 1e-8);
@@ -128,8 +127,7 @@ TEST_F(SumOverThresholdTest, SumOverThreshold2) {
 
   auto threshold = 0.5 + 0.1 * var_t3;
 
-  auto sot =
-      sum_over_threshold(threshold, {sum_t0, sum_t1, sum_t2}, true, universe);
+  auto sot = sum_over_threshold(threshold, {sum_t0, sum_t1, sum_t2}, true);
   // (max(0, 0.6 - 0.5))^2 + 0 + 0 = 0.01.
   EXPECT_NEAR(0.01, sot->getInitialValue(), 1e-8);
   EXPECT_NEAR(0.0, lower_bound(*sot), 1e-8);

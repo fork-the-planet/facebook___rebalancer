@@ -198,7 +198,7 @@ folly::coro::Task<ExprPtr> GroupDiversitySpecBuilder::getContinuousPenaltyExpr(
     // moves), then quadratic factor ensures we move objects of under-utilized
     // groups first.
     totalPenaltyExpression +=
-        normUtil - QUADRATIC_TERM_MULTIPLIER * power(normUtil, 2, *universe_);
+        normUtil - QUADRATIC_TERM_MULTIPLIER * power(normUtil, 2);
   }
   co_return totalPenaltyExpression;
 }

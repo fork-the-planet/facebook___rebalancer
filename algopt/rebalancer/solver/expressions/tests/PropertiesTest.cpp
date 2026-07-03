@@ -212,7 +212,7 @@ TEST_F(PropertiesTest, Piecewise) {
 TEST_F(PropertiesTest, TransformPower) {
   buildUniverse();
   const auto& universe = getUniverse();
-  auto transform = power(const_expr(1.0, universe), 2.0, universe);
+  auto transform = power(const_expr(1.0, universe), 2.0);
   ASSERT_EQ("Power", transform->getType());
 
   auto properties = transform->getProperties();
@@ -374,8 +374,7 @@ TEST_F(PropertiesTest, SumOverThreshold) {
   auto overThreshold = sum_over_threshold(
       const_expr(0.6, universe),
       {variable(object(0), container(1), universe, assignment) + 0.2},
-      false,
-      universe);
+      false);
   ASSERT_EQ("SumOverThreshold", overThreshold->getType());
 }
 

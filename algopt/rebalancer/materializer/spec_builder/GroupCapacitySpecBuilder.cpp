@@ -253,8 +253,7 @@ folly::coro::Task<ExprPtr> GroupCapacitySpecBuilder::getDuringUtilForMainGroup(
         return step(util, *universe_);
       case GroupCapacitySpecUtilType::STEP_MOD_K:
         assert(perScopeItemBundleSize_.has_value());
-        return step_mod_k(
-            util, perScopeItemBundleSize_->getLimit(scopeItemId), *universe_);
+        return step_mod_k(util, perScopeItemBundleSize_->getLimit(scopeItemId));
       default:
         throw std::runtime_error("Unhandled GroupCapacitySpecUtilType");
     }
