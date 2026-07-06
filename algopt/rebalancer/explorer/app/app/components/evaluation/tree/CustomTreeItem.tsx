@@ -225,7 +225,7 @@ export const CustomTreeItem = forwardRef<HTMLLIElement, TreeItemProps>(
                 variant="body2"
                 sx={{
                   fontWeight: 600,
-                  fontFamily: 'monospace',
+                  fontVariantNumeric: 'tabular-nums',
                   fontSize: '0.8125rem',
                 }}>
                 {precise(sourceValue)}

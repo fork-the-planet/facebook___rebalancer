@@ -4,6 +4,7 @@ import ArrowRight from '@mui/icons-material/ArrowRight';
 import {Typography} from '@mui/material';
 
 import {precise} from '@/lib/format';
+import {IMPROVING_COLOR, WORSENING_COLOR} from '@/lib/ui-tokens';
 
 export function NodeDelta({
   sourceValue,
@@ -22,7 +23,7 @@ export function NodeDelta({
   // When minimizing, decreasing values are good (green).
   // When maximizing, increasing values are good (green).
   const effectiveDelta = (minimizing ? 1 : -1) * delta;
-  const color = effectiveDelta < 0 ? 'success.main' : 'error.main';
+  const color = effectiveDelta < 0 ? IMPROVING_COLOR : WORSENING_COLOR;
 
   return (
     <>
@@ -30,7 +31,7 @@ export function NodeDelta({
       <Typography
         component="span"
         variant="body2"
-        sx={{fontWeight: 600, fontFamily: 'monospace', fontSize: '0.8125rem'}}>
+        sx={{fontWeight: 600, fontVariantNumeric: 'tabular-nums', fontSize: '0.8125rem'}}>
         {precise(destinationValue)}
       </Typography>
       <Typography
@@ -39,7 +40,7 @@ export function NodeDelta({
         sx={{
           ml: 0.5,
           fontWeight: 600,
-          fontFamily: 'monospace',
+          fontVariantNumeric: 'tabular-nums',
           fontSize: '0.8125rem',
           color,
         }}>
