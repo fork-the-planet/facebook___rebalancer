@@ -26,8 +26,8 @@ namespace {
 MoveSet generateRandomSampleAndMoveSet(
     std::vector<entities::ContainerId>& allContainers,
     const std::vector<entities::ObjectId>& groupObjectIds,
-    const Problem& problem) {
-  auto rng = std::default_random_engine{std::random_device{}()};
+    const Problem& problem,
+    std::mt19937& rng) {
   std::shuffle(allContainers.begin(), allContainers.end(), rng);
 
   const int sampleSize = groupObjectIds.size();
@@ -95,7 +95,7 @@ MoveResult GreedyGroupToScopeItemMoveType::exploreMovingGroup(
               ++nSampleSetsConsidered;
 
               auto candidateMoveSet = generateRandomSampleAndMoveSet(
-                  containerIds, groupObjectIds, problem);
+                  containerIds, groupObjectIds, problem, rng_);
               auto result = evaluator.evaluate(std::move(candidateMoveSet));
               stats.add(result);
 
