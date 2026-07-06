@@ -2,7 +2,6 @@
 
 import {useMemo, useState} from 'react';
 
-import {Autocomplete, TextField} from '@mui/material';
 import {useParams, useRouter, useSearchParams} from 'next/navigation';
 
 import AssignmentCard from '@/app/components/evaluation/AssignmentCard';
@@ -21,7 +20,6 @@ import MoveSetsTable, {
 } from '@/app/components/evaluation/MoveSetsTable';
 import {useProblemMetadata} from '@/lib/contexts/ProblemMetadataContext';
 import {useRebalancerHandle} from '@/lib/contexts/RebalancerHandleContext';
-import {AUTOCOMPLETE_WORD_BREAK_PROPS, toTitleCase} from '@/lib/format';
 import {findMetricNameBySlug, slugifyMetricName} from '@/lib/metric-slug';
 import {decodeRunId, encodeRunId} from '@/lib/run-id';
 import {useUrlStateSync} from '@/lib/url-state';
@@ -167,24 +165,6 @@ export default function MetricsView() {
 
   return (
     <div className="p-4 space-y-4">
-      <Autocomplete
-        size="small"
-        options={metricCollectionNames}
-        value={metricCollectionNames.includes(metricName) ? metricName : null}
-        onChange={handleMetricNameChange}
-        getOptionLabel={toTitleCase}
-        isOptionEqualToValue={(option, value) => option === value}
-        renderInput={inputParams => (
-          <TextField
-            {...inputParams}
-            label="Metric Collection"
-            placeholder="Select a metric collection"
-          />
-        )}
-        sx={{maxWidth: 400}}
-        slotProps={AUTOCOMPLETE_WORD_BREAK_PROPS}
-      />
-
       <AssignmentCard
         assignments={assignments}
         onAssignmentsChange={setAssignments}
@@ -203,6 +183,8 @@ export default function MetricsView() {
         viewState={viewState}
         onViewStateChange={setViewState}
         assignments={assignments}
+        metricCollectionNames={metricCollectionNames}
+        onMetricNameChange={handleMetricNameChange}
       />
     </div>
   );

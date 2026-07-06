@@ -7,12 +7,14 @@ import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import HelpOutline from '@mui/icons-material/HelpOutline';
 import {
   Alert,
+  Autocomplete,
   Box,
   Chip,
   CircularProgress,
   IconButton,
   Paper,
   TablePagination,
+  TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -43,7 +45,11 @@ import {
 } from '@/app/components/evaluation/MoveSetsTable.cells';
 import PreciseNumber from '@/app/components/evaluation/PreciseNumber';
 import {useMetricsData} from '@/app/components/evaluation/useMetricsData';
-import {isNumericColumn} from '@/lib/format';
+import {
+  AUTOCOMPLETE_WORD_BREAK_PROPS,
+  isNumericColumn,
+  toTitleCase,
+} from '@/lib/format';
 import type {CellData, Filter} from '@/lib/rebalancer-explorer-types';
 import {OrderDirection} from '@/lib/rebalancer-explorer-types';
 
@@ -58,6 +64,11 @@ interface MetricsTableProps {
   viewState: MetricsViewState;
   onViewStateChange: (viewState: MetricsViewState) => void;
   assignments: Assignments;
+  metricCollectionNames: string[];
+  onMetricNameChange: (
+    event: React.SyntheticEvent,
+    value: string | null,
+  ) => void;
 }
 
 export default function MetricsTable({
@@ -65,6 +76,8 @@ export default function MetricsTable({
   viewState,
   onViewStateChange,
   assignments,
+  metricCollectionNames,
+  onMetricNameChange,
 }: MetricsTableProps) {
   const {copyOnClick, snackbar} = useCopyOnClick();
 
@@ -269,6 +282,27 @@ export default function MetricsTable({
             ({totalCount} rows)
           </Typography>
         )}
+      </Box>
+
+      {/* Metric collection picker */}
+      <Box sx={{px: 2, py: 2, borderBottom: 1, borderBottomColor: 'divider'}}>
+        <Autocomplete
+          options={metricCollectionNames}
+          value={metricCollectionNames.includes(metricName) ? metricName : null}
+          onChange={onMetricNameChange}
+          getOptionLabel={toTitleCase}
+          isOptionEqualToValue={(option, value) => option === value}
+          renderInput={inputParams => (
+            <TextField
+              {...inputParams}
+              label="Metric Collection"
+              placeholder="Select a metric collection"
+            />
+          )}
+          fullWidth
+          sx={{maxWidth: 520}}
+          slotProps={AUTOCOMPLETE_WORD_BREAK_PROPS}
+        />
       </Box>
 
       {/* Filters */}
