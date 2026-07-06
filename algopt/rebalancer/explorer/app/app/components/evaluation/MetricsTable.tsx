@@ -1,5 +1,6 @@
 'use client';
 
+import type {Dispatch, SetStateAction} from 'react';
 import {useCallback, useMemo} from 'react';
 
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
@@ -31,6 +32,10 @@ import {
   PINNED_SHADOW,
   useColumnPinning,
 } from '@/app/components/columnPinning';
+import {
+  ColumnHideButton,
+  getColumnHiding,
+} from '@/app/components/columnVisibility';
 
 import {metricsFaqUrl} from '@platform/internal-links';
 
@@ -71,7 +76,7 @@ const columnHelper = createColumnHelper<RowData>();
 interface MetricsTableProps {
   metricName: string;
   viewState: MetricsViewState;
-  onViewStateChange: (viewState: MetricsViewState) => void;
+  onViewStateChange: Dispatch<SetStateAction<MetricsViewState>>;
   assignments: Assignments;
   metricCollectionNames: string[];
   onMetricNameChange: (
@@ -271,6 +276,7 @@ export default function MetricsTable({
 
   const pinnedLeft = columnPinning.left ?? [];
   const {stickyStyle, isLastPinned} = getPinnedColumnHelpers(table, pinnedLeft);
+  const hiding = getColumnHiding(allColumns, groupBy, showColumns);
 
   return (
     <Paper variant="outlined" sx={{position: 'relative', overflow: 'hidden'}}>
@@ -476,6 +482,24 @@ export default function MetricsTable({
                                 : `Pin ${meta?.colName}`
                             }
                           />
+                          {meta?.colName != null &&
+                            hiding.isHideable(meta.colName) && (
+                              <ColumnHideButton
+                                colName={meta.colName}
+                                pinned={isPinned}
+                                hideDisabled={hiding.hideDisabled}
+                                onHide={() =>
+                                  onViewStateChange(prev => ({
+                                    ...prev,
+                                    showColumns: hiding.hideColumn(
+                                      meta.colName!,
+                                      prev.showColumns,
+                                    ),
+                                    offset: 0,
+                                  }))
+                                }
+                              />
+                            )}
                         </Box>
                         {header.column.getCanResize() && (
                           <Box

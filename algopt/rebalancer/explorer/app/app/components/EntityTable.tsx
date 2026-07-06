@@ -18,6 +18,10 @@ import {
   PINNED_SHADOW,
   useColumnPinning,
 } from '@/app/components/columnPinning';
+import {
+  ColumnHideButton,
+  getColumnHiding,
+} from '@/app/components/columnVisibility';
 
 import type {CellData, Result} from '@/lib/rebalancer-explorer-types';
 import {ColumnType, OrderDirection} from '@/lib/rebalancer-explorer-types';
@@ -288,6 +292,11 @@ export default function EntityTable({
 
   const pinnedLeft = columnPinning.left ?? [];
   const {stickyStyle, isLastPinned} = getPinnedColumnHelpers(table, pinnedLeft);
+  const hiding = getColumnHiding(
+    resultColumns,
+    viewState.groupByColumns,
+    viewState.showColumns,
+  );
 
   const headerGroups = table.getHeaderGroups();
   const rows = table.getRowModel().rows;
@@ -450,6 +459,24 @@ export default function EntityTable({
                                 : `Pin ${meta?.colName}`
                             }
                           />
+                          {meta?.colName != null &&
+                            hiding.isHideable(meta.colName) && (
+                              <ColumnHideButton
+                                colName={meta.colName}
+                                pinned={isPinned}
+                                hideDisabled={hiding.hideDisabled}
+                                onHide={() =>
+                                  onViewStateChange(prev => ({
+                                    ...prev,
+                                    showColumns: hiding.hideColumn(
+                                      meta.colName!,
+                                      prev.showColumns,
+                                    ),
+                                    offset: 0,
+                                  }))
+                                }
+                              />
+                            )}
                         </Box>
                         {/* Resize handle */}
                         <div
