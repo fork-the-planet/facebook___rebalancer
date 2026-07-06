@@ -462,7 +462,7 @@ export default function MoveSetsTable({
                 size="small"
                 color="error"
                 variant="filled"
-                sx={{fontFamily: 'monospace', fontSize: '0.8125rem'}}
+                sx={{fontVariantNumeric: 'tabular-nums', fontSize: '0.8125rem'}}
               />
             );
           }
@@ -476,13 +476,13 @@ export default function MoveSetsTable({
                 size="small"
                 color={color}
                 variant={color === 'default' ? 'outlined' : 'filled'}
-                sx={{fontFamily: 'monospace', fontSize: '0.8125rem'}}
+                sx={{fontVariantNumeric: 'tabular-nums', fontSize: '0.8125rem'}}
               />
             );
           }
 
           return (
-            <span style={{fontFamily: 'monospace', fontSize: '0.8125rem'}}>
+            <span style={{fontVariantNumeric: 'tabular-nums', fontSize: '0.8125rem'}}>
               {formatCellValue(value)}
             </span>
           );
@@ -605,7 +605,7 @@ export default function MoveSetsTable({
           borderBottomColor: isMinimized ? undefined : 'divider',
         }}>
         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-          <Typography variant="subtitle1" sx={{fontWeight: 600}}>
+          <Typography variant="h6" sx={{fontWeight: 600}}>
             {metadata?.hasOnlySingleMoves ? 'Moves' : 'Move sets'}
           </Typography>
           {result != null && (
@@ -889,9 +889,8 @@ export default function MoveSetsTable({
                             minWidth: 36,
                             maxWidth: 36,
                             padding: '4px 6px',
-                            borderBottom: 2,
+                            borderBottom: 1,
                             borderBottomColor: 'divider',
-                            backgroundColor: 'action.hover',
                             textAlign: 'center',
                           }}>
                           <Checkbox
@@ -947,13 +946,13 @@ export default function MoveSetsTable({
                               width: header.getSize(),
                               textAlign: meta?.numeric ? 'right' : 'left',
                               padding: '8px 12px',
-                              borderBottom: 2,
+                              borderBottom: 1,
                               borderBottomColor: 'divider',
-                              fontWeight: 600,
+                              fontWeight: 500,
                               fontSize: '0.875rem',
+                              color: 'text.secondary',
                               cursor: 'pointer',
                               userSelect: 'none',
-                              backgroundColor: 'action.hover',
                             }}>
                             <Box
                               sx={{

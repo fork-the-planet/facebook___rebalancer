@@ -35,6 +35,17 @@ import type {
   Filter,
   Handle,
 } from '@/lib/rebalancer-explorer-types';
+import {
+  LINE_COLOR,
+  MUTED_TEXT_COLOR,
+  ROW_HOVER_COLOR,
+  TOTAL_LINE_COLOR,
+} from '@/lib/ui-tokens';
+
+const totalCellStyle = {
+  padding: '10px 24px',
+  borderTop: `2px solid ${TOTAL_LINE_COLOR}`,
+};
 
 // ---------------------------------------------------------------------------
 // Types
@@ -225,9 +236,7 @@ const EvaluationTable = memo(function EvaluationTable({
       columnHelper.accessor('name', {
         header: 'Name',
         cell: info => (
-          <Typography
-            variant="body2"
-            sx={{fontWeight: 500, fontSize: '0.8125rem'}}>
+          <Typography variant="body2" sx={{fontSize: '0.8125rem'}}>
             {info.getValue()}
           </Typography>
         ),
@@ -331,12 +340,11 @@ const EvaluationTable = memo(function EvaluationTable({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          px: 2,
-          py: 0.5,
-          backgroundColor: '#fafafa',
-          borderBottom: '1px solid #e0e0e0',
+          px: 3,
+          py: 1.5,
+          borderBottom: `1px solid ${LINE_COLOR}`,
         }}>
-        <Typography variant="subtitle2" sx={{fontWeight: 600}}>
+        <Typography variant="subtitle1" sx={{fontWeight: 600, fontSize: '1.125rem'}}>
           {title}
         </Typography>
         <Tooltip title="Hide rows where the two assignments have the same value">
@@ -385,13 +393,13 @@ const EvaluationTable = memo(function EvaluationTable({
                       style={{
                         width: header.getSize(),
                         textAlign: meta?.numeric ? 'right' : 'left',
-                        padding: '8px 12px',
-                        borderBottom: '2px solid #e0e0e0',
-                        fontWeight: 600,
+                        padding: '10px 24px',
+                        borderBottom: `1px solid ${LINE_COLOR}`,
+                        fontWeight: 500,
                         fontSize: '0.875rem',
+                        color: MUTED_TEXT_COLOR,
                         cursor: canSort ? 'pointer' : 'default',
                         userSelect: 'none',
-                        backgroundColor: '#fafafa',
                       }}
                       onClick={
                         canSort
@@ -430,7 +438,7 @@ const EvaluationTable = memo(function EvaluationTable({
                 key={row.id}
                 style={{backgroundColor: 'white'}}
                 onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = '#f5f5f5';
+                  e.currentTarget.style.backgroundColor = ROW_HOVER_COLOR;
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.backgroundColor = 'white';
@@ -448,8 +456,8 @@ const EvaluationTable = memo(function EvaluationTable({
                       tabIndex={copyable ? 0 : undefined}
                       style={{
                         textAlign: meta?.numeric ? 'right' : 'left',
-                        padding: '8px 12px',
-                        borderBottom: '1px solid #e0e0e0',
+                        padding: '10px 24px',
+                        borderBottom: `1px solid ${LINE_COLOR}`,
                         fontSize: '0.875rem',
                         whiteSpace: 'normal',
                         wordBreak: 'break-word',
@@ -483,13 +491,10 @@ const EvaluationTable = memo(function EvaluationTable({
             )}
           </tbody>
           <tfoot>
-            <tr style={{backgroundColor: '#fafafa'}}>
+            <tr>
               {/* Name */}
               <td
-                style={{
-                  padding: '8px 12px',
-                  borderTop: '2px solid #e0e0e0',
-                }}>
+                style={totalCellStyle}>
                 <Typography
                   variant="body2"
                   sx={{fontWeight: 600, fontSize: '0.8125rem'}}>
@@ -498,10 +503,7 @@ const EvaluationTable = memo(function EvaluationTable({
               </td>
               {/* Description */}
               <td
-                style={{
-                  padding: '8px 12px',
-                  borderTop: '2px solid #e0e0e0',
-                }}>
+                style={totalCellStyle}>
                 <Typography
                   variant="body2"
                   sx={{color: 'text.secondary', fontSize: '0.75rem'}}>
@@ -511,11 +513,7 @@ const EvaluationTable = memo(function EvaluationTable({
               </td>
               {/* A */}
               <td
-                style={{
-                  textAlign: 'right',
-                  padding: '8px 12px',
-                  borderTop: '2px solid #e0e0e0',
-                }}>
+                style={{...totalCellStyle, textAlign: 'right'}}>
                 <PreciseNumber
                   value={totals.srcTotal}
                   highlight={isConstraint}
@@ -523,11 +521,7 @@ const EvaluationTable = memo(function EvaluationTable({
               </td>
               {/* B */}
               <td
-                style={{
-                  textAlign: 'right',
-                  padding: '8px 12px',
-                  borderTop: '2px solid #e0e0e0',
-                }}>
+                style={{...totalCellStyle, textAlign: 'right'}}>
                 <PreciseNumber
                   value={totals.dstTotal}
                   highlight={isConstraint}
@@ -535,11 +529,7 @@ const EvaluationTable = memo(function EvaluationTable({
               </td>
               {/* B - A */}
               <td
-                style={{
-                  textAlign: 'right',
-                  padding: '8px 12px',
-                  borderTop: '2px solid #e0e0e0',
-                }}>
+                style={{...totalCellStyle, textAlign: 'right'}}>
                 <PreciseNumber
                   value={totals.deltaTotal}
                   highlight={!isConstraint}
@@ -547,11 +537,7 @@ const EvaluationTable = memo(function EvaluationTable({
               </td>
               {/* % */}
               <td
-                style={{
-                  textAlign: 'right',
-                  padding: '8px 12px',
-                  borderTop: '2px solid #e0e0e0',
-                }}>
+                style={{...totalCellStyle, textAlign: 'right'}}>
                 <PreciseNumber
                   value={Math.round(totals.percentTotal * 1000) / 1000}
                   highlight={!isConstraint}
@@ -560,10 +546,7 @@ const EvaluationTable = memo(function EvaluationTable({
               </td>
               {/* Actions */}
               <td
-                style={{
-                  padding: '8px 12px',
-                  borderTop: '2px solid #e0e0e0',
-                }}
+                style={totalCellStyle}
               />
             </tr>
           </tfoot>

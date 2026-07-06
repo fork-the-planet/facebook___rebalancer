@@ -108,7 +108,7 @@ export default function MetricsTable({
                 size="small"
                 color="error"
                 variant="filled"
-                sx={{fontFamily: 'monospace', fontSize: '0.8125rem'}}
+                sx={{fontVariantNumeric: 'tabular-nums', fontSize: '0.8125rem'}}
               />
             );
           }
@@ -122,7 +122,7 @@ export default function MetricsTable({
             );
           }
           return (
-            <span style={{fontFamily: 'monospace', fontSize: '0.8125rem'}}>
+            <span style={{fontVariantNumeric: 'tabular-nums', fontSize: '0.8125rem'}}>
               {formatCellValue(value)}
             </span>
           );
@@ -245,7 +245,7 @@ export default function MetricsTable({
           borderBottom: 1,
           borderBottomColor: 'divider',
         }}>
-        <Typography variant="subtitle1" sx={{fontWeight: 600}}>
+        <Typography variant="h6" sx={{fontWeight: 600}}>
           Metrics
         </Typography>
         {(() => {
@@ -373,13 +373,13 @@ export default function MetricsTable({
                           width: header.getSize(),
                           textAlign: meta?.numeric ? 'right' : 'left',
                           padding: '8px 12px',
-                          borderBottom: 2,
+                          borderBottom: 1,
                           borderBottomColor: 'divider',
-                          fontWeight: meta?.primaryKey ? 700 : 600,
+                          fontWeight: meta?.primaryKey ? 600 : 500,
                           fontSize: '0.875rem',
+                          color: 'text.secondary',
                           cursor: 'pointer',
                           userSelect: 'none',
-                          backgroundColor: 'action.hover',
                         }}>
                         <Box
                           sx={{

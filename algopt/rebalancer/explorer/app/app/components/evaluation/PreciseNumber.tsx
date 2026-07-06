@@ -47,7 +47,7 @@ export default function PreciseNumber({
           onClick={toggle}
           sx={{
             cursor: 'pointer',
-            fontFamily: 'monospace',
+            fontVariantNumeric: 'tabular-nums',
             fontSize: '0.8125rem',
           }}
         />
@@ -62,7 +62,7 @@ export default function PreciseNumber({
         onClick={toggle}
         sx={{
           cursor: 'pointer',
-          fontFamily: 'monospace',
+          fontVariantNumeric: 'tabular-nums',
           fontSize: '0.8125rem',
           '&:hover': {textDecoration: 'underline'},
         }}>
