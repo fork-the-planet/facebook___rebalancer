@@ -245,6 +245,42 @@ clang++ -std=c++20 test_solve.cpp \
 # → PASS: 2-2 split achieved
 ```
 
+## Rebalancer Explorer
+
+Rebalancer Explorer is a web UI for inspecting and analyzing solver runs. It lets
+you browse a problem's objects, containers, constraints, and goals, and see how a
+solution scores against them. This makes it a handy way to understand and debug
+solver behavior.
+
+Under the hood, the Explorer backend is a C++ Thrift service that serves run data
+directly from the solver. A small JSON proxy sits in front of it and exposes that
+Thrift API over plain HTTP (`POST /v2/<method>`); the web UI calls the proxy
+rather than the Thrift service directly, so the frontend needs no Thrift
+toolchain and runs anywhere Node runs.
+
+### Run with Docker Compose
+
+The quickest way to try it is the bundled `docker-compose.yml`, which builds and
+wires up every piece — the C++ backend, the JSON proxy, and the Next.js app. From
+the repository root:
+
+```bash
+docker compose up --build
+```
+
+Then open [http://localhost:3000](http://localhost:3000).
+
+Compose also seeds a shared volume with example problem bundles, so you can load
+one from the UI by name (e.g. the
+[`sudoku.py`](algopt/rebalancer/examples/sudoku/sudoku.py) example as
+`sudoku.bundle`, or the
+[`EightQueens.cpp`](algopt/rebalancer/examples/eightqueens/EightQueens.cpp)
+example as `eightqueens.bundle`) and explore a sample run without setting up your
+own.
+
+For running the app directly with Node (e.g. for frontend development), see
+[`algopt/rebalancer/explorer/app/README.md`](algopt/rebalancer/explorer/app/README.md).
+
 ## Development Setup
 
 ### Pre-commit hooks
