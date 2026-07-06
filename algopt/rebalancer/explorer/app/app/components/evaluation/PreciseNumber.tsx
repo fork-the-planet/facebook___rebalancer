@@ -49,6 +49,14 @@ export default function PreciseNumber({
             cursor: 'pointer',
             fontVariantNumeric: 'tabular-nums',
             fontSize: '0.8125rem',
+            // Let the chip grow and the number wrap, instead of clipping it with "...".
+            height: 'auto',
+            '& .MuiChip-label': {
+              whiteSpace: 'normal',
+              overflow: 'visible',
+              textOverflow: 'clip',
+              py: '2px',
+            },
           }}
         />
       </Tooltip>

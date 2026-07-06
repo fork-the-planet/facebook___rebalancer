@@ -4,10 +4,12 @@ import {memo, useCallback, useMemo, useState} from 'react';
 
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import {
   Box,
   Checkbox,
   FormControlLabel,
+  IconButton,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -43,7 +45,7 @@ import {
 } from '@/lib/ui-tokens';
 
 const totalCellStyle = {
-  padding: '10px 24px',
+  padding: '10px 16px',
   borderTop: `2px solid ${TOTAL_LINE_COLOR}`,
 };
 
@@ -97,6 +99,12 @@ function calculatePercentageChange(src: number, dst: number): number {
   }
   return (delta / Math.abs(src)) * 100;
 }
+
+// Fixed number-column widths so columns line up across tables and stay compact;
+// longer values wrap. `ch` is the width of one digit (tabular-nums keeps digits
+// equal), plus `3rem` padding. "%" is narrower since its values are small.
+const NUMBER_COL_WIDTH = 'calc(17ch + 3rem)';
+const PERCENT_COL_WIDTH = 'calc(10ch + 3rem)';
 
 // ---------------------------------------------------------------------------
 // Column definitions
@@ -242,36 +250,50 @@ const EvaluationTable = memo(function EvaluationTable({
         ),
         enableSorting: false,
         size: 180,
+        meta: {
+          tooltip:
+            'Unique name of a goal or constraint. It can be customized with the parameter "name" when constructing a spec.',
+        },
       }),
       columnHelper.accessor('description', {
         header: 'Description',
         cell: info => <CollapsibleText text={info.getValue()} />,
         enableSorting: false,
         size: 280,
+        meta: {
+          flex: true,
+          tooltip: 'Auto-generated description of the goal or constraint.',
+        },
       }),
       columnHelper.accessor('srcValue', {
         header: 'A',
         cell: info => (
           <PreciseNumber value={info.getValue()} highlight={isConstraint} />
         ),
-        size: 120,
-        meta: {numeric: true},
+        meta: {
+          numeric: true,
+          tooltip: 'Result of evaluating the expression with assignment A.',
+        },
       }),
       columnHelper.accessor('dstValue', {
         header: 'B',
         cell: info => (
           <PreciseNumber value={info.getValue()} highlight={isConstraint} />
         ),
-        size: 120,
-        meta: {numeric: true},
+        meta: {
+          numeric: true,
+          tooltip: 'Result of evaluating the expression with assignment B.',
+        },
       }),
       columnHelper.accessor('delta', {
         header: 'B - A',
         cell: info => (
           <PreciseNumber value={info.getValue()} highlight={!isConstraint} />
         ),
-        size: 120,
-        meta: {numeric: true},
+        meta: {
+          numeric: true,
+          tooltip: 'Difference between evaluating the two assignments (B - A).',
+        },
       }),
       columnHelper.accessor('percentage', {
         header: '%',
@@ -279,11 +301,15 @@ const EvaluationTable = memo(function EvaluationTable({
           <PreciseNumber
             value={info.getValue()}
             highlight={!isConstraint}
-            fixedDecimals={3}
+            fixedDecimals={2}
           />
         ),
-        size: 100,
-        meta: {numeric: true},
+        meta: {
+          numeric: true,
+          percent: true,
+          tooltip:
+            'Percentage difference between the two assignments. Formula: (B - A) / A * 100, rounded to 2 decimal places.',
+        },
       }),
       columnHelper.display({
         id: 'actions',
@@ -382,18 +408,33 @@ const EvaluationTable = memo(function EvaluationTable({
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map(header => {
                   const meta = header.column.columnDef.meta as
-                    | {numeric?: boolean}
+                    | {
+                        numeric?: boolean;
+                        percent?: boolean;
+                        flex?: boolean;
+                        tooltip?: string;
+                      }
                     | undefined;
                   const canSort = header.column.getCanSort();
                   const sorted = header.column.getIsSorted();
+                  const headerLabel =
+                    typeof header.column.columnDef.header === 'string'
+                      ? header.column.columnDef.header
+                      : header.column.id;
 
                   return (
                     <th
                       key={header.id}
                       style={{
-                        width: header.getSize(),
+                        width: meta?.flex
+                          ? 'auto'
+                          : meta?.percent
+                            ? PERCENT_COL_WIDTH
+                            : meta?.numeric
+                              ? NUMBER_COL_WIDTH
+                              : header.getSize(),
                         textAlign: meta?.numeric ? 'right' : 'left',
-                        padding: '10px 24px',
+                        padding: '10px 16px',
                         borderBottom: `1px solid ${LINE_COLOR}`,
                         fontWeight: 500,
                         fontSize: '0.875rem',
@@ -418,6 +459,21 @@ const EvaluationTable = memo(function EvaluationTable({
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
+                        )}
+                        {meta?.tooltip != null && (
+                          <Tooltip title={meta.tooltip}>
+                            <IconButton
+                              aria-label={`Help: ${headerLabel}`}
+                              disableRipple
+                              onClick={e => e.stopPropagation()}
+                              sx={{
+                                p: 0,
+                                color: 'text.disabled',
+                                cursor: 'help',
+                              }}>
+                              <InfoOutlined sx={{fontSize: 14}} />
+                            </IconButton>
+                          </Tooltip>
                         )}
                         {sorted === 'asc' && (
                           <ArrowUpward sx={{fontSize: 16}} />
@@ -456,7 +512,7 @@ const EvaluationTable = memo(function EvaluationTable({
                       tabIndex={copyable ? 0 : undefined}
                       style={{
                         textAlign: meta?.numeric ? 'right' : 'left',
-                        padding: '10px 24px',
+                        padding: '10px 16px',
                         borderBottom: `1px solid ${LINE_COLOR}`,
                         fontSize: '0.875rem',
                         whiteSpace: 'normal',
@@ -539,9 +595,9 @@ const EvaluationTable = memo(function EvaluationTable({
               <td
                 style={{...totalCellStyle, textAlign: 'right'}}>
                 <PreciseNumber
-                  value={Math.round(totals.percentTotal * 1000) / 1000}
+                  value={Math.round(totals.percentTotal * 100) / 100}
                   highlight={!isConstraint}
-                  fixedDecimals={3}
+                  fixedDecimals={2}
                 />
               </td>
               {/* Actions */}
