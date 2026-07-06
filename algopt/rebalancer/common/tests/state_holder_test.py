@@ -63,3 +63,29 @@ class TestStateHolder(testutil.BaseFacebookTestCase):
         self.assertNone(state.get_scope_by_name("sub_region_fd"))
         self.assertNone(state.get_scope_by_name("other_scope"))
         self.assertEqual(state.scopes(), {"serf_scopes": serf_scope})
+
+    def test_mapping_interface(self) -> None:
+        state = StateHolder()
+        state["custom_key"] = "/tmp/rebalancer"
+        self.assertIn("custom_key", state)
+        self.assertEqual(state["custom_key"], "/tmp/rebalancer")
+        self.assertNotIn("missing", state)
+        with self.assertRaises(AssertionError):
+            state["custom_key"] = "/tmp/other"
+
+    def test_object_and_container_accessors(self) -> None:
+        state = StateHolder(
+            config_map={"object_name": "task", "container_name": "host"},
+            tasks_data={"t1": "task_value"},
+            hosts_data={"h1": "host_value"},
+            additional_tasks_data={"t2": "extra_task_value"},
+        )
+        self.assertEqual(state.getObjectName(), "task")
+        self.assertEqual(state.getContainerName(), "host")
+        self.assertEqual(state.getObjectsData(), {"t1": "task_value"})
+        self.assertEqual(state.getContainersData(), {"h1": "host_value"})
+        self.assertEqual(state.getAdditionalObjectsData(), {"t2": "extra_task_value"})
+
+    def test_additional_objects_data_missing(self) -> None:
+        state = StateHolder(config_map={"object_name": "task"})
+        self.assertEqual(state.getAdditionalObjectsData(), {})
