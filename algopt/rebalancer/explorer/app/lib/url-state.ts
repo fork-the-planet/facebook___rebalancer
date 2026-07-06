@@ -103,11 +103,7 @@ export function normalizeFilters(raw: unknown): Filter[] {
               },
             };
           }
-          if (
-            'regex' in r &&
-            typeof r.regex === 'object' &&
-            r.regex != null
-          ) {
+          if ('regex' in r && typeof r.regex === 'object' && r.regex != null) {
             const s = r.regex as Record<string, unknown>;
             if (!s.column) return null;
             return {

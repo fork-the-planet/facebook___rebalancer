@@ -93,7 +93,10 @@ export default function TablePaginationActions({
           }}
           sx={{width: 64}}
         />
-        <Typography variant="body2" color="text.secondary" sx={{whiteSpace: 'nowrap'}}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{whiteSpace: 'nowrap'}}>
           / {lastPage + 1}
         </Typography>
       </Box>

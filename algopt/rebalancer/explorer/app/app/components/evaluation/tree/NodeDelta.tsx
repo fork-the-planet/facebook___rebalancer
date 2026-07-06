@@ -31,7 +31,11 @@ export function NodeDelta({
       <Typography
         component="span"
         variant="body2"
-        sx={{fontWeight: 600, fontVariantNumeric: 'tabular-nums', fontSize: '0.8125rem'}}>
+        sx={{
+          fontWeight: 600,
+          fontVariantNumeric: 'tabular-nums',
+          fontSize: '0.8125rem',
+        }}>
         {precise(destinationValue)}
       </Typography>
       <Typography

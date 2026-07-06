@@ -1,6 +1,13 @@
 'use client';
 
-import {startTransition, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   Box,
@@ -12,7 +19,10 @@ import {
 } from '@mui/material';
 
 import EntityFilter from '@/app/components/EntityFilter';
-import {filterExpressions, type TableDescriptor} from '@/app/components/evaluation/ConstraintsObjectivesView.tables';
+import {
+  filterExpressions,
+  type TableDescriptor,
+} from '@/app/components/evaluation/ConstraintsObjectivesView.tables';
 import EvaluationTable from '@/app/components/evaluation/EvaluationTable';
 import type {
   Assignment,

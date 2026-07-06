@@ -28,7 +28,9 @@ const AssistantContext = createContext<AssistantContextValue | null>(null);
 export function useAssistantContext() {
   const context = useContext(AssistantContext);
   if (!context) {
-    throw new Error('useAssistantContext must be used within AssistantProvider');
+    throw new Error(
+      'useAssistantContext must be used within AssistantProvider',
+    );
   }
   return context;
 }

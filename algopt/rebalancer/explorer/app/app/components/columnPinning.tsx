@@ -43,7 +43,10 @@ export function useColumnPinning(defaultPinnedIds: string[]) {
 
 // Works out where each pinned column sits so they line up against the left edge
 // as the rest scroll. Call during render (needs the table).
-export function getPinnedColumnHelpers<T>(table: Table<T>, pinnedLeft: string[]) {
+export function getPinnedColumnHelpers<T>(
+  table: Table<T>,
+  pinnedLeft: string[],
+) {
   const offsets: Record<string, number> = {};
   let acc = 0;
   for (const colId of pinnedLeft) {

@@ -51,7 +51,12 @@ function getField(
 type CompiledFilter = {
   rules: Array<
     | {type: 'regex'; column: string; compiled: RegExp}
-    | {type: 'numeric'; column: string; comparator: Comparator; doubleValue: number}
+    | {
+        type: 'numeric';
+        column: string;
+        comparator: Comparator;
+        doubleValue: number;
+      }
     | {type: 'stringAny'; column: string; values: string[]}
     | {type: 'stringNe'; column: string; value: string}
   >;
@@ -67,16 +72,33 @@ export function compileEvaluationFilters(filters: Filter[]): CompiledFilter[] {
     for (const rule of filter.rules) {
       if ('regex' in rule) {
         try {
-          rules.push({type: 'regex', column: rule.regex.column, compiled: new RegExp(rule.regex.regex, 'i')});
+          rules.push({
+            type: 'regex',
+            column: rule.regex.column,
+            compiled: new RegExp(rule.regex.regex, 'i'),
+          });
         } catch {
           // invalid regex — drop the rule (it would never match anyway)
         }
       } else if ('numeric' in rule) {
-        rules.push({type: 'numeric', column: rule.numeric.column, comparator: rule.numeric.comparator, doubleValue: rule.numeric.doubleValue});
+        rules.push({
+          type: 'numeric',
+          column: rule.numeric.column,
+          comparator: rule.numeric.comparator,
+          doubleValue: rule.numeric.doubleValue,
+        });
       } else if ('stringAny' in rule) {
-        rules.push({type: 'stringAny', column: rule.stringAny.column, values: rule.stringAny.values});
+        rules.push({
+          type: 'stringAny',
+          column: rule.stringAny.column,
+          values: rule.stringAny.values,
+        });
       } else if ('stringNe' in rule) {
-        rules.push({type: 'stringNe', column: rule.stringNe.column, value: rule.stringNe.value});
+        rules.push({
+          type: 'stringNe',
+          column: rule.stringNe.column,
+          value: rule.stringNe.value,
+        });
       }
     }
     return {rules};
@@ -112,7 +134,8 @@ export function matchesEvaluationFilters(
       } else if (rule.type === 'numeric') {
         const val = getField(record, rule.column);
         if (typeof val !== 'number') continue;
-        if (!compareNumeric(val, rule.comparator, rule.doubleValue)) return false;
+        if (!compareNumeric(val, rule.comparator, rule.doubleValue))
+          return false;
       } else if (rule.type === 'stringAny') {
         const val = getField(record, rule.column);
         if (val == null) continue;

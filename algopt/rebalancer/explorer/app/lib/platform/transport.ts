@@ -69,12 +69,15 @@ async function callProxy(
   }
 
   try {
-    const response = await fetch(`${PROXY_URL.replace(/\/+$/, '')}/v2/${method}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(args ?? {}),
-      signal: controller.signal,
-    });
+    const response = await fetch(
+      `${PROXY_URL.replace(/\/+$/, '')}/v2/${method}`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(args ?? {}),
+        signal: controller.signal,
+      },
+    );
 
     const text = await response.text();
     let payload: unknown = null;

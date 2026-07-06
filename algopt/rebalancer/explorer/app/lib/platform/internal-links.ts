@@ -34,7 +34,9 @@ export function thriftExplorerUrl(_encodedRunId: string): string | null {
   return null;
 }
 
-export function metamateConversationUrl(_conversationId: string): string | null {
+export function metamateConversationUrl(
+  _conversationId: string,
+): string | null {
   return null;
 }
 

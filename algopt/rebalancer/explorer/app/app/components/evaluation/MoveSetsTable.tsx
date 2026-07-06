@@ -482,7 +482,11 @@ export default function MoveSetsTable({
           }
 
           return (
-            <span style={{fontVariantNumeric: 'tabular-nums', fontSize: '0.8125rem'}}>
+            <span
+              style={{
+                fontVariantNumeric: 'tabular-nums',
+                fontSize: '0.8125rem',
+              }}>
               {formatCellValue(value)}
             </span>
           );
