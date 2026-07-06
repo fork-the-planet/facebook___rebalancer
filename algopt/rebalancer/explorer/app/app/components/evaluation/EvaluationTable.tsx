@@ -27,6 +27,7 @@ import {
   compileEvaluationFilters,
   matchesEvaluationFilters,
 } from '@/app/components/evaluation/evaluation-filters';
+import CopyCellAffordance from '@/app/components/CopyCellAffordance';
 import PreciseNumber from '@/app/components/evaluation/PreciseNumber';
 import SpecViewerButton from '@/app/components/evaluation/SpecViewerButton';
 import TreeViewer from '@/app/components/evaluation/TreeViewer';
@@ -507,12 +508,17 @@ const EvaluationTable = memo(function EvaluationTable({
                   return (
                     <td
                       key={cell.id}
+                      className={copyable ? 'group' : undefined}
                       onClick={copyable ? copyOnClick : undefined}
                       onKeyDown={copyable ? copyOnKeyDown : undefined}
                       tabIndex={copyable ? 0 : undefined}
                       style={{
+                        position: copyable ? 'relative' : undefined,
                         textAlign: meta?.numeric ? 'right' : 'left',
-                        padding: '10px 16px',
+                        paddingTop: 10,
+                        paddingBottom: 10,
+                        paddingLeft: 16,
+                        paddingRight: copyable ? 24 : 16,
                         borderBottom: `1px solid ${LINE_COLOR}`,
                         fontSize: '0.875rem',
                         whiteSpace: 'normal',
@@ -524,6 +530,7 @@ const EvaluationTable = memo(function EvaluationTable({
                         cell.column.columnDef.cell,
                         cell.getContext(),
                       )}
+                      {copyable && <CopyCellAffordance />}
                     </td>
                   );
                 })}

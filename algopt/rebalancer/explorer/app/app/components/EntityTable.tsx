@@ -34,6 +34,7 @@ import {
 } from '@/lib/ui-tokens';
 
 import type {ViewState} from './EntityView';
+import CopyCellAffordance from './CopyCellAffordance';
 import useCopyOnClick from './useCopyOnClick';
 
 interface EntityTableProps {
@@ -580,15 +581,21 @@ export default function EntityTable({
                     return (
                       <td
                         key={cell.id}
+                        className="group"
                         onClick={copyOnClick}
                         onKeyDown={copyOnKeyDown}
                         tabIndex={0}
                         style={{
+                          position: 'relative',
                           width: cell.column.getSize(),
                           maxWidth: cell.column.getSize(),
                           ...getStickyStyles(cell.column.id),
                           textAlign: meta?.numeric ? 'center' : 'left',
-                          padding: '8px 12px',
+                          paddingTop: 8,
+                          paddingBottom: 8,
+                          paddingLeft: 12,
+                          // Extra right room for the copy icon.
+                          paddingRight: 24,
                           borderBottom: `1px solid ${LINE_COLOR}`,
                           fontWeight: meta?.primaryKey ? 600 : 400,
                           fontSize: '0.875rem',
@@ -607,6 +614,7 @@ export default function EntityTable({
                           cell.column.columnDef.cell,
                           cell.getContext(),
                         )}
+                        <CopyCellAffordance />
                       </td>
                     );
                   })}

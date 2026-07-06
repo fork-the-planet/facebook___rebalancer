@@ -43,6 +43,7 @@ import {
   formatCellValue,
   NAN_STRING,
 } from '@/app/components/evaluation/MoveSetsTable.cells';
+import CopyCellAffordance from '@/app/components/CopyCellAffordance';
 import PreciseNumber from '@/app/components/evaluation/PreciseNumber';
 import {useMetricsData} from '@/app/components/evaluation/useMetricsData';
 import {
@@ -466,10 +467,15 @@ export default function MetricsTable({
                       <Box
                         component="td"
                         key={cell.id}
+                        className="group"
                         onClick={copyOnClick}
                         sx={{
+                          position: 'relative',
                           textAlign: meta?.numeric ? 'right' : 'left',
-                          padding: '8px 12px',
+                          py: '8px',
+                          pl: '12px',
+                          // Extra right room for the copy icon.
+                          pr: '24px',
                           borderBottom: 1,
                           borderBottomColor: 'divider',
                           fontSize: '0.875rem',
@@ -482,6 +488,7 @@ export default function MetricsTable({
                           cell.column.columnDef.cell,
                           cell.getContext(),
                         )}
+                        <CopyCellAffordance />
                       </Box>
                     );
                   })}

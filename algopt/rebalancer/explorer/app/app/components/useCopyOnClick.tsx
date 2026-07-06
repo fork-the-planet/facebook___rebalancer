@@ -46,12 +46,19 @@ function getCopyableText(root: Element): string {
   return text;
 }
 
+// Keep the confirmation readable when a cell holds a long value.
+function truncateForMessage(text: string): string {
+  const MAX = 60;
+  return text.length > MAX ? `${text.slice(0, MAX - 1)}…` : text;
+}
+
 export default function useCopyOnClick(): {
   copyOnClick: (event: React.MouseEvent<HTMLElement>) => void;
   copyOnKeyDown: (event: React.KeyboardEvent<HTMLElement>) => void;
   snackbar: React.ReactElement;
 } {
   const [open, setOpen] = useState(false);
+  const [copiedText, setCopiedText] = useState('');
 
   const copyFromTarget = useCallback((target: HTMLElement) => {
     const text = getCopyableText(target).trim();
@@ -60,6 +67,7 @@ export default function useCopyOnClick(): {
     }
     navigator.clipboard.writeText(text).then(
       () => {
+        setCopiedText(text);
         setOpen(true);
       },
       () => {
@@ -91,7 +99,7 @@ export default function useCopyOnClick(): {
       open={open}
       autoHideDuration={1500}
       onClose={() => setOpen(false)}
-      message="Copied to clipboard"
+      message={`Copied "${truncateForMessage(copiedText)}" to clipboard`}
       anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
     />
   );
