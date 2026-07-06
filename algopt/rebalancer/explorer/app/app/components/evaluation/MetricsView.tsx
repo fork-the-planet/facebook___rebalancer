@@ -53,15 +53,10 @@ export default function MetricsView() {
     [],
   );
 
-  // Track whether URL explicitly specified dstBase
-  const urlSpecifiedDstBase = useMemo(
-    () => searchParams.has('dstBase'),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
-
   // ---------------------------------------------------------------------------
-  // Assignment state — initialized from URL or metadata defaults
+  // Assignment state - initialized from URL, falling back to metadata defaults.
+  // ProblemMetadataProvider gates the run UI until metadata loads, so it is
+  // available here on the first render.
   // ---------------------------------------------------------------------------
 
   const [assignments, setAssignments] = useState<Assignments>(() => ({
@@ -78,19 +73,6 @@ export default function MetricsView() {
       step: urlState.dstStep,
     },
   }));
-
-  // Re-initialize dst when metadata loads, unless URL explicitly specified dstBase
-  const [hasInitializedDst, setHasInitializedDst] = useState(metadata != null);
-  if (!hasInitializedDst && metadata != null) {
-    setHasInitializedDst(true);
-    if (!urlSpecifiedDstBase && metadata.hasFinalAssignment) {
-      setAssignments(prev =>
-        prev.dst.base === 'INITIAL' && prev.dst.overrides.length === 0
-          ? {...prev, dst: {base: 'FINAL', overrides: [], step: null}}
-          : prev,
-      );
-    }
-  }
 
   // ---------------------------------------------------------------------------
   // View state — initialized from URL, reset on metric name change

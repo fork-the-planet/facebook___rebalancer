@@ -18,6 +18,9 @@
 
 import {createContext, useContext, useEffect, useState} from 'react';
 
+import {Alert, AlertTitle} from '@mui/material';
+import {Loader2} from 'lucide-react';
+
 import type {ProblemMetadata} from '@/lib/rebalancer-explorer-types';
 import {fetchProblemMetadata} from '@/lib/rebalancer-explorer-api';
 
@@ -40,22 +43,25 @@ export function ProblemMetadataProvider({
   const {handle} = useRebalancerHandle();
 
   const [metadata, setMetadata] = useState<ProblemMetadata | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(handle != null);
   const [error, setError] = useState<string | null>(null);
+
+  // Reset when the run (handle) changes, during render so children never see
+  // stale data from the previous run.
+  const [prevHandle, setPrevHandle] = useState(handle);
+  if (handle !== prevHandle) {
+    setPrevHandle(handle);
+    setMetadata(null);
+    setError(null);
+    setLoading(handle != null);
+  }
 
   useEffect(() => {
     if (handle == null) {
-      setMetadata(null);
-      setError(null);
-      setLoading(false);
       return;
     }
 
     let cancelled = false;
-
-    setMetadata(null);
-    setLoading(true);
-    setError(null);
 
     fetchProblemMetadata(handle)
       .then(response => {
@@ -79,6 +85,33 @@ export function ProblemMetadataProvider({
       cancelled = true;
     };
   }, [handle]);
+
+  if (error != null) {
+    return (
+      <Alert severity="error">
+        <AlertTitle>Error</AlertTitle>
+        {error}
+      </Alert>
+    );
+  }
+
+  // Spinner only while a run is actually loading; with no run (handle null)
+  // there is nothing to load, so don't spin forever.
+  if (handle != null && (loading || metadata == null)) {
+    return (
+      <div
+        role="status"
+        className="flex flex-col items-center justify-center gap-3 p-8">
+        <Loader2
+          aria-hidden
+          className="size-8 animate-spin text-muted-foreground"
+        />
+        <p className="text-sm text-muted-foreground">
+          Loading problem metadata...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <ProblemMetadataContext.Provider value={{metadata, loading, error}}>
