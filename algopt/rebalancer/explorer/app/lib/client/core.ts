@@ -33,6 +33,16 @@ import {getRpcClient as getTransportRpcClient} from '@platform/transport';
 const REBALANCER_SERVICE_TIER = 'rebalancer_explorer';
 const REBALANCER_SERVICE_NAME = 'RebalancerExplorerService';
 
+// Shared RPC options for every RebalancerExplorerService call. Timeouts are 600s
+// (10 min) to match the ServiceRouter config in D106090726; large runs can take
+// several minutes to evaluate. One source of truth so the eval RPC and the
+// getHandle server-selection call can't drift apart.
+export const REBALANCER_RPC_OPTIONS = {
+  processing_timeout_ms: 600000,
+  overall_timeout_ms: 600000,
+  client_id: 'rebalancer_explorer_nest',
+} as const;
+
 // Host override for OSS / local development
 const REBALANCER_HOST = process.env.REBALANCER_HOST ?? null;
 const REBALANCER_PORT = process.env.REBALANCER_PORT
@@ -127,11 +137,7 @@ export async function getRpcClient(
   catToken?: string,
   hostOverride?: {ip_addr: string; port: number},
 ) {
-  const options: Record<string, unknown> = {
-    processing_timeout_ms: 30000,
-    overall_timeout_ms: 60000,
-    client_id: 'rebalancer_explorer_nest',
-  };
+  const options: Record<string, unknown> = {...REBALANCER_RPC_OPTIONS};
 
   if (hostOverride) {
     options.host_override = hostOverride;
