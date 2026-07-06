@@ -25,9 +25,11 @@ export function getDefaultMetricsViewState(): MetricsViewState {
   };
 }
 
+// Starting column widths. Columns can be dragged to resize; kept small so the
+// table fits without scrolling when it can.
 export function getColumnWidth(col: ColumnDescription): number {
-  if (col.primaryKey) return 220;
-  return isNumericColumn(col.type) ? 130 : 180;
+  if (col.primaryKey) return 200;
+  return isNumericColumn(col.type) ? 120 : 160;
 }
 
 export function isVisibleColumn(

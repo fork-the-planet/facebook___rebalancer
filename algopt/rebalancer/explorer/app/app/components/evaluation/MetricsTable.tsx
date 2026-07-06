@@ -25,6 +25,13 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 
+import {
+  ColumnPinButton,
+  getPinnedColumnHelpers,
+  PINNED_SHADOW,
+  useColumnPinning,
+} from '@/app/components/columnPinning';
+
 import {metricsFaqUrl} from '@platform/internal-links';
 
 import EntityFilter from '@/app/components/EntityFilter';
@@ -110,6 +117,7 @@ export default function MetricsTable({
     return visibleColumnIndices.map(colIndex => {
       const col = allColumns[colIndex];
       const isBMinusA = col.name.endsWith(B_MINUS_A_SUFFIX);
+      const isNumeric = isNumericColumn(col.type);
       return columnHelper.accessor(String(colIndex), {
         id: String(colIndex),
         header: col.name,
@@ -143,7 +151,7 @@ export default function MetricsTable({
         },
         size: getColumnWidth(col),
         meta: {
-          numeric: isNumericColumn(col.type),
+          numeric: isNumeric,
           colName: col.name,
           primaryKey: col.primaryKey,
         },
@@ -163,12 +171,26 @@ export default function MetricsTable({
     });
   }, [result, allColumns]);
 
+  // The identifier columns start pinned to the left.
+  const defaultPinnedIds = useMemo(
+    () =>
+      visibleColumnIndices
+        .filter(i => allColumns[i]?.primaryKey)
+        .map(i => String(i)),
+    [visibleColumnIndices, allColumns],
+  );
+  const {columnPinning, setColumnPinning, togglePin} =
+    useColumnPinning(defaultPinnedIds);
+
   const table = useReactTable({
     data,
     columns,
+    state: {columnPinning},
+    onColumnPinningChange: setColumnPinning,
     getCoreRowModel: getCoreRowModel(),
     manualSorting: true,
     manualPagination: true,
+    columnResizeMode: 'onChange',
   });
 
   // ---- Handlers ----
@@ -245,6 +267,9 @@ export default function MetricsTable({
   const filterColumns = originalResult?.columns ?? [];
   const headerGroups = table.getHeaderGroups();
   const rows = table.getRowModel().rows;
+
+  const pinnedLeft = columnPinning.left ?? [];
+  const {stickyStyle, isLastPinned} = getPinnedColumnHelpers(table, pinnedLeft);
 
   return (
     <Paper variant="outlined" sx={{position: 'relative', overflow: 'hidden'}}>
@@ -386,8 +411,8 @@ export default function MetricsTable({
           )}
           <table
             style={{
-              width: '100%',
-              minWidth: table.getTotalSize(),
+              width: table.getTotalSize(),
+              minWidth: '100%',
               tableLayout: 'fixed',
               borderCollapse: 'separate',
               borderSpacing: 0,
@@ -407,12 +432,15 @@ export default function MetricsTable({
                     const isAsc =
                       isSorted &&
                       orderBy?.direction === OrderDirection.ASCENDING;
+                    const isPinned = pinnedLeft.includes(header.column.id);
                     return (
                       <Box
                         component="th"
                         key={header.id}
                         onClick={() => handleSort(header.column.id)}
                         sx={{
+                          position: 'relative',
+                          ...stickyStyle(header.column.id, 3),
                           width: header.getSize(),
                           textAlign: meta?.numeric ? 'right' : 'left',
                           padding: '8px 12px',
@@ -421,8 +449,12 @@ export default function MetricsTable({
                           fontWeight: meta?.primaryKey ? 600 : 500,
                           fontSize: '0.875rem',
                           color: 'text.secondary',
+                          backgroundColor: 'background.paper',
                           cursor: 'pointer',
                           userSelect: 'none',
+                          boxShadow: isLastPinned(header.column.id)
+                            ? PINNED_SHADOW
+                            : undefined,
                         }}>
                         <Box
                           sx={{
@@ -443,7 +475,38 @@ export default function MetricsTable({
                             ) : (
                               <ArrowDownward sx={{fontSize: 16}} />
                             ))}
+                          <ColumnPinButton
+                            pinned={isPinned}
+                            onToggle={() => togglePin(header.column.id)}
+                            label={
+                              isPinned
+                                ? `Unpin ${meta?.colName}`
+                                : `Pin ${meta?.colName}`
+                            }
+                          />
                         </Box>
+                        {header.column.getCanResize() && (
+                          <Box
+                            component="div"
+                            onMouseDown={header.getResizeHandler()}
+                            onTouchStart={header.getResizeHandler()}
+                            onClick={e => e.stopPropagation()}
+                            sx={{
+                              position: 'absolute',
+                              right: 0,
+                              top: 0,
+                              height: '100%',
+                              width: '4px',
+                              cursor: 'col-resize',
+                              userSelect: 'none',
+                              touchAction: 'none',
+                              bgcolor: header.column.getIsResizing()
+                                ? 'primary.main'
+                                : 'transparent',
+                              '&:hover': {bgcolor: 'action.disabled'},
+                            }}
+                          />
+                        )}
                       </Box>
                     );
                   })}
@@ -463,6 +526,7 @@ export default function MetricsTable({
                     const meta = cell.column.columnDef.meta as
                       | {numeric?: boolean}
                       | undefined;
+                    const isPinned = pinnedLeft.includes(cell.column.id);
                     return (
                       <Box
                         component="td"
@@ -471,6 +535,8 @@ export default function MetricsTable({
                         onClick={copyOnClick}
                         sx={{
                           position: 'relative',
+                          ...stickyStyle(cell.column.id, 2),
+                          width: cell.column.getSize(),
                           textAlign: meta?.numeric ? 'right' : 'left',
                           py: '8px',
                           pl: '12px',
@@ -478,11 +544,15 @@ export default function MetricsTable({
                           pr: '24px',
                           borderBottom: 1,
                           borderBottomColor: 'divider',
+                          backgroundColor: isPinned ? 'inherit' : undefined,
                           fontSize: '0.875rem',
                           whiteSpace: 'normal',
                           wordBreak: 'break-word',
                           overflowWrap: 'anywhere',
                           cursor: 'pointer',
+                          boxShadow: isLastPinned(cell.column.id)
+                            ? PINNED_SHADOW
+                            : undefined,
                         }}>
                         {flexRender(
                           cell.column.columnDef.cell,

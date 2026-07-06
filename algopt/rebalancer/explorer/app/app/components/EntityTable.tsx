@@ -1,16 +1,13 @@
 'use client';
 
 import type {Dispatch, SetStateAction} from 'react';
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useMemo} from 'react';
 
-import PushPin from '@mui/icons-material/PushPin';
-import PushPinOutlined from '@mui/icons-material/PushPinOutlined';
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import {
   Box,
   CircularProgress,
-  IconButton,
   Paper,
   TablePagination,
   Typography,
@@ -21,7 +18,12 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import type {ColumnPinningState} from '@tanstack/react-table';
+import {
+  ColumnPinButton,
+  getPinnedColumnHelpers,
+  PINNED_SHADOW,
+  useColumnPinning,
+} from '@/app/components/columnPinning';
 
 import type {CellData, Result} from '@/lib/rebalancer-explorer-types';
 import {ColumnType, OrderDirection} from '@/lib/rebalancer-explorer-types';
@@ -214,10 +216,8 @@ export default function EntityTable({
       .map(({i}) => String(i));
   }, [resultColumns, visibleColumnIndices]);
 
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: defaultPinnedIds,
-    right: [],
-  });
+  const {columnPinning, setColumnPinning, togglePin} =
+    useColumnPinning(defaultPinnedIds);
 
   const table = useReactTable({
     data,
@@ -262,16 +262,6 @@ export default function EntityTable({
     [resultColumns, onViewStateChange],
   );
 
-  const togglePin = useCallback((colId: string) => {
-    setColumnPinning(prev => {
-      const left = prev.left ?? [];
-      if (left.includes(colId)) {
-        return {...prev, left: left.filter(id => id !== colId)};
-      }
-      return {...prev, left: [...left, colId]};
-    });
-  }, []);
-
   const currentPage = Math.floor(viewState.offset / viewState.limit);
   const totalCount = result?.totalCount ?? 0;
 
@@ -301,32 +291,11 @@ export default function EntityTable({
     return null;
   }
 
-  // Compute left offsets for pinned columns
   const pinnedLeft = columnPinning.left ?? [];
-  const pinnedLeftOffsets: Record<string, number> = {};
-  let cumulativeOffset = 0;
-  for (const colId of pinnedLeft) {
-    const col = table.getColumn(colId);
-    if (col) {
-      pinnedLeftOffsets[colId] = cumulativeOffset;
-      cumulativeOffset += col.getSize();
-    }
-  }
+  const {stickyStyle, isLastPinned} = getPinnedColumnHelpers(table, pinnedLeft);
 
   const headerGroups = table.getHeaderGroups();
   const rows = table.getRowModel().rows;
-
-  const getStickyStyles = (colId: string): React.CSSProperties => {
-    if (!pinnedLeft.includes(colId)) {
-      return {};
-    }
-    return {
-      position: 'sticky',
-      left: pinnedLeftOffsets[colId] ?? 0,
-      zIndex: 2,
-      backgroundColor: 'inherit',
-    };
-  };
 
   return (
     <Paper
@@ -389,15 +358,12 @@ export default function EntityTable({
                       isSorted &&
                       viewState.orderDirection === OrderDirection.ASCENDING;
 
-                    // Shadow on last pinned column
-                    const isLastPinned =
-                      isPinned &&
-                      pinnedLeft[pinnedLeft.length - 1] === header.column.id;
-
                     return (
                       <th
                         key={header.id}
                         style={{
+                          position: 'relative',
+                          ...stickyStyle(header.column.id, 3),
                           width: header.getSize(),
                           maxWidth: header.getSize(),
                           minWidth: header.column.columnDef.minSize,
@@ -407,16 +373,11 @@ export default function EntityTable({
                           fontWeight: meta?.primaryKey ? 600 : 500,
                           fontSize: '0.875rem',
                           color: MUTED_TEXT_COLOR,
-                          position: isPinned ? 'sticky' : 'relative',
-                          left: isPinned
-                            ? (pinnedLeftOffsets[header.column.id] ?? 0)
-                            : undefined,
-                          zIndex: isPinned ? 3 : undefined,
                           cursor: 'pointer',
                           userSelect: 'none',
                           backgroundColor: 'white',
-                          boxShadow: isLastPinned
-                            ? '4px 0 8px -2px rgba(0,0,0,0.15)'
+                          boxShadow: isLastPinned(header.column.id)
+                            ? PINNED_SHADOW
                             : undefined,
                         }}>
                         <Box
@@ -498,29 +459,15 @@ export default function EntityTable({
                                 />
                               ))}
                           </span>
-                          <IconButton
-                            size="small"
-                            onClick={e => {
-                              e.stopPropagation();
-                              togglePin(header.column.id);
-                            }}
-                            sx={{
-                              p: 0.25,
-                              flexShrink: 0,
-                              opacity: isPinned ? 1 : 0.3,
-                              '&:hover': {opacity: 1},
-                            }}
-                            aria-label={
+                          <ColumnPinButton
+                            pinned={isPinned}
+                            onToggle={() => togglePin(header.column.id)}
+                            label={
                               isPinned
                                 ? `Unpin ${meta?.colName}`
                                 : `Pin ${meta?.colName}`
-                            }>
-                            {isPinned ? (
-                              <PushPin sx={{fontSize: 16}} />
-                            ) : (
-                              <PushPinOutlined sx={{fontSize: 16}} />
-                            )}
-                          </IconButton>
+                            }
+                          />
                         </Box>
                         {/* Resize handle */}
                         <div
@@ -574,9 +521,6 @@ export default function EntityTable({
                       | {numeric?: boolean; primaryKey?: boolean}
                       | undefined;
                     const isPinned = pinnedLeft.includes(cell.column.id);
-                    const isLastPinned =
-                      isPinned &&
-                      pinnedLeft[pinnedLeft.length - 1] === cell.column.id;
 
                     return (
                       <td
@@ -587,9 +531,9 @@ export default function EntityTable({
                         tabIndex={0}
                         style={{
                           position: 'relative',
+                          ...stickyStyle(cell.column.id, 2),
                           width: cell.column.getSize(),
                           maxWidth: cell.column.getSize(),
-                          ...getStickyStyles(cell.column.id),
                           textAlign: meta?.numeric ? 'center' : 'left',
                           paddingTop: 8,
                           paddingBottom: 8,
@@ -606,8 +550,9 @@ export default function EntityTable({
                           wordBreak: 'break-word',
                           overflowWrap: 'anywhere',
                           cursor: 'pointer',
-                          boxShadow: isLastPinned
-                            ? '4px 0 8px -2px rgba(0,0,0,0.15)'
+                          backgroundColor: isPinned ? 'inherit' : undefined,
+                          boxShadow: isLastPinned(cell.column.id)
+                            ? PINNED_SHADOW
                             : undefined,
                         }}>
                         {flexRender(
