@@ -155,8 +155,8 @@ async def _discover_servers(tier: str) -> list[ServerAddr]:
             tier=tier,
             options={
                 "svc_prefer_localities": "global",
-                "svc_select_count": 0,
-                "svc_try_connect": True,
+                "svc_select_count": "0",
+                "svc_try_connect": "true",
             },
             overrides={},
         )
