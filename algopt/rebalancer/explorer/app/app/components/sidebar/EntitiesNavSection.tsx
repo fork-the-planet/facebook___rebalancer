@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import {Circle, Box, Layers, Grid3X3} from 'lucide-react';
+import {Circle, Archive, Boxes, Ruler} from 'lucide-react';
 import {useProblemMetadata} from '@/lib/contexts/ProblemMetadataContext';
 import {SidebarMenuItem} from './SidebarMenuItem';
 import {CollapsibleNavSection} from './CollapsibleNavSection';
@@ -35,7 +35,7 @@ export function EntitiesNavSection({
     <SidebarMenuItem
       key={`scope-${name}`}
       href={`${basePath}/entity/${encodeURIComponent(name)}`}
-      icon={Layers}
+      icon={Boxes}
       title={name}
       isActive={isItemActive(`/entity/${encodeURIComponent(name)}`)}
       isCollapsed={collapsed}
@@ -47,7 +47,7 @@ export function EntitiesNavSection({
     <SidebarMenuItem
       key={`dd-${name}`}
       href={`${basePath}/dynamic-dimensions/${encodeURIComponent(name)}`}
-      icon={Grid3X3}
+      icon={Ruler}
       title={name}
       isActive={isItemActive(`/dynamic-dimensions/${encodeURIComponent(name)}`)}
       isCollapsed={collapsed}
@@ -76,7 +76,7 @@ export function EntitiesNavSection({
       />
       <SidebarMenuItem
         href={`${basePath}/entity/${encodeURIComponent(metadata.containerName)}`}
-        icon={Box}
+        icon={Archive}
         title={metadata.containerName}
         isActive={isItemActive(
           `/entity/${encodeURIComponent(metadata.containerName)}`,
@@ -89,7 +89,7 @@ export function EntitiesNavSection({
       {scopeNames.length > 0 && (
         <CollapsibleNavSection
           title="Scopes"
-          icon={Layers}
+          icon={Boxes}
           isCollapsed={collapsed}>
           {scopeItems}
         </CollapsibleNavSection>
@@ -98,7 +98,7 @@ export function EntitiesNavSection({
       {dynamicDimensionNames.length > 0 && (
         <CollapsibleNavSection
           title="Dynamic Dimensions"
-          icon={Grid3X3}
+          icon={Ruler}
           isCollapsed={collapsed}>
           {dynamicDimensionItems}
         </CollapsibleNavSection>

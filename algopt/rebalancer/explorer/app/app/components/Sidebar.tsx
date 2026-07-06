@@ -7,13 +7,15 @@ import {useParams, usePathname} from 'next/navigation';
 import {Tooltip} from '@mui/material';
 import {
   FileText,
-  BarChart3,
   TrendingDown,
+  Gauge,
   Activity,
   ExternalLink,
   BookOpen,
   Users,
   Sparkles,
+  Copy,
+  Check,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -34,6 +36,47 @@ import {
 } from '@platform/internal-links';
 
 export {SidebarProvider, SidebarTrigger};
+
+function RunIdCopy({runId}: {runId: string}) {
+  const [copied, setCopied] = React.useState(false);
+  const handleCopy = async () => {
+    // navigator.clipboard is undefined in non-secure contexts.
+    if (navigator.clipboard == null) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(runId);
+      setCopied(true);
+    } catch {
+      // write failed; keep the current state.
+    }
+  };
+  return (
+    <>
+      <Tooltip
+        title={copied ? 'Copied!' : 'Click to copy run ID'}
+        placement="bottom">
+        <button
+          type="button"
+          aria-label={`Copy run ID ${runId}`}
+          className="flex items-start gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground bg-transparent border-0 p-0 text-left"
+          onClick={handleCopy}
+          onMouseLeave={() => setCopied(false)}
+          onBlur={() => setCopied(false)}>
+          <span className="break-all">{runId}</span>
+          {copied ? (
+            <Check className="size-3 shrink-0" />
+          ) : (
+            <Copy className="size-3 shrink-0" />
+          )}
+        </button>
+      </Tooltip>
+      <span className="sr-only" role="status">
+        {copied ? 'Copied!' : ''}
+      </span>
+    </>
+  );
+}
 
 interface NavItem {
   title: string;
@@ -71,38 +114,30 @@ export function Sidebar() {
   const sidebarContent = (
     <>
       {/* Header */}
-      <div className="flex h-14 items-center border-b border-gray-300 px-3 shrink-0">
-        <Link
-          href="/"
-          className="flex items-center gap-3 text-foreground no-underline min-w-0"
-          onClick={closeMobile}>
+      <div className="flex min-h-14 items-center gap-3 border-b border-gray-300 px-3 py-3 shrink-0">
+        <Link href="/" className="shrink-0" onClick={closeMobile}>
           <Image
             src="/favicon.gif"
             alt="Rebalancer Explorer"
             width={32}
             height={32}
-            className="shrink-0 rounded-lg"
+            className="rounded-lg"
             unoptimized
           />
-          {(!isCollapsed || isMobileOpen) && (
-            <div className="flex flex-col gap-1 min-w-0">
+        </Link>
+        {(!isCollapsed || isMobileOpen) && (
+          <div className="flex flex-col gap-1 min-w-0">
+            <Link
+              href="/"
+              className="text-foreground no-underline"
+              onClick={closeMobile}>
               <span className="text-sm font-semibold leading-none whitespace-nowrap">
                 Rebalancer Explorer
               </span>
-              <Tooltip title={runId} placement="bottom">
-                <span
-                  className="text-xs text-muted-foreground truncate cursor-pointer hover:text-foreground"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    navigator.clipboard.writeText(runId);
-                  }}>
-                  {runId}
-                </span>
-              </Tooltip>
-            </div>
-          )}
-        </Link>
+            </Link>
+            <RunIdCopy runId={runId} />
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
@@ -150,7 +185,7 @@ export function Sidebar() {
           )}
           <SidebarMenuItem
             href={`${basePath}/constraints-objectives`}
-            icon={BarChart3}
+            icon={TrendingDown}
             title="Constraints & Objectives"
             isActive={isItemActive('/constraints-objectives')}
             isCollapsed={isCollapsed && !isMobileOpen}
@@ -160,7 +195,7 @@ export function Sidebar() {
           {(metadata?.metricCollectionNames?.length ?? 0) > 0 && (
             <SidebarMenuItem
               href={`${basePath}/metrics/${slugifyMetricName(metadata!.metricCollectionNames[0])}`}
-              icon={TrendingDown}
+              icon={Gauge}
               title="Metrics"
               isActive={isItemActive('/metrics/')}
               isCollapsed={isCollapsed && !isMobileOpen}
@@ -237,7 +272,7 @@ export function Sidebar() {
       {/* Desktop sidebar */}
       <aside
         data-state={isOpen ? 'expanded' : 'collapsed'}
-        className="fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-gray-300 bg-background transition-[width] duration-200 ease-in-out md:flex"
+        className="fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-gray-300 bg-white transition-[width] duration-200 ease-in-out md:flex"
         style={{width: 'var(--sidebar-width)'}}>
         {sidebarContent}
       </aside>
@@ -252,7 +287,7 @@ export function Sidebar() {
       )}
       <aside
         className={[
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-300 bg-background transition-transform duration-200 ease-in-out md:hidden',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-300 bg-white transition-transform duration-200 ease-in-out md:hidden',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}>
         {sidebarContent}

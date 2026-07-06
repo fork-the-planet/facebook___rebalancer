@@ -34,7 +34,7 @@ export function SidebarMenuItem(props: MenuItemProps) {
   const className = [
     'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
     'hover:bg-muted',
-    isActive ? 'bg-muted font-medium' : 'text-muted-foreground',
+    isActive ? 'bg-muted font-medium' : 'text-foreground',
     isCollapsed ? 'justify-center px-2' : '',
   ].join(' ');
 

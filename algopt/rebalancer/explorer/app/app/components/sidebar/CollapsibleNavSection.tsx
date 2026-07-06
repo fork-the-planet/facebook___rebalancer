@@ -16,7 +16,7 @@ export function CollapsibleNavSection({
   icon: Icon,
   isCollapsed,
   children,
-  defaultOpen = true,
+  defaultOpen = false,
 }: CollapsibleNavSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultOpen);
 
@@ -28,7 +28,7 @@ export function CollapsibleNavSection({
     <div>
       <button
         onClick={() => setIsExpanded(prev => !prev)}
-        className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors">
+        className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors">
         <Icon className="size-4 shrink-0" />
         <span className="flex-1 text-left">{title}</span>
         {isExpanded ? (
