@@ -5,13 +5,7 @@ import {useCallback, useMemo} from 'react';
 
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
-import {
-  Box,
-  CircularProgress,
-  Paper,
-  TablePagination,
-  Typography,
-} from '@mui/material';
+import {Box, Paper, TablePagination, Typography} from '@mui/material';
 import {
   createColumnHelper,
   flexRender,
@@ -37,6 +31,7 @@ import {
 
 import type {ViewState} from './EntityView';
 import CopyCellAffordance from './CopyCellAffordance';
+import UpdatingOverlay from './UpdatingOverlay';
 import useCopyOnClick from './useCopyOnClick';
 
 interface EntityTableProps {
@@ -307,21 +302,8 @@ export default function EntityTable({
         overflow: 'hidden',
         boxShadow: CARD_SHADOW,
       }}>
-      {/* Loading overlay */}
-      {loading && (
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: 'rgba(255,255,255,0.7)',
-            zIndex: 10,
-          }}>
-          <CircularProgress />
-        </Box>
-      )}
+      {/* Keeps the old rows visible while refetching */}
+      {loading && <UpdatingOverlay />}
 
       {/* Scroll wide tables sideways; the page handles vertical scrolling. */}
       <Box sx={{overflowX: 'auto'}}>

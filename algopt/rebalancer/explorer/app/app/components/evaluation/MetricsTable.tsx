@@ -51,6 +51,7 @@ import {
   NAN_STRING,
 } from '@/app/components/evaluation/MoveSetsTable.cells';
 import CopyCellAffordance from '@/app/components/CopyCellAffordance';
+import UpdatingOverlay from '@/app/components/UpdatingOverlay';
 import PreciseNumber from '@/app/components/evaluation/PreciseNumber';
 import {useMetricsData} from '@/app/components/evaluation/useMetricsData';
 import {
@@ -394,24 +395,12 @@ export default function MetricsTable({
         </Box>
       )}
 
+      {/* Refetch overlay, anchored to the Paper so the badge stays in view. */}
+      {result != null && loading && <UpdatingOverlay />}
+
       {/* Table */}
       {result != null && (
-        <Box sx={{position: 'relative', overflow: 'auto'}}>
-          {/* Loading overlay — preserves data while refetching */}
-          {loading && (
-            <Box
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: 'rgba(255,255,255,0.7)',
-                zIndex: 10,
-              }}>
-              <CircularProgress />
-            </Box>
-          )}
+        <Box sx={{overflow: 'auto'}}>
           <table
             style={{
               width: table.getTotalSize(),
