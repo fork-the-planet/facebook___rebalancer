@@ -26,6 +26,12 @@ import type {ColumnPinningState} from '@tanstack/react-table';
 import type {CellData, Result} from '@/lib/rebalancer-explorer-types';
 import {ColumnType, OrderDirection} from '@/lib/rebalancer-explorer-types';
 import {isNumericColumn} from '@/lib/format';
+import {
+  CARD_SHADOW,
+  LINE_COLOR,
+  MUTED_TEXT_COLOR,
+  ROW_HOVER_OPAQUE,
+} from '@/lib/ui-tokens';
 
 import type {ViewState} from './EntityView';
 import useCopyOnClick from './useCopyOnClick';
@@ -39,33 +45,38 @@ interface EntityTableProps {
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
-function getColumnTypeLabel(type: ColumnType): {label: string; color: string} {
+function getColumnTypeLabel(type: ColumnType): {
+  label: string;
+  full: string;
+  color: string;
+} {
   switch (type) {
     case ColumnType.DIMENSION:
-      return {label: 'dim', color: '#e3f2fd'};
+      return {label: 'dim', full: 'Dimension', color: '#e3f2fd'};
     case ColumnType.UTILIZATION:
-      return {label: 'util', color: '#fff3e0'};
+      return {label: 'util', full: 'Utilization', color: '#fff3e0'};
     case ColumnType.ENTITY_NAME:
-      return {label: 'entity', color: '#e8f5e9'};
+      return {label: 'entity', full: 'Entity name', color: '#e8f5e9'};
     case ColumnType.ASSIGNMENT:
-      return {label: 'assign', color: '#fce4ec'};
+      return {label: 'assign', full: 'Assignment', color: '#fce4ec'};
     case ColumnType.PARTITION:
-      return {label: 'part', color: '#f3e5f5'};
+      return {label: 'part', full: 'Partition', color: '#f3e5f5'};
     case ColumnType.SCOPE:
-      return {label: 'scope', color: '#e0f2f1'};
+      return {label: 'scope', full: 'Scope', color: '#e0f2f1'};
     case ColumnType.IDENTIFIER:
-      return {label: 'id', color: '#e8eaf6'};
+      return {label: 'id', full: 'Identifier', color: '#e8eaf6'};
     case ColumnType.DOUBLE:
-      return {label: 'double', color: '#f5f5f5'};
+      return {label: 'double', full: 'Double', color: '#f5f5f5'};
     case ColumnType.INTEGER:
-      return {label: 'int', color: '#f5f5f5'};
+      return {label: 'int', full: 'Integer', color: '#f5f5f5'};
     case ColumnType.STRING:
-      return {label: 'string', color: '#f5f5f5'};
+      return {label: 'string', full: 'String', color: '#f5f5f5'};
     default:
-      return {label: '', color: 'transparent'};
+      return {label: '', full: '', color: 'transparent'};
   }
 }
 
+// Column width sized to the value/type; long header names wrap within it.
 function getColumnWidth(type: ColumnType, isPrimaryKey: boolean): number {
   if (isPrimaryKey) {
     return 220;
@@ -73,15 +84,15 @@ function getColumnWidth(type: ColumnType, isPrimaryKey: boolean): number {
   switch (type) {
     case ColumnType.DOUBLE:
     case ColumnType.UTILIZATION:
-      return 130;
+      return 170;
     case ColumnType.INTEGER:
-      return 110;
+      return 150;
     case ColumnType.PARTITION:
     case ColumnType.SCOPE:
     case ColumnType.ASSIGNMENT:
-      return 150;
-    case ColumnType.DIMENSION:
       return 160;
+    case ColumnType.DIMENSION:
+      return 180;
     case ColumnType.ENTITY_NAME:
     case ColumnType.IDENTIFIER:
       return 200;
@@ -325,6 +336,7 @@ export default function EntityTable({
         flexDirection: 'column',
         position: 'relative',
         overflow: 'hidden',
+        boxShadow: CARD_SHADOW,
       }}>
       {/* Loading overlay */}
       {loading && (
@@ -389,11 +401,12 @@ export default function EntityTable({
                           width: header.getSize(),
                           maxWidth: header.getSize(),
                           minWidth: header.column.columnDef.minSize,
-                          textAlign: meta?.numeric ? 'right' : 'left',
+                          textAlign: 'center',
                           padding: '8px 12px',
-                          borderBottom: '2px solid #e0e0e0',
-                          fontWeight: meta?.primaryKey ? 700 : 600,
+                          borderBottom: `1px solid ${LINE_COLOR}`,
+                          fontWeight: meta?.primaryKey ? 600 : 500,
                           fontSize: '0.875rem',
+                          color: MUTED_TEXT_COLOR,
                           position: isPinned ? 'sticky' : 'relative',
                           left: isPinned
                             ? (pinnedLeftOffsets[header.column.id] ?? 0)
@@ -401,7 +414,7 @@ export default function EntityTable({
                           zIndex: isPinned ? 3 : undefined,
                           cursor: 'pointer',
                           userSelect: 'none',
-                          backgroundColor: '#fafafa',
+                          backgroundColor: 'white',
                           boxShadow: isLastPinned
                             ? '4px 0 8px -2px rgba(0,0,0,0.15)'
                             : undefined,
@@ -410,9 +423,7 @@ export default function EntityTable({
                           sx={{
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: meta?.numeric
-                              ? 'flex-end'
-                              : 'flex-start',
+                            justifyContent: 'center',
                             gap: 0.5,
                             overflow: 'hidden',
                             minWidth: 0,
@@ -445,21 +456,20 @@ export default function EntityTable({
                                 <span
                                   key={i}
                                   style={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
+                                    overflowWrap: 'anywhere',
+                                    wordBreak: 'break-word',
                                   }}>
                                   {part}
                                 </span>
                               ))}
                               {meta?.colType != null &&
                                 (() => {
-                                  const {label, color} = getColumnTypeLabel(
-                                    meta.colType,
-                                  );
+                                  const {label, full, color} =
+                                    getColumnTypeLabel(meta.colType);
                                   if (!label) return null;
                                   return (
                                     <span
+                                      title={full}
                                       style={{
                                         fontSize: '0.625rem',
                                         lineHeight: 1,
@@ -469,9 +479,7 @@ export default function EntityTable({
                                         color: '#666',
                                         fontWeight: 500,
                                         whiteSpace: 'nowrap',
-                                        alignSelf: meta.numeric
-                                          ? 'flex-end'
-                                          : 'flex-start',
+                                        alignSelf: 'center',
                                         marginTop: 2,
                                       }}>
                                       {label}
@@ -556,7 +564,7 @@ export default function EntityTable({
                     backgroundColor: 'white',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = '#f5f5f5';
+                    e.currentTarget.style.backgroundColor = ROW_HOVER_OPAQUE;
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.backgroundColor = 'white';
@@ -580,11 +588,14 @@ export default function EntityTable({
                           width: cell.column.getSize(),
                           maxWidth: cell.column.getSize(),
                           ...getStickyStyles(cell.column.id),
-                          textAlign: meta?.numeric ? 'right' : 'left',
+                          textAlign: meta?.numeric ? 'center' : 'left',
                           padding: '8px 12px',
-                          borderBottom: '1px solid #e0e0e0',
+                          borderBottom: `1px solid ${LINE_COLOR}`,
                           fontWeight: meta?.primaryKey ? 600 : 400,
                           fontSize: '0.875rem',
+                          fontVariantNumeric: meta?.numeric
+                            ? 'tabular-nums'
+                            : undefined,
                           whiteSpace: 'normal',
                           wordBreak: 'break-word',
                           overflowWrap: 'anywhere',
@@ -617,7 +628,8 @@ export default function EntityTable({
         onRowsPerPageChange={handleRowsPerPageChange}
         rowsPerPageOptions={PAGE_SIZE_OPTIONS}
         sx={{
-          borderTop: '1px solid #e0e0e0',
+          borderTop: 1,
+          borderTopColor: 'divider',
           flexShrink: 0,
           '& .MuiTablePagination-spacer': {display: 'none'},
           '& .MuiTablePagination-toolbar': {justifyContent: 'flex-start'},

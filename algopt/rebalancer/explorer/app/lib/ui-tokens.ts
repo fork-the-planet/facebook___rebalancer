@@ -8,6 +8,9 @@ export const LINE_COLOR = 'rgba(5, 54, 89, 0.1)';
 export const TOTAL_LINE_COLOR = 'rgba(5, 54, 89, 0.2)';
 // Background shown when the mouse hovers over a row.
 export const ROW_HOVER_COLOR = 'rgba(5, 54, 89, 0.05)';
+// Solid hover color for tables with pinned (fixed) columns. A see-through color
+// would let scrolled cells show through the fixed column as you scroll sideways.
+export const ROW_HOVER_OPAQUE = '#f1f4f7';
 // Dimmed text color for column headers and captions.
 export const MUTED_TEXT_COLOR = '#4E606F';
 // Colors for a change in value: green when it improved, red when it got worse.
