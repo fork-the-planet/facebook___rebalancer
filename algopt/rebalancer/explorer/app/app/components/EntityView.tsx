@@ -286,28 +286,30 @@ export default function EntityView({entityName}: EntityViewProps) {
         />
       )}
 
-      <GroupBySelector
-        columnDescriptions={columnDescriptions ?? []}
-        groupByColumns={viewState.groupByColumns}
-        onGroupByChange={groupByColumns =>
-          setViewState(prev => ({
-            ...prev,
-            groupByColumns,
-            offset: 0,
-            orderColumn: groupByColumns.length > 0 ? groupByColumns[0] : null,
-            orderDirection: OrderDirection.ASCENDING,
-          }))
-        }
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <GroupBySelector
+          columnDescriptions={columnDescriptions ?? []}
+          groupByColumns={viewState.groupByColumns}
+          onGroupByChange={groupByColumns =>
+            setViewState(prev => ({
+              ...prev,
+              groupByColumns,
+              offset: 0,
+              orderColumn: groupByColumns.length > 0 ? groupByColumns[0] : null,
+              orderDirection: OrderDirection.ASCENDING,
+            }))
+          }
+        />
 
-      <ShowColumnsSelector
-        columnDescriptions={columnDescriptions ?? []}
-        groupByColumns={viewState.groupByColumns}
-        showColumns={viewState.showColumns}
-        onShowColumnsChange={showColumns =>
-          setViewState(prev => ({...prev, showColumns}))
-        }
-      />
+        <ShowColumnsSelector
+          columnDescriptions={columnDescriptions ?? []}
+          groupByColumns={viewState.groupByColumns}
+          showColumns={viewState.showColumns}
+          onShowColumnsChange={showColumns =>
+            setViewState(prev => ({...prev, showColumns}))
+          }
+        />
+      </div>
 
       {dataLoading && result == null ? (
         <div className="space-y-2">

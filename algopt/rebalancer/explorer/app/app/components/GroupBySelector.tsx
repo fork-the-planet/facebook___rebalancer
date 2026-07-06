@@ -4,6 +4,7 @@ import {useMemo} from 'react';
 
 import {Autocomplete, Chip, TextField} from '@mui/material';
 
+import {renderColumnTypeGroup} from '@/app/components/columnTypeGroup';
 import {AUTOCOMPLETE_WORD_BREAK_PROPS} from '@/lib/format';
 import type {ColumnDescription} from '@/lib/rebalancer-explorer-types';
 import {ColumnType} from '@/lib/rebalancer-explorer-types';
@@ -69,7 +70,7 @@ export default function GroupBySelector({
     <Autocomplete
       multiple
       size="small"
-      sx={{maxWidth: 360}}
+      sx={{flex: 1, minWidth: 240, maxWidth: 360}}
       options={options}
       value={selectedOptions}
       onChange={(_event, newValue) => {
@@ -77,6 +78,7 @@ export default function GroupBySelector({
       }}
       getOptionLabel={option => option.name}
       groupBy={option => formatColumnType(option.type)}
+      renderGroup={renderColumnTypeGroup}
       isOptionEqualToValue={(option, value) => option.name === value.name}
       renderTags={(value, getTagProps) =>
         value.map((option, index) => {

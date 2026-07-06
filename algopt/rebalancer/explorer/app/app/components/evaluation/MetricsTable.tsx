@@ -344,20 +344,23 @@ export default function MetricsTable({
         </Box>
       )}
 
-      {/* Group by */}
+      {/* Group-by and columns-to-show pickers, on one row */}
       {filterColumns.length > 0 && (
-        <Box sx={{px: 2, py: 1}}>
+        <Box
+          sx={{
+            px: 2,
+            py: 1,
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 2,
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+          }}>
           <GroupBySelector
             columnDescriptions={filterColumns}
             groupByColumns={groupBy}
             onGroupByChange={handleGroupByChange}
           />
-        </Box>
-      )}
-
-      {/* Show columns */}
-      {filterColumns.length > 0 && (
-        <Box sx={{px: 2, py: 1}}>
           <ShowColumnsSelector
             columnDescriptions={filterColumns}
             groupByColumns={groupBy}
