@@ -352,8 +352,16 @@ export default function MetricsTable({
 
       {/* Initial loading (no data yet) */}
       {result == null && loading && (
-        <Box sx={{display: 'flex', justifyContent: 'center', py: 4}}>
-          <CircularProgress />
+        <Box
+          role="status"
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            py: 4,
+          }}>
+          <CircularProgress size={40} />
+          <Box sx={{ml: 2, color: 'text.secondary'}}>Loading metrics...</Box>
         </Box>
       )}
 

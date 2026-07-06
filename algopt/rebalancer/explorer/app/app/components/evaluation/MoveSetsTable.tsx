@@ -849,12 +849,17 @@ export default function MoveSetsTable({
           {/* Loading state */}
           {loading && (
             <Box
+              role="status"
               sx={{
                 display: 'flex',
                 justifyContent: 'center',
+                alignItems: 'center',
                 py: 4,
               }}>
-              <CircularProgress />
+              <CircularProgress size={40} />
+              <Box sx={{ml: 2, color: 'text.secondary'}}>
+                Loading move sets...
+              </Box>
             </Box>
           )}
 
