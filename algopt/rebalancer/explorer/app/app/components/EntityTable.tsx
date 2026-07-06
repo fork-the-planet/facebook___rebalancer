@@ -331,7 +331,6 @@ export default function EntityTable({
     <Paper
       variant="outlined"
       sx={{
-        height: 650,
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
@@ -354,10 +353,10 @@ export default function EntityTable({
         </Box>
       )}
 
-      {/* Scrollable table area */}
-      <Box sx={{flex: 1, overflow: 'auto'}}>
+      {/* Scroll wide tables sideways; the page handles vertical scrolling. */}
+      <Box sx={{overflowX: 'auto'}}>
         {data.length === 0 && !loading ? (
-          <Box className="flex h-full items-center justify-center">
+          <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
             <Typography variant="body1" color="text.secondary">
               No data found
             </Typography>

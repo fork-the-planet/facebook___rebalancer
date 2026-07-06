@@ -13,11 +13,6 @@ export default function DynamicDimensionsPage({
   const decodedDimensionName = decodeURIComponent(dimensionName);
 
   return (
-    <div className="p-4 space-y-4">
-      <EntityView
-        key={decodedDimensionName}
-        entityName={decodedDimensionName}
-      />
-    </div>
+    <EntityView key={decodedDimensionName} entityName={decodedDimensionName} />
   );
 }

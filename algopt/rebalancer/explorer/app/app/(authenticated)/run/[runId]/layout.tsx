@@ -130,7 +130,7 @@ export default function RunLayout({
                     <UserInfo />
                   </div>
                 </header>
-                <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+                <div className="flex flex-1 flex-col min-w-0 overflow-y-auto">
                   {children}
                 </div>
               </SidebarInset>
