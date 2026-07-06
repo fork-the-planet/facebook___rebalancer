@@ -20,7 +20,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import type {SortingState} from '@tanstack/react-table';
+import type {Column, SortingState} from '@tanstack/react-table';
 
 import CollapsibleText from '@/app/components/evaluation/CollapsibleText';
 import {
@@ -101,11 +101,79 @@ function calculatePercentageChange(src: number, dst: number): number {
   return (delta / Math.abs(src)) * 100;
 }
 
-// Fixed number-column widths so columns line up across tables and stay compact;
-// longer values wrap. `ch` is the width of one digit (tabular-nums keeps digits
-// equal), plus `3rem` padding. "%" is narrower since its values are small.
+// Small muted "(%)" shown beneath the B - A delta. Parenthesized to match the
+// "(%)" sort label in the header. data-copy-skip keeps it out of the cell's
+// click-to-copy text, so copying a B - A cell yields just the value.
+function PercentBeneath({value}: {value: number}) {
+  return (
+    <Box
+      component="span"
+      data-copy-skip
+      sx={{
+        fontSize: '0.6rem',
+        lineHeight: 1,
+        color: 'text.disabled',
+        fontVariantNumeric: 'tabular-nums',
+      }}>
+      {`(${value.toFixed(2)}%)`}
+    </Box>
+  );
+}
+
+// A clickable sort target with its own direction arrow, used for the two labels
+// ("B - A" and the smaller, muted "(%)") stacked in the merged B - A header.
+function SortLabel({
+  label,
+  column,
+  secondary = false,
+}: {
+  label: string;
+  column: Column<EvaluationRow> | undefined;
+  secondary?: boolean;
+}) {
+  const sorted = column?.getIsSorted();
+  const arrowSize = secondary ? 12 : 14;
+  return (
+    <Box
+      component="button"
+      type="button"
+      aria-label={`Sort by ${label}`}
+      onClick={e => {
+        e.stopPropagation();
+        column?.toggleSorting();
+      }}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 0.25,
+        cursor: 'pointer',
+        border: 0,
+        p: 0,
+        bgcolor: 'transparent',
+        font: 'inherit',
+        color: 'inherit',
+        ...(secondary && {color: 'text.secondary', fontSize: '0.65rem'}),
+      }}>
+      {label}
+      {sorted === 'asc' && <ArrowUpward sx={{fontSize: arrowSize}} />}
+      {sorted === 'desc' && <ArrowDownward sx={{fontSize: arrowSize}} />}
+    </Box>
+  );
+}
+
+// Fixed width for the A / B / B-A number columns, so they line up and stay
+// compact; longer values wrap. `ch` is the width of one digit (tabular-nums
+// keeps digits equal), plus `3rem` padding.
 const NUMBER_COL_WIDTH = 'calc(17ch + 3rem)';
-const PERCENT_COL_WIDTH = 'calc(10ch + 3rem)';
+
+// Stacks the B - A value over its smaller "(%)" line, right-aligned. Used in the
+// header, the body cell, and the totals footer so all three line up.
+const STACKED_BA_SX = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-end',
+  gap: '2px',
+} as const;
 
 // ---------------------------------------------------------------------------
 // Column definitions
@@ -287,31 +355,34 @@ const EvaluationTable = memo(function EvaluationTable({
         },
       }),
       columnHelper.accessor('delta', {
-        header: 'B - A',
-        cell: info => (
-          <PreciseNumber value={info.getValue()} highlight={!isConstraint} />
+        // Two independent sort targets stacked in one header: "B - A" sorts by
+        // the delta, "(%)" sorts by the hidden percentage column.
+        header: ({table: t}) => (
+          <Box sx={STACKED_BA_SX}>
+            <SortLabel label="B - A" column={t.getColumn('delta')} />
+            <SortLabel label="(%)" column={t.getColumn('percentage')} secondary />
+          </Box>
         ),
-        meta: {
-          numeric: true,
-          tooltip: 'Difference between evaluating the two assignments (B - A).',
+        cell: info => {
+          const {delta, percentage} = info.row.original;
+          return (
+            <Box sx={STACKED_BA_SX}>
+              <PreciseNumber value={delta} highlight={!isConstraint} />
+              <PercentBeneath value={percentage} />
+            </Box>
+          );
         },
-      }),
-      columnHelper.accessor('percentage', {
-        header: '%',
-        cell: info => (
-          <PreciseNumber
-            value={info.getValue()}
-            highlight={!isConstraint}
-            fixedDecimals={2}
-          />
-        ),
         meta: {
           numeric: true,
-          percent: true,
+          dualSort: true,
+          headerLabel: 'B - A',
           tooltip:
-            'Percentage difference between the two assignments. Formula: (B - A) / A * 100, rounded to 2 decimal places.',
+            'B - A is the difference between the two assignments, with the percentage change beneath. Click "B - A" or "(%)" in the header to sort by either.',
         },
       }),
+      // Hidden (see columnVisibility): exists only as the sort target for the
+      // "(%)" control in the B - A header. Its value is shown by PercentBeneath.
+      columnHelper.accessor('percentage', {header: '%'}),
       columnHelper.display({
         id: 'actions',
         header: ' ',
@@ -352,6 +423,9 @@ const EvaluationTable = memo(function EvaluationTable({
     columns,
     state: {sorting},
     onSortingChange: setSorting,
+    // The percentage column is merged into the B - A cell; keep it in the model
+    // (so it stays sortable) but hidden so it renders no column of its own.
+    initialState: {columnVisibility: {percentage: false}},
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
@@ -411,17 +485,22 @@ const EvaluationTable = memo(function EvaluationTable({
                   const meta = header.column.columnDef.meta as
                     | {
                         numeric?: boolean;
-                        percent?: boolean;
                         flex?: boolean;
                         tooltip?: string;
+                        dualSort?: boolean;
+                        headerLabel?: string;
                       }
                     | undefined;
-                  const canSort = header.column.getCanSort();
+                  // The dual-sort column (B - A / %) handles its own clicks and
+                  // arrows inside its header, so skip the generic ones here.
+                  const isDualSort = meta?.dualSort === true;
+                  const canSort = header.column.getCanSort() && !isDualSort;
                   const sorted = header.column.getIsSorted();
                   const headerLabel =
-                    typeof header.column.columnDef.header === 'string'
+                    meta?.headerLabel ??
+                    (typeof header.column.columnDef.header === 'string'
                       ? header.column.columnDef.header
-                      : header.column.id;
+                      : header.column.id);
 
                   return (
                     <th
@@ -429,11 +508,9 @@ const EvaluationTable = memo(function EvaluationTable({
                       style={{
                         width: meta?.flex
                           ? 'auto'
-                          : meta?.percent
-                            ? PERCENT_COL_WIDTH
-                            : meta?.numeric
-                              ? NUMBER_COL_WIDTH
-                              : header.getSize(),
+                          : meta?.numeric
+                            ? NUMBER_COL_WIDTH
+                            : header.getSize(),
                         textAlign: meta?.numeric ? 'right' : 'left',
                         padding: '10px 16px',
                         borderBottom: `1px solid ${LINE_COLOR}`,
@@ -476,10 +553,10 @@ const EvaluationTable = memo(function EvaluationTable({
                             </IconButton>
                           </Tooltip>
                         )}
-                        {sorted === 'asc' && (
+                        {!isDualSort && sorted === 'asc' && (
                           <ArrowUpward sx={{fontSize: 16}} />
                         )}
-                        {sorted === 'desc' && (
+                        {!isDualSort && sorted === 'desc' && (
                           <ArrowDownward sx={{fontSize: 16}} />
                         )}
                       </Box>
@@ -539,7 +616,7 @@ const EvaluationTable = memo(function EvaluationTable({
             {rows.length === 0 && (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={6}
                   style={{
                     textAlign: 'center',
                     padding: '24px 12px',
@@ -590,22 +667,17 @@ const EvaluationTable = memo(function EvaluationTable({
                   highlight={isConstraint}
                 />
               </td>
-              {/* B - A */}
-              <td
-                style={{...totalCellStyle, textAlign: 'right'}}>
-                <PreciseNumber
-                  value={totals.deltaTotal}
-                  highlight={!isConstraint}
-                />
-              </td>
-              {/* % */}
-              <td
-                style={{...totalCellStyle, textAlign: 'right'}}>
-                <PreciseNumber
-                  value={Math.round(totals.percentTotal * 100) / 100}
-                  highlight={!isConstraint}
-                  fixedDecimals={2}
-                />
+              {/* B - A, with % beneath */}
+              <td style={{...totalCellStyle, textAlign: 'right'}}>
+                <Box sx={STACKED_BA_SX}>
+                  <PreciseNumber
+                    value={totals.deltaTotal}
+                    highlight={!isConstraint}
+                  />
+                  <PercentBeneath
+                    value={Math.round(totals.percentTotal * 100) / 100}
+                  />
+                </Box>
               </td>
               {/* Actions */}
               <td
