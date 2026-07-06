@@ -22,6 +22,12 @@ import type {
   Handle,
 } from '@/lib/rebalancer-explorer-types';
 import {ColumnType} from '@/lib/rebalancer-explorer-types';
+import {CARD_SHADOW, LINE_COLOR} from '@/lib/ui-tokens';
+
+const CARD_SX = {
+  overflow: 'hidden',
+  boxShadow: CARD_SHADOW,
+} as const;
 
 const EVAL_COLUMN_DESCRIPTIONS: ColumnDescription[] = [
   {name: 'Name', type: ColumnType.STRING, primaryKey: false, description: ''},
@@ -130,65 +136,62 @@ export default function EvaluationSection({
   }, [srcEvaluation, dstEvaluation]);
 
   return (
-    <Paper variant="outlined" sx={{overflow: 'hidden'}}>
-      {/* Section header */}
-      <Box
-        sx={{
-          px: 2,
-          py: 1,
-          borderBottom: '1px solid #e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <Typography variant="subtitle1" sx={{fontWeight: 600}}>
-          Constraints & Objectives
-        </Typography>
-        <Tooltip title="Hide all rows across all tables where the two assignments have the same value">
-          <FormControlLabel
-            sx={{mr: 0}}
-            control={
-              <Checkbox
-                size="small"
-                checked={hideAllUnchanged}
-                onChange={(_e, checked) => handleHideAllToggle(checked)}
-              />
-            }
-            label={
-              <Typography variant="body2" sx={{fontSize: '0.8125rem'}}>
-                Hide unchanged Constraints & Objectives
-              </Typography>
-            }
-          />
-        </Tooltip>
-      </Box>
-
-      {/* Filter */}
-      <Box sx={{px: 2, py: 1, borderBottom: '1px solid #e0e0e0'}}>
-        <EntityFilter
-          columnDescriptions={EVAL_COLUMN_DESCRIPTIONS}
-          filters={evalFilters}
-          onFiltersChange={onEvalFiltersChange}
-          entityName="expression"
-          localOptions={nameOptions}
-        />
-      </Box>
-
-      {/* Evaluation tables */}
+    <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
       {tableDescriptors.map((desc, index) => (
-        <EvaluationTable
-          key={desc.label}
-          title={desc.label}
-          srcExpressions={splitExpressions[index].src}
-          dstExpressions={splitExpressions[index].dst}
-          expressionType={desc.type}
-          hideAllUnchangedControl={hideAllUnchangedControls[index]}
-          handle={handle}
-          sourceAssignment={sourceAssignment}
-          destinationAssignment={destinationAssignment}
-          evaluationFilters={appliedFilters}
-        />
+        <Paper key={desc.label} variant="outlined" sx={CARD_SX}>
+          {/* Section heading and filter sit at the top of the first table's card. */}
+          {index === 0 && (
+            <Box sx={{p: 2, borderBottom: `1px solid ${LINE_COLOR}`}}>
+              <Box
+                sx={{
+                  mb: 1.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                <Typography variant="h6" sx={{fontWeight: 600}}>
+                  Constraints & Objectives
+                </Typography>
+                <Tooltip title="Hide all rows across all tables where the two assignments have the same value">
+                  <FormControlLabel
+                    sx={{mr: 0}}
+                    control={
+                      <Checkbox
+                        size="small"
+                        checked={hideAllUnchanged}
+                        onChange={(_e, checked) => handleHideAllToggle(checked)}
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" sx={{fontSize: '0.8125rem'}}>
+                        Hide unchanged Constraints & Objectives
+                      </Typography>
+                    }
+                  />
+                </Tooltip>
+              </Box>
+              <EntityFilter
+                columnDescriptions={EVAL_COLUMN_DESCRIPTIONS}
+                filters={evalFilters}
+                onFiltersChange={onEvalFiltersChange}
+                entityName="expression"
+                localOptions={nameOptions}
+              />
+            </Box>
+          )}
+          <EvaluationTable
+            title={desc.label}
+            srcExpressions={splitExpressions[index].src}
+            dstExpressions={splitExpressions[index].dst}
+            expressionType={desc.type}
+            hideAllUnchangedControl={hideAllUnchangedControls[index]}
+            handle={handle}
+            sourceAssignment={sourceAssignment}
+            destinationAssignment={destinationAssignment}
+            evaluationFilters={appliedFilters}
+          />
+        </Paper>
       ))}
-    </Paper>
+    </Box>
   );
 }

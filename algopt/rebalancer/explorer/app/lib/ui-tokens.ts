@@ -13,3 +13,5 @@ export const MUTED_TEXT_COLOR = '#4E606F';
 // Colors for a change in value: green when it improved, red when it got worse.
 export const IMPROVING_COLOR = '#0d8626';
 export const WORSENING_COLOR = '#e3193b';
+// Shadow that lifts each table/card off the gray page.
+export const CARD_SHADOW = '0 2px 8px rgba(0, 0, 0, 0.08)';
