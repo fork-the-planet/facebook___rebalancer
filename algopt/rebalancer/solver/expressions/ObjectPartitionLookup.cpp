@@ -350,7 +350,16 @@ double ObjectPartitionLookup<Policy>::evaluate(
         groupObjectWeights_, groupId, kEmptyObjectWeights);
     const double oldWeight = objectWeights.query();
     const double newWeight = oldWeight + weightDelta;
-    const double oldPenalty = groupPenalties_.get(groupId);
+    // getGroupPenalty() is O(1) arithmetic for the default policy but expensive
+    // for MinPresence (transformWeight + LimitWrapper lookups). Recompute it
+    // for the default policy---far cheaper than the O(log n) SumMap lookup
+    // when the expression spans many groups---and read the cached value for
+    // MinPresence.
+    constexpr auto kIsMinPresence =
+        std::is_same_v<Policy, ObjectPartitionLookupWithMinPresencePolicy>;
+    const auto oldPenalty = kIsMinPresence
+        ? groupPenalties_.get(groupId)
+        : getGroupPenalty(oldWeight, groupId);
     const double newPenalty = getGroupPenalty(newWeight, groupId);
     const double penaltyDelta = newPenalty - oldPenalty;
     totalPenalty += penaltyDelta;

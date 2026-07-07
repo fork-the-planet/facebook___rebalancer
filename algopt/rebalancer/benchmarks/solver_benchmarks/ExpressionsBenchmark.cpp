@@ -1123,6 +1123,83 @@ BENCHMARK(LinearSumEvalMixedCoeffs) {
   }
 }
 
+BENCHMARK(ObjectPartitionLookupEvaluateManyGroups) {
+  // One ObjectPartitionLookup over a partition with many groups. Each eval of a
+  // change reads the old penalty of every changed group. For the default policy
+  // that read used to be an O(log n) SumMap lookup and is now an O(1)
+  // recompute. We move many objects per eval so a single eval touches many
+  // groups, so the SumMap lookup dominates and the two versions differ starkly.
+  folly::BenchmarkSuspender suspend;
+  constexpr int nGroups = 200e3;
+  constexpr int objectsPerGroup = 2;
+  constexpr int objectCount = nGroups * objectsPerGroup;
+  constexpr int containerCount = 10;
+  constexpr int nMovedObjects = 20e3;
+  constexpr int nEvals = 2500;
+
+  BenchmarkUniverse builder;
+  entities::Map<std::string, std::vector<std::string>> initialAssignment;
+  entities::Map<std::string, std::vector<std::string>> groupToObjects;
+  std::vector<std::string> allContainerNames;
+  for (const auto i : folly::irange(containerCount)) {
+    allContainerNames.push_back(fmt::format("container{}", i));
+    initialAssignment[fmt::format("container{}", i)] = {};
+  }
+  for (const auto i : folly::irange(objectCount)) {
+    const auto objectName = fmt::format("object{}", i);
+    groupToObjects[fmt::format("group{}", i % nGroups)].push_back(objectName);
+    initialAssignment[fmt::format("container{}", i % containerCount)].push_back(
+        objectName);
+  }
+  builder.setInitialAssignment(initialAssignment);
+  folly::coro::blockingWait(builder.addPartition("partition1", groupToObjects));
+  folly::coro::blockingWait(builder.addScope(
+      "scope1",
+      entities::Map<std::string, std::vector<std::string>>{
+          {"scopeItem0", allContainerNames}}));
+
+  const auto partitionId = builder.partitionId("partition1");
+  const auto dimensionId = builder.dimensionId("object_count");
+  const auto scopeId = builder.scopeId("scope1");
+  const auto scopeItem0 = builder.scopeItemId(scopeId, "scopeItem0");
+  const auto universe = builder.buildUniverse();
+  const Assignment assignment(universe->getContainers().getInitialAssignment());
+
+  auto objectPartition =
+      object_partition(partitionId, dimensionId, {}, *universe);
+  auto containers = std::make_shared<PackerSet<entities::ContainerId>>();
+  for (const auto i : folly::irange(containerCount)) {
+    containers->insert(container(i, universe));
+  }
+  auto lookup = object_partition_lookup(
+      objectPartition, containers, scopeId, scopeItem0, assignment);
+
+  Context context;
+  lookup->fullApply(TopToBottomEvaluator(context), assignment);
+
+  Orchestrator orchestrator;
+  orchestrator.init(
+      std::vector<Expression*>{lookup.get()},
+      AffectedByChangeDecisionData(objectCount, containerCount));
+
+  // Move many objects, each to a neighbouring container, so a single eval's
+  // change set spans many groups.
+  ChangeSet changeSet;
+  for (const auto k : folly::irange(nMovedObjects)) {
+    changeSet.insert(Change(
+        object(k, universe), container(k % containerCount, universe), -1));
+    changeSet.insert(Change(
+        object(k, universe), container((k + 1) % containerCount, universe), 1));
+  }
+  suspend.dismiss();
+
+  for (const auto _ : folly::irange(nEvals)) {
+    context.clear();
+    context.changes() = changeSet;
+    evaluate(orchestrator, lookup.get(), context);
+  }
+}
+
 int main(int argc, char** argv) {
   const folly::Init init(&argc, &argv);
 
