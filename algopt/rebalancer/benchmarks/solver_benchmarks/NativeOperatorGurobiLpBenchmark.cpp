@@ -22,7 +22,6 @@
 #include "algopt/rebalancer/entities/tests/UniverseBuilderTestUtils.h"
 #include "algopt/rebalancer/interface/thrift/gen-cpp2/SolverSpecs_types.h"
 #include "algopt/rebalancer/solver/expressions/Operators.h"
-#include "algopt/rebalancer/solver/expressions/Orchestrator.h"
 #include "algopt/rebalancer/solver/solvers/OptimalSolver.h"
 #include "algopt/rebalancer/solver/tests/ExprProblemCreation.h"
 #include "algopt/rebalancer/solver/utils/Assignment.h"
@@ -59,15 +58,15 @@ struct BenchmarkUniverse : public entities::tests::UniverseBuilderTestUtils {
 };
 
 ExprPtr containerLoad(
-    const std::shared_ptr<const entities::Universe>& uni,
+    const entities::Universe& uni,
     const Assignment& assignment,
     int containerIdx,
     int nObjects) {
   auto load = const_expr(0, uni);
   const auto contId =
-      uni->getContainerId(fmt::format("container{}", containerIdx));
+      uni.getContainerId(fmt::format("container{}", containerIdx));
   for (const auto i : folly::irange(nObjects)) {
-    const auto objId = uni->getObjectId(fmt::format("object{}", i));
+    const auto objId = uni.getObjectId(fmt::format("object{}", i));
     load += variable(objId, contId, uni, assignment);
   }
   return load;
@@ -113,8 +112,8 @@ BENCHMARK(GurobiSquareLpSolve_baseline) {
     algopt::useGurobiNativeQuadratic() = false;
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
-    auto obj = square(containerLoad(uni, assignment, 0, kN), uni);
-    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+    auto obj = square(containerLoad(*uni, assignment, 0, kN));
+    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   gGurobiSquareBaseline() = buildAndSolveGurobi(*p_ptr);
 }
@@ -125,8 +124,8 @@ BENCHMARK(GurobiSquareLpSolve_native) {
     algopt::useGurobiNativeQuadratic() = true;
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
-    auto obj = square(containerLoad(uni, assignment, 0, kN), uni);
-    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+    auto obj = square(containerLoad(*uni, assignment, 0, kN));
+    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   SCOPE_EXIT {
     algopt::useGurobiNativeQuadratic() = false;
@@ -162,8 +161,8 @@ BENCHMARK(GurobiPiecewiseLpSolve_baseline) {
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
     auto obj = piecewise(
-        makeGurobiPwlPoints(), containerLoad(uni, assignment, 0, kN), uni);
-    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+        makeGurobiPwlPoints(), containerLoad(*uni, assignment, 0, kN));
+    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   gGurobiPwlBaseline() = buildAndSolveGurobi(*p_ptr);
 }
@@ -175,8 +174,8 @@ BENCHMARK(GurobiPiecewiseLpSolve_native) {
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
     auto obj = piecewise(
-        makeGurobiPwlPoints(), containerLoad(uni, assignment, 0, kN), uni);
-    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+        makeGurobiPwlPoints(), containerLoad(*uni, assignment, 0, kN));
+    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   SCOPE_EXIT {
     algopt::useGurobiNativePwl() = false;
@@ -202,10 +201,9 @@ BENCHMARK(GurobiMaxLpSolve_baseline) {
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
     auto obj =
-        max(containerLoad(uni, assignment, 0, kN),
-            containerLoad(uni, assignment, 1, kN),
-            uni);
-    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+        max(containerLoad(*uni, assignment, 0, kN),
+            containerLoad(*uni, assignment, 1, kN));
+    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   gGurobiMaxBaseline() = buildAndSolveGurobi(*p_ptr);
 }
@@ -217,10 +215,9 @@ BENCHMARK(GurobiMaxLpSolve_native) {
     auto uni = BenchmarkUniverse().build(kN, 2);
     const Assignment assignment(uni->getContainers().getInitialAssignment());
     auto obj =
-        max(containerLoad(uni, assignment, 0, kN),
-            containerLoad(uni, assignment, 1, kN),
-            uni);
-    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, uni));
+        max(containerLoad(*uni, assignment, 0, kN),
+            containerLoad(*uni, assignment, 1, kN));
+    p_ptr = packer::tests::createTestProblem(uni, {obj}, const_expr(0, *uni));
   }
   SCOPE_EXIT {
     algopt::useGurobiNativeMax() = false;
@@ -240,14 +237,14 @@ static constexpr int kStepCap = 12;
 std::unique_ptr<Problem> makeGurobiStepProblem(
     const std::shared_ptr<const entities::Universe>& uni,
     const Assignment& assignment) {
-  auto obj = const_expr(0, uni);
+  auto obj = const_expr(0, *uni);
   std::vector<ExprPtr> excesses;
   for (const auto k : folly::irange(kStepK)) {
-    auto load = containerLoad(uni, assignment, k, kStepN);
-    obj = obj + step(load, uni);
+    auto load = containerLoad(*uni, assignment, k, kStepN);
+    obj = obj + step(load);
     excesses.push_back(load - kStepCap);
   }
-  auto constraint = max(excesses, uni);
+  auto constraint = max(excesses, *uni);
   return packer::tests::createTestProblem(uni, {obj}, constraint);
 }
 
