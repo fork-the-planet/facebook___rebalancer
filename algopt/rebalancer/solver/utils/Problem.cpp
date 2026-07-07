@@ -161,7 +161,8 @@ Problem::Problem(
         SimilarContainers(materializedProblem_->similarContainers.value());
   }
 
-  if (XLOG_IS_ON(DBG1)) {
+  // log_objective_summary() is expensive, so run only in DBG2.
+  if (XLOG_IS_ON(DBG2)) {
     log_objective_summary();
   }
 
@@ -224,32 +225,31 @@ std::shared_ptr<const MoveStatsAggregatorConfig> Problem::makeMoveStatsConfig()
 }
 
 void Problem::log_objective_summary() {
-  const Context context;
-  XLOG(DBG1) << "Objectives:";
+  XLOG(DBG2) << "Objectives:";
   int pos = 0;
   for (const auto& labeled_objectives_elem :
        materializedProblem_->labeledObjectives) {
-    XLOG(DBG1) << fmt::format("Objective_{}", pos);
+    XLOG(DBG2) << fmt::format("Objective_{}", pos);
     for (auto& labeled_objective : labeled_objectives_elem) {
       auto value = labeled_objective->expression->value;
-      XLOG(DBG1) << labeled_objective->name << " : "
+      XLOG(DBG2) << labeled_objective->name << " : "
                  << labeled_objective->expression->description << " : "
                  << value;
     }
     ++pos;
   }
 
-  XLOG(DBG1) << "Constraints:";
+  XLOG(DBG2) << "Constraints:";
   for (auto& labeled_constraint :
        materializedProblem_->labeledHardConstraints) {
     auto value = labeled_constraint->expression->value;
-    XLOG(DBG1) << labeled_constraint->name << " : "
+    XLOG(DBG2) << labeled_constraint->name << " : "
                << labeled_constraint->expression->description << " : " << value;
   }
 
-  XLOG(DBG1) << "Objective Root:\n"
+  XLOG(DBG2) << "Objective Root:\n"
              << objective.getFirstObjective()->digest(*this, true);
-  XLOG(DBG1) << "Constraint root:\n" << constraint->digest(*this, true);
+  XLOG(DBG2) << "Constraint root:\n" << constraint->digest(*this, true);
 } // namespace rebalancer
 
 const LabeledConstraints& Problem::getLabeledConstraints() const {
