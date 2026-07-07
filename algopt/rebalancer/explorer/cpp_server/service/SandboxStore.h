@@ -5,6 +5,7 @@
 
 #include <fmt/format.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
+#include <folly/container/F14Map.h>
 #include <folly/coro/AsyncScope.h>
 #include <folly/coro/BlockingWait.h>
 #include <folly/coro/Sleep.h>
@@ -14,7 +15,11 @@
 #include <folly/logging/xlog.h>
 #include <folly/MapUtil.h>
 #include <folly/ScopeGuard.h>
+#include <folly/Synchronized.h>
 #include <folly/system/HardwareConcurrency.h>
+
+#include <chrono>
+#include <optional>
 
 namespace facebook {
 namespace rebalancer {
@@ -22,6 +27,21 @@ namespace explorer {
 
 constexpr auto kDefaultInactiveSandboxTimeout = std::chrono::minutes(60);
 constexpr auto kDropInactiveSandboxesInterval = std::chrono::minutes(1);
+constexpr auto kMaxInactiveSandboxTtl =
+    std::chrono::duration_cast<std::chrono::seconds>(
+        std::chrono::steady_clock::duration::max());
+
+inline std::chrono::steady_clock::duration inactiveSandboxTtlFromRequest(
+    const HandleRequest& request) {
+  const auto ttlSeconds = *request.ttlSeconds();
+  if (ttlSeconds > 0) {
+    if (ttlSeconds >= kMaxInactiveSandboxTtl.count()) {
+      return kMaxInactiveSandboxTtl;
+    }
+    return std::chrono::seconds(ttlSeconds);
+  }
+  return kDefaultInactiveSandboxTimeout;
+}
 
 template <typename SandboxFactory, typename SandboxStatus, typename Sandbox>
 class SandboxStore {
@@ -61,8 +81,17 @@ class SandboxStore {
         status_, manifoldId, SandboxStatus::NOT_LOADED);
   }
 
-  void startLoadSandbox(std::string manifoldId) {
-    folly::coro::co_withExecutor(executor_.get(), loadSandbox(manifoldId))
+  void startLoadSandbox(
+      std::string manifoldId,
+      std::optional<std::chrono::steady_clock::duration> ttl = std::nullopt) {
+    // Treat getHandle as access; loaded sandboxes skip loadSandbox().
+    // TTLs only increase, so short-lived callers cannot shorten them.
+    if (ttl) {
+      raiseTtl(manifoldId, *ttl);
+    }
+    lastAccess_.insert_or_assign(manifoldId, std::chrono::steady_clock::now());
+    folly::coro::co_withExecutor(
+        executor_.get(), loadSandbox(std::move(manifoldId)))
         .start();
   }
 
@@ -118,6 +147,7 @@ class SandboxStore {
 
       status_.erase(manifoldId);
       lastAccess_.erase(manifoldId);
+      ttl_.wlock()->erase(manifoldId);
     }
 
     co_return;
@@ -147,7 +177,25 @@ class SandboxStore {
     return counts;
   }
 
+  // Test hook for the minute-granularity background sweep.
+  void dropInactiveSandboxesForTesting() {
+    dropInactiveSandboxes();
+  }
+
  private:
+  void raiseTtl(
+      const std::string& manifoldId,
+      std::chrono::steady_clock::duration ttl) {
+    // Hold the write lock across the read-modify-write so a concurrent shorter
+    // TTL cannot clobber a longer one. A missing entry default-constructs to
+    // zero, so any positive TTL wins on first insert.
+    auto wlock = ttl_.wlock();
+    auto& current = (*wlock)[manifoldId];
+    if (ttl > current) {
+      current = ttl;
+    }
+  }
+
   void dropInactiveSandboxes() {
     for (auto& [manifoldId, status] : status_) {
       if (status != SandboxStatus::LOADED) {
@@ -156,18 +204,20 @@ class SandboxStore {
       const auto lastAccess = lastAccess_.at(manifoldId);
       const auto now = std::chrono::steady_clock::now();
       const auto elapsed = now - lastAccess;
-      if (elapsed > inactiveSandboxTimeout_) {
+      const auto ttl = folly::get_default(
+          *ttl_.rlock(), manifoldId, inactiveSandboxTimeout_);
+      if (elapsed > ttl) {
         const auto elapsedSec = std::chrono::duration<double>(elapsed).count();
-        const auto timeoutSec =
-            std::chrono::duration<double>(inactiveSandboxTimeout_).count();
+        const auto ttlSec = std::chrono::duration<double>(ttl).count();
         XLOG(INFO) << fmt::format(
             "dropping sandbox {} after being inactive for {:.3f} seconds, which is more than the limit of {:.3f} seconds",
             manifoldId,
             elapsedSec,
-            timeoutSec);
+            ttlSec);
         sandboxes_.erase(manifoldId);
         status_.erase(manifoldId);
         lastAccess_.erase(manifoldId);
+        ttl_.wlock()->erase(manifoldId);
         XLOG(INFO) << "dropped inactive sandbox " << manifoldId;
       }
     }
@@ -198,6 +248,11 @@ class SandboxStore {
   folly::ConcurrentHashMap<std::string, SandboxStatus> status_;
   folly::ConcurrentHashMap<std::string, std::chrono::steady_clock::time_point>
       lastAccess_;
+  // Per-sandbox idle TTL from getHandle; missing entries fall back to
+  // inactiveSandboxTimeout_.
+  folly::Synchronized<
+      folly::F14FastMap<std::string, std::chrono::steady_clock::duration>>
+      ttl_;
 
   // Async scope for background tasks.
   folly::coro::CancellableAsyncScope scope_;
