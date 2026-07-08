@@ -527,8 +527,7 @@ export default function EntityTable({
                   }}>
                   {row.getVisibleCells().map(cell => {
                     const meta = cell.column.columnDef.meta as
-                      | {numeric?: boolean; primaryKey?: boolean}
-                      | undefined;
+                      {numeric?: boolean; primaryKey?: boolean} | undefined;
                     const isPinned = pinnedLeft.includes(cell.column.id);
 
                     return (

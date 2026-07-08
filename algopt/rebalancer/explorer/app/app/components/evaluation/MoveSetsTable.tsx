@@ -939,8 +939,7 @@ export default function MoveSetsTable({
                       )}
                       {headerGroup.headers.map(header => {
                         const meta = header.column.columnDef.meta as
-                          | {numeric?: boolean; colName?: string}
-                          | undefined;
+                          {numeric?: boolean; colName?: string} | undefined;
                         const isSorted = orderColumn === meta?.colName;
                         const isAsc =
                           isSorted &&
@@ -1043,8 +1042,7 @@ export default function MoveSetsTable({
                         )}
                         {row.getVisibleCells().map(cell => {
                           const meta = cell.column.columnDef.meta as
-                            | {numeric?: boolean}
-                            | undefined;
+                            {numeric?: boolean} | undefined;
                           return (
                             <Box
                               component="td"

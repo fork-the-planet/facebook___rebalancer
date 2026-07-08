@@ -544,8 +544,7 @@ export default function MetricsTable({
                   }}>
                   {row.getVisibleCells().map(cell => {
                     const meta = cell.column.columnDef.meta as
-                      | {numeric?: boolean}
-                      | undefined;
+                      {numeric?: boolean} | undefined;
                     const isPinned = pinnedLeft.includes(cell.column.id);
                     return (
                       <Box

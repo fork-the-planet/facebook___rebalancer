@@ -585,8 +585,7 @@ const EvaluationTable = memo(function EvaluationTable({
                 }}>
                 {row.getVisibleCells().map(cell => {
                   const meta = cell.column.columnDef.meta as
-                    | {numeric?: boolean}
-                    | undefined;
+                    {numeric?: boolean} | undefined;
                   const copyable = cell.column.id !== 'actions';
                   return (
                     <td
