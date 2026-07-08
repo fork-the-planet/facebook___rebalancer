@@ -83,7 +83,8 @@ class SandboxStore {
 
   void startLoadSandbox(
       std::string manifoldId,
-      std::optional<std::chrono::steady_clock::duration> ttl = std::nullopt) {
+      std::optional<std::chrono::steady_clock::duration> ttl = std::nullopt,
+      std::string clientId = "") {
     // Treat getHandle as access; loaded sandboxes skip loadSandbox().
     // TTLs only increase, so short-lived callers cannot shorten them.
     if (ttl) {
@@ -91,11 +92,14 @@ class SandboxStore {
     }
     lastAccess_.insert_or_assign(manifoldId, std::chrono::steady_clock::now());
     folly::coro::co_withExecutor(
-        executor_.get(), loadSandbox(std::move(manifoldId)))
+        executor_.get(),
+        loadSandbox(std::move(manifoldId), std::move(clientId)))
         .start();
   }
 
-  folly::coro::Task<void> loadSandbox(std::string manifoldId) {
+  folly::coro::Task<void> loadSandbox(
+      std::string manifoldId,
+      std::string clientId = "") {
     // Atomically claim the load. If another coroutine already claimed it or the
     // sandbox is already loaded, bail without taking a semaphore token so
     // duplicate requests can't starve unrelated loads of slots.
@@ -125,7 +129,15 @@ class SandboxStore {
       XLOG(INFO) << "loading sandbox " << manifoldId;
 
       const auto start = std::chrono::steady_clock::now();
-      auto sandbox = co_await factory_.create(manifoldId);
+      // Forward clientId only to factories whose create() accepts it (the
+      // production factory logs it to Scuba); others keep the single-arg form,
+      // so the standalone and Opal factories are unaffected.
+      std::shared_ptr<Sandbox> sandbox;
+      if constexpr (requires { factory_.create(manifoldId, clientId); }) {
+        sandbox = co_await factory_.create(manifoldId, clientId);
+      } else {
+        sandbox = co_await factory_.create(manifoldId);
+      }
       sandboxes_.getSavedOrCompute(
           manifoldId, [&sandbox]() { return sandbox; });
       const auto end = std::chrono::steady_clock::now();
