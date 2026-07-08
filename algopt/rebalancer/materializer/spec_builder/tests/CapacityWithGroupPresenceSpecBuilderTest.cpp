@@ -619,6 +619,67 @@ CO_TEST_P(CapacityWithGroupPresenceSpecBuilderTest, AlwaysPresentHonorsFloor) {
 
 CO_TEST_P(
     CapacityWithGroupPresenceSpecBuilderTest,
+    MaxBoundTypeContinuousPenaltyGatedAtLowerBound) {
+  if (GetParam() !=
+      interface::CapacityWithGroupPresenceUsageIntent::
+          PER_GROUP_AND_SCOPE_ITEM) {
+    co_return;
+  }
+
+  interface::CapacityWithGroupPresenceSpec spec;
+  spec.dimension() = "replicaCount";
+  spec.partition() = "tenantTrafficObjects";
+  spec.scope() = "region";
+  spec.roundUpGroupUtilOnScopeItem() = false;
+  spec.bound() = interface::CapacityWithGroupPresenceBound::MAX;
+  spec.intent() = GetParam();
+  spec.scopeItemToLimit()->type() = interface::LimitType::ABSOLUTE;
+  spec.scopeItemToLimit()->globalLimit() = 0; // MAX limit 0 -> always broken
+  // Presence floor of 1.0 for every group; force tenant2 always-present in
+  // region1 so its contribution has a static lower bound of 1.0 there.
+  spec.groupToPresenceWeight()->globalLimit() = 1.0;
+  spec.scopeItemToAlwaysPresentGroups() = {
+      {"region1", {"tenant2-trafficObjects"}}};
+
+  const auto universe = buildUniverse();
+  auto& builder = expressionBuilder();
+  const CapacityWithGroupPresenceSpecBuilder specBuilder(
+      universe, spec, /*needsContinuousExpressions=*/true);
+  auto components = co_await specBuilder.constraints(builder);
+
+  EXPECT_EQ(4, components.size());
+  // Component order is (region1,tenant1),(region1,tenant2),(region2,tenant1),
+  // (region2,tenant2); index 1 is the always-present (region1, tenant2) group.
+  const auto& r1t2 = components[1];
+  EXPECT_TRUE(r1t2.additionalPenaltyExpr != nullptr);
+
+  // Pinned at the lower bound with NONZERO raw util: keep tenant2 present in
+  // region1 but below the floor. Move its only region1 object (trafficObject8)
+  // out to region2 and bring trafficObject6 (value 0.115) in. tenant2's actual
+  // util in region1 is then 0.115 < floor, so finalUtil = max(floor 1.0, 0.115)
+  // = 1.0 = its static lower bound -- the contribution cannot be reduced
+  // further. Because the raw util (0.115) is nonzero, the penalty is 0 only
+  // because the gate fires; an ungated penalty would be 0.115 * normFactor.
+  // This is what makes the assertion actually guard the gate.
+  auto atLowerBound = deltaFromInitial(
+      {{"trafficObject8", "host3"}, {"trafficObject6", "host2"}});
+  EXPECT_NEAR(
+      0.0,
+      evaluate(r1t2, atLowerBound, /*evaluateConstraintExpr=*/false),
+      1e-8);
+
+  // Above the lower bound: bring trafficObject6 into region1 (host2) so
+  // tenant2's actual util in region1 is 1.0 + 0.115 = 1.115 > floor. finalUtil
+  // = 1.115 > lower bound, so the penalty is active (normalized raw util).
+  auto aboveLowerBound = deltaFromInitial({{"trafficObject6", "host2"}});
+  EXPECT_NEAR(
+      1.115 * kNormTenant2NoRoundUp,
+      evaluate(r1t2, aboveLowerBound, /*evaluateConstraintExpr=*/false),
+      1e-8);
+}
+
+CO_TEST_P(
+    CapacityWithGroupPresenceSpecBuilderTest,
     WithRoundUpMaxBoundAndMultipliersBasic) {
   interface::CapacityWithGroupPresenceSpec spec;
   spec.dimension() = "replicaCount";

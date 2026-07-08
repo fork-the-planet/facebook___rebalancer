@@ -584,21 +584,10 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilContributionToScopeItemUtil(
       aggregationScopeItemId,
       aggregationPartitionId_,
       aggregationGroupId);
-  if (makeContinuousPenaltyTerm) {
-    auto unweightedPenalty = folly::copy(actualGroupUtilInScopeItem);
-    const auto extraAdditivePenalty = groupToExtraAdditivePenalty_.getLimit(
-        aggregationScopeItemId, aggregationGroupId);
-    if (!universe_->getPrecision().isEqual(extraAdditivePenalty, 0.0)) {
-      unweightedPenalty = max(unweightedPenalty + extraAdditivePenalty, 0.0);
-    }
-    co_return getWeightedExpr(
-        unweightedPenalty,
-        aggregationGroupId,
-        aggregationScopeItemId,
-        {interface::GroupUtilMultiplierTarget::PRESENCE_WEIGHT,
-         interface::GroupUtilMultiplierTarget::UTILIZATION,
-         interface::GroupUtilMultiplierTarget::COMMON});
-  }
+  // Create a copy of the util expression for continuous penalty term.
+  ExprPtr unweightedPenalty = makeContinuousPenaltyTerm
+      ? folly::copy(actualGroupUtilInScopeItem)
+      : nullptr;
 
   const auto presenceWeight = groupToPresenceWeight_.getLimit(
       aggregationScopeItemId, aggregationGroupId);
@@ -623,8 +612,34 @@ CapacityWithGroupPresenceSpecBuilder::getGroupUtilContributionToScopeItemUtil(
       {interface::GroupUtilMultiplierTarget::UTILIZATION,
        interface::GroupUtilMultiplierTarget::COMMON},
       *spec_.roundUpGroupUtilOnScopeItem());
+  auto finalUtil = max(minContributionToUtil, actualGroupUtilInScopeItem);
 
-  co_return max(minContributionToUtil, actualGroupUtilInScopeItem);
+  if (makeContinuousPenaltyTerm) {
+    const auto extraAdditivePenalty = groupToExtraAdditivePenalty_.getLimit(
+        aggregationScopeItemId, aggregationGroupId);
+    if (!universe_->getPrecision().isEqual(extraAdditivePenalty, 0.0)) {
+      unweightedPenalty = max(unweightedPenalty + extraAdditivePenalty, 0.0);
+    }
+    auto penalty = getWeightedExpr(
+        unweightedPenalty,
+        aggregationGroupId,
+        aggregationScopeItemId,
+        {interface::GroupUtilMultiplierTarget::PRESENCE_WEIGHT,
+         interface::GroupUtilMultiplierTarget::UTILIZATION,
+         interface::GroupUtilMultiplierTarget::COMMON});
+    // TODO(@yangsea): add support for min bound
+    if (*spec_.bound() == interface::CapacityWithGroupPresenceBound::MAX) {
+      penalty = product(
+          step(
+              finalUtil -
+              const_expr(
+                  expressionBuilder.getLowerBound(*finalUtil), *universe_)),
+          std::move(penalty));
+    }
+    co_return penalty;
+  }
+
+  co_return finalUtil;
 }
 
 ExprPtr CapacityWithGroupPresenceSpecBuilder::getWeightedExpr(

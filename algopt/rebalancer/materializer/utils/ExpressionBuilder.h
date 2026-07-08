@@ -278,12 +278,15 @@ class ExpressionBuilder {
       entities::GroupId outerGroupId);
 
  public:
-  // Serializes access to context_ from getUpperBound().
+  // Serializes access to context_ from getUpperBound()/getLowerBound().
   // Capability-annotated so the FOLLY_TS_GUARDED_BY/REQUIRES claims below are
   // checked under -Wthread-safety on Clang.
   folly::AnnotatedMutex applyfunc;
   // Upper bound of the values the given expression may take.
   double getUpperBound(const Expression& expression)
+      FOLLY_TS_REQUIRES(!applyfunc);
+  // Lower bound of the values the given expression may take.
+  double getLowerBound(const Expression& expression)
       FOLLY_TS_REQUIRES(!applyfunc);
 
  private:
@@ -703,7 +706,7 @@ class ExpressionBuilder {
       objectPartitionLookupCache_;
 
   // Context for computing bounds.
-  // Accessed by getUpperBound(); guarded by applyfunc.
+  // Accessed by getUpperBound()/getLowerBound(); guarded by applyfunc.
   Context context_ FOLLY_TS_GUARDED_BY(applyfunc);
 
   // Initial assignment, exposed via getInitialAssignment(). Set once in the

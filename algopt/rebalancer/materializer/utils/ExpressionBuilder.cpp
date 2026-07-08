@@ -267,6 +267,11 @@ double ExpressionBuilder::getUpperBound(const Expression& expression) {
   return expression.lowerAndUpperBounds(context_).upper_bound;
 }
 
+double ExpressionBuilder::getLowerBound(const Expression& expression) {
+  const folly::AnnotatedLockGuard lock(applyfunc);
+  return expression.lowerAndUpperBounds(context_).lower_bound;
+}
+
 folly::coro::Task<ExprPtr> ExpressionBuilder::getAbsoluteUtil(
     UtilMetric metric,
     Descriptor descriptor) FOLLY_TS_REQUIRES(!applyfunc) {
