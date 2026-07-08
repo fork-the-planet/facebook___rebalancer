@@ -33,6 +33,7 @@
 #include <folly/logging/Init.h>
 #include <folly/system/HardwareConcurrency.h>
 #include <folly/testing/TestUtil.h>
+#include <gflags/gflags.h>
 
 #include <exception>
 #include <filesystem>
@@ -384,7 +385,12 @@ static void possiblyModifyProblem(AssignmentProblem& problem) {
     problem.runId() = UuidGenerator::genString();
   }
 
-  problem.enableInvalidMoveFilter() = FLAGS_enable_invalid_move_filter;
+  // Only override the instance's saved setting when the flag was passed
+  // explicitly, so replays preserve the value the problem was solved with.
+  if (!gflags::GetCommandLineFlagInfoOrDie("enable_invalid_move_filter")
+           .is_default) {
+    problem.enableInvalidMoveFilter() = FLAGS_enable_invalid_move_filter;
+  }
 
   if (!FLAGS_logging_label.empty()) {
     problem.scubaLoggingLabel() = FLAGS_logging_label;
