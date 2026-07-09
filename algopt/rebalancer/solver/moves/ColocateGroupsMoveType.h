@@ -140,7 +140,7 @@ class ColocateGroupsMoveType : public MoveType {
       const Problem& problem);
 
   static std::vector<MoveSet> getMoveSetsToDestinationScopeItem(
-      const std::vector<entities::Set<entities::ContainerId>>&
+      const std::vector<std::vector<entities::ContainerId>>&
           destinationContainersPerGroup,
       const std::vector<entities::ObjectId>& representativeObjectPerGroup,
       const Problem& problem,

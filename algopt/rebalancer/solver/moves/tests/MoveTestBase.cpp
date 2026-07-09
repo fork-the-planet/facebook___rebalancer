@@ -35,12 +35,17 @@ void MoveTestBaseT<T>::createProblem(
     ExprPtr constraint,
     const std::optional<algopt::common::thrift::HigherPriorityObjectivesConfig>&
         higherPriorityObjConfig,
-    const PackerSet<entities::ContainerId>& nonAcceptingContainers) {
+    const PackerSet<entities::ContainerId>& nonAcceptingContainers,
+    std::unique_ptr<InvalidMoveFilter> invalidMoveFilter) {
   problem_ = createTestProblem(
       getUniversePtr(),
       objectiveTuple,
       std::move(constraint),
-      nonAcceptingContainers);
+      nonAcceptingContainers,
+      ProblemConfigs{},
+      /*performInitialFullApply=*/true,
+      /*enableParallelizedBoundsComputing=*/false,
+      std::move(invalidMoveFilter));
   auto objSize = problem_->objective.size();
   movesEvaluator_.emplace(
       *problem_,

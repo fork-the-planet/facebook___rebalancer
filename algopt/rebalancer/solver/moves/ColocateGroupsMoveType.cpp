@@ -15,6 +15,7 @@
 #include "algopt/rebalancer/solver/moves/ColocateGroupsMoveType.h"
 
 #include "algopt/rebalancer/solver/iterators/MultiCollectionCartesianProduct.h"
+#include "algopt/rebalancer/solver/moves/InvalidMoveFilter.h"
 #include "algopt/rebalancer/solver/moves/MoveHelper.h"
 #include "algopt/rebalancer/solver/moves/MoveTypeUtils.h"
 #include "algopt/rebalancer/solver/utils/ObjectDeduper.h"
@@ -22,6 +23,33 @@
 #include <folly/container/irange.h>
 
 namespace facebook::rebalancer {
+
+namespace {
+
+// Valid destinations for a group's representative object: candidates minus
+// non-accepting containers, the object's own source container, and any pair
+// the invalid-move filter forbids.
+std::vector<entities::ContainerId> getValidDestinations(
+    const entities::Set<entities::ContainerId>& candidates,
+    entities::ObjectId object,
+    const Problem& problem,
+    const InvalidMoveFilter* invalidMoveFilter) {
+  const auto sourceContainer = problem.assignment.getContainer(object);
+  std::vector<entities::ContainerId> valid;
+  valid.reserve(candidates.size());
+  for (const auto containerId : candidates) {
+    if (problem.not_accepting_containers.contains(containerId) ||
+        containerId == sourceContainer ||
+        (invalidMoveFilter &&
+         invalidMoveFilter->isMarkedInvalid(object, containerId))) {
+      continue;
+    }
+    valid.push_back(containerId);
+  }
+  return valid;
+}
+
+} // namespace
 
 std::string ColocateGroupsMoveType::name() const {
   return kColocateGroupsMoveTypeName.data();
@@ -139,6 +167,7 @@ std::vector<MoveSet> ColocateGroupsMoveType::getMoveSetsForRelatedGroups(
     double timeLimit) const {
   const auto& universe = problem.getUniverse();
   const auto& colocationScope = universe.getScope(specInfo_->colocationScopeId);
+  const auto* const invalidMoveFilter = problem.getInvalidMoveFilter();
   // if the group has a specific set of colocation scope items, then only those
   // are considered as potential destinations; else consider all scope items in
   // colocationScope
@@ -159,25 +188,33 @@ std::vector<MoveSet> ColocateGroupsMoveType::getMoveSetsForRelatedGroups(
       continue;
     }
 
-    std::vector<entities::Set<entities::ContainerId>>
+    std::vector<std::vector<entities::ContainerId>>
         destinationContainersPerGroup;
     auto groupToContainersPtr = folly::get_ptr(
         specInfo_->colocationScopeItemToGroupToContainers,
         destinationScopeItem);
     auto& relatedGroups = *relatedGroupsInfo.relatedGroups;
-    for (auto group : relatedGroups) {
+    destinationContainersPerGroup.reserve(relatedGroups.size());
+    for (const auto i : folly::irange(relatedGroups.size())) {
+      const auto group = relatedGroups[i];
       auto containersPtr = groupToContainersPtr
           ? folly::get_ptr(*groupToContainersPtr, group)
           : nullptr;
-      auto& unsampledContainers = containersPtr
+      const auto& unsampledContainers = containersPtr
           ? *containersPtr
           : colocationScope.getContainerIds(destinationScopeItem);
 
+      auto validContainers = getValidDestinations(
+          unsampledContainers,
+          representativeObjectPerGroup[i],
+          problem,
+          invalidMoveFilter);
+
       destinationContainersPerGroup.emplace_back(
           specInfo_->defaultSampleSize
-              ? getRandomSample(
-                    unsampledContainers, *specInfo_->defaultSampleSize, rng_)
-              : folly::copy(unsampledContainers));
+              ? getRandomSample<std::vector>(
+                    validContainers, *specInfo_->defaultSampleSize, rng_)
+              : std::move(validContainers));
     }
 
     auto moveSetsToDestinationScopeItem = getMoveSetsToDestinationScopeItem(
@@ -242,7 +279,7 @@ ColocateGroupsMoveType::getRepresentativeObjectFromSourceScopeItem(
 }
 
 std::vector<MoveSet> ColocateGroupsMoveType::getMoveSetsToDestinationScopeItem(
-    const std::vector<entities::Set<entities::ContainerId>>&
+    const std::vector<std::vector<entities::ContainerId>>&
         destinationContainersPerGroup,
     const std::vector<entities::ObjectId>& representativeObjectPerGroup,
     const Problem& problem,
@@ -264,14 +301,9 @@ std::vector<MoveSet> ColocateGroupsMoveType::getMoveSetsToDestinationScopeItem(
     }
     MoveSet moveSet;
     for (const auto j : folly::irange(destinationContainers.size())) {
-      auto objectId = representativeObjectPerGroup.at(j);
-      auto destinationContainer = destinationContainers[j];
-      auto sourceContainer = problem.assignment.getContainer(objectId);
-      if (problem.not_accepting_containers.contains(destinationContainer) ||
-          sourceContainer == destinationContainer) {
-        continue;
-      }
-
+      const auto objectId = representativeObjectPerGroup[j];
+      const auto destinationContainer = destinationContainers[j];
+      const auto sourceContainer = problem.assignment.getContainer(objectId);
       moveSet.insert(Move(objectId, sourceContainer, destinationContainer));
     }
     moveSets.emplace_back(std::move(moveSet));

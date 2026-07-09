@@ -17,6 +17,7 @@
 #include "algopt/rebalancer/entities/Identifiers.h"
 #include "algopt/rebalancer/entities/tests/UniverseBuilderTestUtils.h"
 #include "algopt/rebalancer/solver/expressions/Expression.h"
+#include "algopt/rebalancer/solver/moves/InvalidMoveFilter.h"
 #include "algopt/rebalancer/solver/moves/MovesEvaluator.h"
 #include "algopt/rebalancer/solver/utils/Problem.h"
 #include "algopt/rebalancer/solver/utils/SearchHints.h"
@@ -49,7 +50,8 @@ class MoveTestBaseT : public T,
       const std::optional<
           algopt::common::thrift::HigherPriorityObjectivesConfig>&
           higherPriorityObjConfig = std::nullopt,
-      const PackerSet<entities::ContainerId>& nonAcceptingContainers = {});
+      const PackerSet<entities::ContainerId>& nonAcceptingContainers = {},
+      std::unique_ptr<InvalidMoveFilter> invalidMoveFilter = nullptr);
 
   Problem& getProblem();
 

@@ -16,6 +16,7 @@
 #include "algopt/rebalancer/solver/expressions/Operators.h"
 #include "algopt/rebalancer/solver/expressions/tests/ExpressionUtils.h"
 #include "algopt/rebalancer/solver/moves/ColocateGroupsMoveType.h"
+#include "algopt/rebalancer/solver/moves/InvalidMoveFilter.h"
 #include "algopt/rebalancer/solver/moves/tests/MoveTestBase.h"
 
 #include <folly/coro/GtestHelpers.h>
@@ -487,6 +488,92 @@ CO_TEST_F(ColocateGroupsMoveTypeTest, VerifyMoveSetsBasicNoBetterMove) {
   // move set
   EXPECT_EQ(
       ((4 * 4 + 1 * 1) * 2) + ((4 * 4 + 1 * 1) * 2), getTotalMovesEvaluated());
+}
+
+CO_TEST_F(ColocateGroupsMoveTypeTest, InvalidMoveFilterPrunesDestinations) {
+  interface::ColocateGroupsMoveTypeSpec spec;
+  spec.partitionName() = "tenant";
+  spec.colocationScopeName() = "region";
+
+  interface::ColocateGroupsMoveTypeRelatedGroupsInfo relatedGroupsInfo;
+  relatedGroupsInfo.relatedGroups() = {"tenant1", "tenant2", "tenant3"};
+  spec.relatedGroupsList() = {relatedGroupsInfo};
+
+  auto colocateMoveType =
+      ColocateGroupsMoveType(interface::LocalSearchSolverSpec{}, spec);
+
+  co_await setUpUniverse();
+
+  // Forbid tenant1's representative (object1) from every region2 container, so
+  // its factor in the region2 Cartesian product is empty and region2 yields no
+  // move sets; only region3 remains.
+  auto invalidMoveFilter = std::make_unique<InvalidMoveFilter>(
+      getNumObjects(), getUniverse().getContainers().getContainerIds().size());
+  for (const auto containerId :
+       {container(12), container(22), container(32), container(42)}) {
+    invalidMoveFilter->markInvalid(object(1), containerId);
+  }
+
+  createProblem(
+      {object_lookup(
+          makeLoadObjectVector(),
+          getContainerSet(),
+          Assignment(getUniverse().getContainers().getInitialAssignment()))},
+      const_expr(0, getUniverse()),
+      /*higherPriorityObjConfig=*/std::nullopt,
+      /*nonAcceptingContainers=*/{},
+      std::move(invalidMoveFilter));
+
+  colocateMoveType.findBestMove(
+      getMovesEvaluator(),
+      container(11) /*hotContainer*/,
+      getMoveStatsAggregator(),
+      getEmptySearchHints(),
+      std::numeric_limits<double>::max() /*timelimit*/);
+
+  // Without the filter this is (4 * 4 * 4 + 1 * 1 * 1) * 3 = 195 (see
+  // VerifyMoveSetsBasic). Emptying tenant1's region2 factor drops region2 to 0
+  // move sets, leaving only region3: (0 + 1 * 1 * 1) * 3 = 3.
+  EXPECT_EQ((0 + 1 * 1 * 1) * 3, getTotalMovesEvaluated());
+}
+
+CO_TEST_F(ColocateGroupsMoveTypeTest, NonAcceptingContainersPrunedFromProduct) {
+  interface::ColocateGroupsMoveTypeSpec spec;
+  spec.partitionName() = "tenant";
+  spec.colocationScopeName() = "region";
+
+  interface::ColocateGroupsMoveTypeRelatedGroupsInfo relatedGroupsInfo;
+  relatedGroupsInfo.relatedGroups() = {"tenant1", "tenant2", "tenant3"};
+  spec.relatedGroupsList() = {relatedGroupsInfo};
+
+  auto colocateMoveType =
+      ColocateGroupsMoveType(interface::LocalSearchSolverSpec{}, spec);
+
+  co_await setUpUniverse();
+
+  // Mark two of region2's four containers non-accepting. Each group's region2
+  // factor drops from 4 to 2 valid containers, so region2 contributes 2 * 2 * 2
+  // move sets instead of 4 * 4 * 4; region3 still contributes 1 * 1 * 1.
+  const PackerSet<entities::ContainerId> nonAcceptingContainers{
+      container(12), container(22)};
+
+  createProblem(
+      {object_lookup(
+          makeLoadObjectVector(),
+          getContainerSet(),
+          Assignment(getUniverse().getContainers().getInitialAssignment()))},
+      const_expr(0, getUniverse()),
+      /*higherPriorityObjConfig=*/std::nullopt,
+      nonAcceptingContainers);
+
+  colocateMoveType.findBestMove(
+      getMovesEvaluator(),
+      container(11) /*hotContainer*/,
+      getMoveStatsAggregator(),
+      getEmptySearchHints(),
+      std::numeric_limits<double>::max() /*timelimit*/);
+
+  EXPECT_EQ((2 * 2 * 2 + 1 * 1 * 1) * 3, getTotalMovesEvaluated());
 }
 
 // Builds a colocation set with a huge candidate space: 4 related groups that
