@@ -16,6 +16,7 @@
 
 #include "algopt/rebalancer/entities/ObjectStaticDimension.h"
 #include "algopt/rebalancer/entities/Universe.h"
+#include "algopt/rebalancer/solver/moves/InvalidMoveFilter.h"
 
 using namespace facebook::rebalancer::entities;
 
@@ -66,6 +67,22 @@ std::string AvoidAssignmentsSpecBuilder::description() const {
       "Avoid {} assignments on scope {}",
       spec_.assignments()->size(),
       *spec_.scope());
+}
+
+void AvoidAssignmentsSpecBuilder::populateInvalidMoveFilter(
+    InvalidMoveFilter& invalidMoveFilter) const {
+  const auto scopeId = universe_->getScopeId(*spec_.scope());
+  const auto& scope = universe_->getScope(scopeId);
+  for (const auto& assignment : *spec_.assignments()) {
+    const auto objectId = universe_->getObjectId(*assignment.object());
+    for (const auto& scopeItemName : *assignment.scopeItems()) {
+      const auto scopeItemId =
+          universe_->getScopeItemId(scopeId, scopeItemName);
+      for (const auto& containerId : scope.getContainerIds(scopeItemId)) {
+        invalidMoveFilter.markInvalid(objectId, containerId);
+      }
+    }
+  }
 }
 
 SpecParameters AvoidAssignmentsSpecBuilder::getSpecInfo() const {

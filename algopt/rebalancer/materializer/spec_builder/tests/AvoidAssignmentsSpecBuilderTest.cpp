@@ -17,6 +17,7 @@
 #include "algopt/rebalancer/interface/thrift/gen-cpp2/ProblemSpecs_types.h"
 #include "algopt/rebalancer/materializer/spec_builder/AvoidAssignmentsSpecBuilder.h"
 #include "algopt/rebalancer/materializer/utils/tests/SpecBuilderTestBase.h"
+#include "algopt/rebalancer/solver/moves/InvalidMoveFilter.h"
 
 #include <folly/coro/BlockingWait.h>
 #include <folly/coro/GtestHelpers.h>
@@ -103,6 +104,32 @@ CO_TEST_F(AvoidAssignmentsSpecBuilderTest, Constraint) {
   // value will be 0 as host2 doesn't have task1
   EXPECT_NEAR(
       0, evaluate(constraint.at(*host2Ctr), deltaFromInitial({})), 1e-8);
+}
+
+TEST_F(AvoidAssignmentsSpecBuilderTest, FilterBlocksAvoidedAssignments) {
+  interface::AvoidAssignmentsSpec avoidAssignmentsSpec;
+  avoidAssignmentsSpec.scope() = "host";
+  avoidAssignmentsSpec.assignments() = {
+      interface::makeAvoidAssignment("task0", {"host0", "host1"}),
+      interface::makeAvoidAssignment("task1", {"host0", "host2"}),
+      interface::makeAvoidAssignment("task2", {"host0"})};
+
+  const AvoidAssignmentsSpecBuilder specBuilder(
+      buildUniverse(), avoidAssignmentsSpec);
+  const auto numObjects = universe_->getObjects().getObjectIds().size();
+  const auto numContainers =
+      universe_->getContainers().getContainerIds().size();
+  InvalidMoveFilter filter(numObjects, numContainers);
+
+  specBuilder.populateInvalidMoveFilter(filter);
+
+  const std::set<InvalidPair> expectedInvalidPairs{
+      {objectId("task0"), containerId("host0")},
+      {objectId("task0"), containerId("host1")},
+      {objectId("task1"), containerId("host0")},
+      {objectId("task1"), containerId("host2")},
+      {objectId("task2"), containerId("host0")}};
+  EXPECT_EQ(expectedInvalidPairs, collectInvalidPairs(filter));
 }
 
 TEST_F(AvoidAssignmentsSpecBuilderTest, Goal) {
