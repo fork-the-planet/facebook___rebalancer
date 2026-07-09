@@ -40,24 +40,25 @@ std::function<bool(entities::ContainerId)> getAcceptingContainersCheckFunc(
     const Problem& problem,
     entities::ContainerId hotContainer);
 
-template <typename InputCollection>
-PackerSet<typename InputCollection::value_type> getRandomSample(
+// Output container defaults to a set; callers wanting a different container
+// pass the container template explicitly: getRandomSample<std::vector>(...).
+// The element type is deduced from the input.
+template <
+    template <typename...> class OutputContainer = PackerSet,
+    typename InputCollection>
+auto getRandomSample(
     const InputCollection& idsCollection,
     size_t sampleSize,
     std::mt19937& rng,
     std::optional<typename InputCollection::value_type> idToExcludeFromSample =
         std::nullopt) {
-  if (sampleSize < 0) {
-    throw std::runtime_error(
-        fmt::format(
-            "found negative sample size {} in getRandomSample()", sampleSize));
-  }
+  using Output = OutputContainer<typename InputCollection::value_type>;
 
   if (sampleSize == 0) {
-    return {};
+    return Output{};
   }
 
-  PackerSet<typename InputCollection::value_type> sampledIds;
+  Output sampledIds;
   algopt::utils::reserveIfPossible(sampledIds, sampleSize);
 
   if (idToExcludeFromSample.has_value()) {

@@ -60,6 +60,33 @@ TEST_F(MoveTypeUtilsTest, RandomSampleWithContainerToExclude) {
   EXPECT_FALSE(sampleSet.contains(container(4)));
 }
 
+TEST_F(MoveTypeUtilsTest, RandomSampleReturnsRequestedVectorType) {
+  const std::vector<entities::ContainerId> containerIds = {
+      container(1), container(2), container(3), container(4), container(5)};
+
+  auto sampleVec = getRandomSample<std::vector>(containerIds, 3, rng_);
+  static_assert(
+      std::is_same_v<decltype(sampleVec), std::vector<entities::ContainerId>>);
+  EXPECT_EQ(sampleVec.size(), 3);
+  for (const auto containerId : sampleVec) {
+    EXPECT_TRUE(
+        std::find(containerIds.begin(), containerIds.end(), containerId) !=
+        containerIds.end());
+  }
+}
+
+TEST_F(MoveTypeUtilsTest, RandomSampleVectorTypeRespectsExclude) {
+  const std::vector<entities::ContainerId> containerIds = {
+      container(1), container(2), container(3), container(4), container(5)};
+
+  auto sampleVec = getRandomSample<std::vector>(
+      containerIds, 5, rng_, std::make_optional(container(4)));
+  EXPECT_EQ(sampleVec.size(), 4);
+  EXPECT_EQ(
+      std::find(sampleVec.begin(), sampleVec.end(), container(4)),
+      sampleVec.end());
+}
+
 TEST_F(MoveTypeUtilsTest, RandomSampleWithReplacementZeroSamples) {
   std::vector<entities::ContainerId> containerIds = {
       container(1), container(2), container(3), container(4), container(5)};
