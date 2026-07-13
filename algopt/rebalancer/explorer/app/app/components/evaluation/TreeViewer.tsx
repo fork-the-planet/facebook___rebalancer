@@ -55,8 +55,6 @@ interface TreeViewerProps {
   handle: Handle;
   sourceAssignment: Assignment;
   destinationAssignment: Assignment;
-  /** Whether the expression is being minimized. Affects delta color coding. */
-  minimizing: boolean;
 }
 
 export default function TreeViewer({
@@ -64,7 +62,6 @@ export default function TreeViewer({
   handle,
   sourceAssignment,
   destinationAssignment,
-  minimizing,
 }: TreeViewerProps) {
   const [open, setOpen] = useState(false);
 
@@ -178,14 +175,15 @@ export default function TreeViewer({
   const handleOpen = useCallback(() => {
     const rootId = String(expressionId);
     setNodeData({});
-    setNodeMeta({[rootId]: {coefficient: 1, minimizing}});
+    // Objectives and constraints are both "lower is better"
+    setNodeMeta({[rootId]: {coefficient: 1, minimizing: true}});
     setChildrenLimits({});
     setExpandedItems([rootId]);
     setNodeSearch({});
     setNodeSort({});
     setOpen(true);
     doFetch(rootId, INITIAL_CHILDREN_LIMIT, '', 0, 1);
-  }, [expressionId, minimizing, doFetch]);
+  }, [expressionId, doFetch]);
 
   // Handle expansion changes — fetch data for newly expanded nodes
   const handleExpandedItemsChange = useCallback(

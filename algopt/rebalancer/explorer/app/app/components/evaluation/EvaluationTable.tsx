@@ -404,7 +404,6 @@ const EvaluationTable = memo(function EvaluationTable({
                 handle={handle}
                 sourceAssignment={sourceAssignment}
                 destinationAssignment={destinationAssignment}
-                minimizing={isConstraint}
               />
             </Box>
           );
