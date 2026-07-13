@@ -30,6 +30,11 @@ export interface Handle {
 
 export interface HandleRequest {
   manifoldId: string;
+  // Idle TTL in seconds. Non-positive values use the 1-hour default; huge
+  // values are clamped. getHandle only raises an existing sandbox's TTL.
+  ttlSeconds?: number;
+  // Caller label for logs; empty when unset.
+  clientId?: string;
 }
 
 export interface HandleResponse {

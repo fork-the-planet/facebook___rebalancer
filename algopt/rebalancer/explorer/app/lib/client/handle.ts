@@ -39,7 +39,9 @@ export async function getHandle(
 ): Promise<HandleResponse> {
   try {
     const rpcClient = await getRpcClient(catToken);
-    const response = await rpcClient.getHandle({request: {manifoldId}});
+    const response = await rpcClient.getHandle({
+      request: {manifoldId, clientId: 'explorer_ui_nextjs'},
+    });
     return response as HandleResponse;
   } catch (error) {
     throw new RebalancerExplorerBackendError('getHandle', error);
