@@ -160,6 +160,40 @@ TEST_F(BackwardCompatabilityUtilsTest, ExclusiveScopeItemsSpec) {
   EXPECT_EQ(2, changedExclusiveScopeItemsGoalSpec.conflictInfoList()->size());
 }
 
+TEST_F(BackwardCompatabilityUtilsTest, MinimizeContainersSpecMaxFreeLimit) {
+  // Old configuration: the deprecated maxFreeLimit field is set directly.
+  interface::MinimizeContainersSpec spec;
+  spec.name() = "test";
+  spec.scope() = "host";
+  spec.dimension() = "task_count";
+  FOLLY_PUSH_WARNING
+  FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
+  // NOLINTNEXTLINE(facebook-hte-Deprecated)
+  spec.maxFreeLimit() = 5;
+  FOLLY_POP_WARNING
+
+  addGoal(spec, /*goalId=*/0);
+
+  BackwardCompatabilityUtils::possiblyModify(universeThrift);
+
+  ASSERT_EQ(1, getGoalCount());
+  const auto& migratedSpec = getGoalSpec(0).get_minimizeContainersSpec();
+
+  // maxFreeLimit is migrated into the target union...
+  ASSERT_TRUE(migratedSpec.target().has_value());
+  EXPECT_EQ(
+      interface::MinimizeContainersTarget::Type::maxFreeLimit,
+      migratedSpec.target()->getType());
+  EXPECT_EQ(5, migratedSpec.target()->get_maxFreeLimit());
+
+  // ...and the deprecated field is cleared so it cannot be read again.
+  FOLLY_PUSH_WARNING
+  FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
+  // NOLINTNEXTLINE(facebook-hte-Deprecated)
+  EXPECT_FALSE(migratedSpec.maxFreeLimit().has_value());
+  FOLLY_POP_WARNING
+}
+
 // ---------------------------------------------------------------------------
 // densifyEntityIds tests
 // ---------------------------------------------------------------------------

@@ -20,6 +20,7 @@
 
 #include <fmt/core.h>
 #include <folly/container/MapUtil.h>
+#include <folly/Portability.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 
 #include <stdexcept>
@@ -547,13 +548,45 @@ void ProblemChecker::addSpec(const MinimizeContainersSpec& spec) {
   checkDimensionExists(*spec.dimension());
   checkScopeItemFilterSpec(*spec.filter(), *spec.scope());
 
-  if (spec.maxFreeLimit() && *spec.maxFreeLimit() <= 0) {
+  // The deprecated maxFreeLimit field is only read by
+  // BackwardCompatabilityUtils when migrating persisted instances (which never
+  // reach the checker); live producers must use `target`.
+  FOLLY_PUSH_WARNING
+  FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
+  // NOLINTNEXTLINE(facebook-hte-Deprecated)
+  if (spec.maxFreeLimit()) {
     throw std::runtime_error(
-        fmt::format(
-            "Minimize containers spec on dimension {} used "
-            "without positive max free limit {}",
-            *spec.dimension(),
-            *spec.maxFreeLimit()));
+        "The field 'maxFreeLimit' in MinimizeContainersSpec is deprecated; use "
+        "`MinimizeContainersSpec.target` instead");
+  }
+  FOLLY_POP_WARNING
+
+  if (spec.target()) {
+    switch (spec.target()->getType()) {
+      case MinimizeContainersTarget::Type::maxFreeLimit:
+        if (spec.target()->get_maxFreeLimit() <= 0) {
+          throw std::runtime_error(
+              fmt::format(
+                  "Minimize containers spec on dimension {} has non-positive "
+                  "maxFreeLimit {}",
+                  *spec.dimension(),
+                  spec.target()->get_maxFreeLimit()));
+        }
+        break;
+      case MinimizeContainersTarget::Type::minUsedLimit:
+        if (spec.target()->get_minUsedLimit() < 0) {
+          throw std::runtime_error(
+              fmt::format(
+                  "Minimize containers spec on dimension {} has negative "
+                  "minUsedLimit {}",
+                  *spec.dimension(),
+                  spec.target()->get_minUsedLimit()));
+        }
+        break;
+      case MinimizeContainersTarget::Type::__EMPTY__:
+        throw std::runtime_error(
+            "Minimize containers spec target is set but empty");
+    }
   }
 
   addSpecName(*spec.name());

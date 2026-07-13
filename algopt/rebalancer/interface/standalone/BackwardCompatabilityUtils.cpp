@@ -407,6 +407,10 @@ void BackwardCompatabilityUtils::possiblyModify(
       specUnion.getType() ==
       interface::GoalSpecs::Type::exclusiveScopeItemsSpec) {
     possiblyModify(specUnion.mutable_exclusiveScopeItemsSpec());
+  } else if (
+      specUnion.getType() ==
+      interface::GoalSpecs::Type::minimizeContainersSpec) {
+    possiblyModify(specUnion.mutable_minimizeContainersSpec());
   }
 }
 
@@ -432,6 +436,25 @@ void BackwardCompatabilityUtils::possiblyModify(
         interface::RoutingLatencyMetric::PERCENTILE, 100);
   }
 }
+
+// Migrate the deprecated `maxFreeLimit` field into the `target` union. Reading
+// the deprecated field is the whole point here, so the deprecation warning is
+// suppressed (mirrors the IdStore.names migration above).
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
+void BackwardCompatabilityUtils::possiblyModify(
+    interface::MinimizeContainersSpec& spec) {
+  // NOLINTNEXTLINE(facebook-hte-Deprecated)
+  if (spec.maxFreeLimit() && !spec.target()) {
+    interface::MinimizeContainersTarget target;
+    // NOLINTNEXTLINE(facebook-hte-Deprecated)
+    target.set_maxFreeLimit(*spec.maxFreeLimit());
+    spec.target() = std::move(target);
+  }
+  // NOLINTNEXTLINE(facebook-hte-Deprecated)
+  spec.maxFreeLimit().reset();
+}
+FOLLY_POP_WARNING
 
 void BackwardCompatabilityUtils::possiblyModify(
     interface::ExclusiveScopeItemsSpec& spec) {

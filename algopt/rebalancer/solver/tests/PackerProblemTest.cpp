@@ -1559,7 +1559,9 @@ TEST(PackerProblemTest, TestMinimizeContainersLimit) {
   minimizeContainersSpec.dimension() = "object_count";
   minimizeContainersSpec.containerCosts() = {};
   minimizeContainersSpec.formula() = MinimizeContainerSpecFormula::LEGACY;
-  minimizeContainersSpec.maxFreeLimit() = 1;
+  MinimizeContainersTarget target;
+  target.set_maxFreeLimit(1);
+  minimizeContainersSpec.target() = std::move(target);
   problem->addGoal(minimizeContainersSpec);
 
   addAfterConstraint(problem, "object_count", 4);

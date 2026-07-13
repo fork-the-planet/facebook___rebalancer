@@ -33,4 +33,5 @@ class BackwardCompatabilityUtils {
 
   static void possiblyModify(interface::RoutingLatencySpec& spec);
   static void possiblyModify(interface::ExclusiveScopeItemsSpec& spec);
+  static void possiblyModify(interface::MinimizeContainersSpec& spec);
 };

@@ -70,14 +70,30 @@ MinimizeContainersSpecBuilder::MinimizeContainersSpecBuilder(
       objectDimension_(universe_->getObjects().getDimension(dimensionId_)),
       containerCosts_(*spec_.containerCosts()) {}
 
+int64_t MinimizeContainersSpecBuilder::numUsedScopeItemLimit(
+    int64_t numScopeItems) const {
+  // No stopping condition configured: pack down as far as possible.
+  if (!spec_.target()) {
+    return 0;
+  }
+  switch (spec_.target()->getType()) {
+    case interface::MinimizeContainersTarget::Type::maxFreeLimit:
+      return numScopeItems -
+          std::min<int64_t>(spec_.target()->get_maxFreeLimit(), numScopeItems);
+    case interface::MinimizeContainersTarget::Type::minUsedLimit:
+      return std::min<int64_t>(
+          spec_.target()->get_minUsedLimit(), numScopeItems);
+    case interface::MinimizeContainersTarget::Type::__EMPTY__:
+      throw std::runtime_error("MinimizeContainersTarget is set but empty");
+  }
+}
+
 folly::coro::Task<ExprPtr>
 MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
     ExpressionBuilder& expressionBuilder) const {
   const ScopeItemFilterWrapper filter(*universe_, *spec_.filter(), scopeId_);
   const auto& filteredScopeItemIds = filter.getScopeItemIds();
-  auto maxFreeLimit = spec_.maxFreeLimit()
-      ? std::min(*spec_.maxFreeLimit(), int(filteredScopeItemIds.size()))
-      : filteredScopeItemIds.size();
+  const auto usedLimit = numUsedScopeItemLimit(filteredScopeItemIds.size());
 
   auto [objectDimensionSum, minPositiveDimensionValue] =
       getObjectDimensionSumAndMinPositiveValue(objectDimension_);
@@ -93,7 +109,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
 
     expr2 = coeff2 * sum_{c \in scopeItemsToFree} (absoluteUtil(c))^1.1)
 
-    expr3 = step(maxFreeLimit - scopeItemsToFree)
+    expr3 = step(occupiedScopeItems - usedLimit)
 
     coeff1 = 2 / minPositiveDimensionValue_or_1
 
@@ -116,8 +132,9 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
   (absoluteUtil(c))^1.1) will always incitivize moving objects from smaller
   containers to bigger containers when absoluteUtil(c) are >= 1
 
-  e) expr3's value indicates whether the the number of freed scopeItems is below
-  maxFreeLimit.
+  e) expr3's value indicates whether the number of occupied scopeItems is still
+  above usedLimit (the used scope item limit). usedLimit collapses both stopping
+  conditions: maxFreeLimit=F => numScopeItems - F, minUsedLimit=U => U.
 
   f) This objective function assumes that local search is implemented in a
   certain way. In particular,
@@ -157,16 +174,13 @@ MinimizeContainersSpecBuilder::getMinimizeContainersContinuousFormulaExpr(
   const double coeff1 = 2 / minPositiveDimensionValue.value();
   const double coeff2 = 0.5 / pow(objectDimensionSum, 1.1);
 
-  auto freeScopeItemsCount =
-      filteredScopeItemIds.size() - occupiedScopeItemsCount;
-  auto isAboveMaxFreeLimit = step(maxFreeLimit - freeScopeItemsCount) /
+  auto isAboveLimit = step(occupiedScopeItemsCount - usedLimit) /
       (2 * filteredScopeItemIds.size());
 
-  // this formula will continue until the number of free scopeItems is equal
-  // to maxFreeLimit or until all objects are in 1 scopeItem
+  // this formula will continue until the number of occupied scopeItems reaches
+  // the used scope item limit or until all objects are in 1 scopeItem
   co_return product(
-      coeff1 * totalAfterUtil - coeff2 * sumOverUtilSquared,
-      isAboveMaxFreeLimit);
+      coeff1 * totalAfterUtil - coeff2 * sumOverUtilSquared, isAboveLimit);
 }
 
 folly::coro::Task<ExprPtr> MinimizeContainersSpecBuilder::getObjectiveExpr(
@@ -191,9 +205,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersDiscreteFormulaExpr(
     ExpressionBuilder& expressionBuilder) const {
   const ScopeItemFilterWrapper filter(*universe_, *spec_.filter(), scopeId_);
   const auto& filteredScopeItemIds = filter.getScopeItemIds();
-  auto maxFreeLimit = spec_.maxFreeLimit()
-      ? std::min(*spec_.maxFreeLimit(), int(filteredScopeItemIds.size()))
-      : filteredScopeItemIds.size();
+  const auto usedLimit = numUsedScopeItemLimit(filteredScopeItemIds.size());
 
   auto result = const_expr(0, *universe_);
   for (auto scopeItemId : filteredScopeItemIds) {
@@ -207,10 +219,7 @@ MinimizeContainersSpecBuilder::getMinimizeContainersDiscreteFormulaExpr(
     result += hasObject * containerCost;
   }
 
-  co_return max(
-      {const_expr(0, *universe_),
-       result - filteredScopeItemIds.size() + maxFreeLimit},
-      *universe_);
+  co_return max({const_expr(0, *universe_), result - usedLimit}, *universe_);
 }
 
 folly::coro::Task<ExprPtr>
@@ -218,14 +227,12 @@ MinimizeContainersSpecBuilder::getMinimizeContainerLegacyFormulaExpr(
     ExpressionBuilder& expressionBuilder) const {
   const ScopeItemFilterWrapper filter(*universe_, *spec_.filter(), scopeId_);
   const auto& filteredScopeItemIds = filter.getScopeItemIds();
-  auto maxFreeLimit = spec_.maxFreeLimit()
-      ? std::min(*spec_.maxFreeLimit(), int(filteredScopeItemIds.size()))
-      : filteredScopeItemIds.size();
+  const auto usedLimit = numUsedScopeItemLimit(filteredScopeItemIds.size());
 
-  if (continuousExpressions_ && maxFreeLimit != filteredScopeItemIds.size()) {
+  if (continuousExpressions_ && usedLimit != 0) {
     throw std::runtime_error(
-        "Custom max free limit not supported in minimize "
-        "containers goal in LEGACY formula but is supported in NEW formula");
+        "Custom stopping condition (maxFreeLimit/minUsedLimit) not supported in "
+        "minimize containers goal in LEGACY formula but is supported in NEW formula");
   }
 
   double dimensionSum = 1;

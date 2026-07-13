@@ -24,6 +24,14 @@
 
 namespace facebook::rebalancer::materializer::tests {
 
+namespace {
+void setMaxFreeLimit(interface::MinimizeContainersSpec& spec, int32_t limit) {
+  interface::MinimizeContainersTarget target;
+  target.set_maxFreeLimit(limit);
+  spec.target() = std::move(target);
+}
+} // namespace
+
 class MinimizeContainersSpecBuilderTest : public SpecBuilderTestBase<> {
  protected:
   static folly::coro::Task<void> setUpCoro() {
@@ -173,7 +181,7 @@ CO_TEST_F(MinimizeContainersSpecBuilderTest, maxFreeLimit) {
   interface::MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = interface::MinimizeContainerSpecFormula::NEW;
 
   const MinimizeContainersSpecBuilder specBuilder(buildUniverse(), spec, true);
@@ -195,7 +203,7 @@ CO_TEST_F(MinimizeContainersSpecBuilderTest, maxFreeLimit2) {
   interface::MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = interface::MinimizeContainerSpecFormula::NEW;
 
   const MinimizeContainersSpecBuilder specBuilder(buildUniverse(), spec, true);
@@ -214,7 +222,7 @@ CO_TEST_F(MinimizeContainersSpecBuilderTest, maxFreeLimit3) {
   interface::MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = interface::MinimizeContainerSpecFormula::NEW;
 
   const MinimizeContainersSpecBuilder specBuilder(buildUniverse(), spec, true);
@@ -236,7 +244,7 @@ CO_TEST_F(MinimizeContainersSpecBuilderTest, maxFreeLimit4) {
   interface::MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = interface::MinimizeContainerSpecFormula::NEW;
 
   const MinimizeContainersSpecBuilder specBuilder(buildUniverse(), spec, true);
@@ -254,5 +262,64 @@ CO_TEST_F(MinimizeContainersSpecBuilderTest, maxFreeLimit4) {
           deltaFromInitial({{"task6", "host1"}, {"task14", "host1"}}),
           assertOptions),
       1e-7);
+}
+
+// minUsedLimit=U and maxFreeLimit=(N-U) are duals for a fixed scope of N items,
+// so both must produce the same goal. createScenario has N=10 hosts, so
+// minUsedLimit=7 must match maxFreeLimit=3.
+CO_TEST_F(MinimizeContainersSpecBuilderTest, minUsedLimitDualToMaxFreeLimit) {
+  createScenario();
+  const auto universe = buildUniverse();
+
+  interface::MinimizeContainersSpec freeSpec;
+  freeSpec.scope() = "host";
+  freeSpec.dimension() = "task_count";
+  freeSpec.formula() = interface::MinimizeContainerSpecFormula::NEW;
+  setMaxFreeLimit(freeSpec, 3);
+
+  interface::MinimizeContainersSpec usedSpec;
+  usedSpec.scope() = "host";
+  usedSpec.dimension() = "task_count";
+  usedSpec.formula() = interface::MinimizeContainerSpecFormula::NEW;
+  interface::MinimizeContainersTarget target;
+  target.set_minUsedLimit(7);
+  usedSpec.target() = target;
+
+  const MinimizeContainersSpecBuilder freeBuilder(universe, freeSpec, true);
+  const MinimizeContainersSpecBuilder usedBuilder(universe, usedSpec, true);
+
+  const auto freeGoal = co_await freeBuilder.goalCoro(expressionBuilder());
+  const auto usedGoal = co_await usedBuilder.goalCoro(expressionBuilder());
+
+  const packer::tests::LpAssertOptions assertOptions = {
+      .exceptionForLpExpr =
+          "At least one of the operands must be a binary variable"};
+  const auto delta =
+      deltaFromInitial({{"task6", "host1"}, {"task14", "host1"}});
+  EXPECT_NEAR(
+      evaluate(freeGoal, delta, assertOptions),
+      evaluate(usedGoal, delta, assertOptions),
+      1e-9);
+}
+
+TEST_F(
+    MinimizeContainersSpecBuilderTest,
+    minUsedLimitUnsupportedInLegacyFormula) {
+  createScenario();
+
+  interface::MinimizeContainersSpec spec;
+  spec.scope() = "host";
+  spec.dimension() = "task_count";
+  spec.formula() = interface::MinimizeContainerSpecFormula::LEGACY;
+  interface::MinimizeContainersTarget target;
+  target.set_minUsedLimit(7);
+  spec.target() = target;
+
+  const MinimizeContainersSpecBuilder specBuilder(buildUniverse(), spec, true);
+
+  REBALANCER_EXPECT_RUNTIME_ERROR(
+      folly::coro::blockingWait(specBuilder.goalCoro(expressionBuilder())),
+      "Custom stopping condition (maxFreeLimit/minUsedLimit) not supported in "
+      "minimize containers goal in LEGACY formula but is supported in NEW formula");
 }
 } // namespace facebook::rebalancer::materializer::tests

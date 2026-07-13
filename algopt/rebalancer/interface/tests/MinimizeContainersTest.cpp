@@ -16,12 +16,21 @@
 #include "algopt/rebalancer/interface/tests/utils.h"
 
 #include <folly/container/irange.h>
+#include <folly/Portability.h>
 #include <gtest/gtest.h>
 
 #include <map>
 #include <string>
 
 using namespace facebook::rebalancer::interface;
+
+namespace {
+void setMaxFreeLimit(MinimizeContainersSpec& spec, int32_t limit) {
+  MinimizeContainersTarget target;
+  target.set_maxFreeLimit(limit);
+  spec.target() = std::move(target);
+}
+} // namespace
 
 class MinimizeContainersTest : public ::testing::TestWithParam<int> {
   void SetUp() override {}
@@ -395,7 +404,7 @@ TEST_P(MinimizeContainersTest, MinimizeContainersWithMaxFreeLimit) {
       {"host8", 9},
       {"host9", 10},
   };
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
 
   solver->addGoal(spec);
 
@@ -418,7 +427,7 @@ TEST_P(MinimizeContainersTest, MinimizeContainersWithMaxFreeLimitScenario2) {
   MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = MinimizeContainerSpecFormula::NEW;
 
   solver->addGoal(spec);
@@ -458,7 +467,7 @@ TEST_P(
   MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 4;
+  setMaxFreeLimit(spec, 4);
   spec.formula() = MinimizeContainerSpecFormula::NEW;
   solver->addGoal(spec);
   // Get a solution from Rebalancer.
@@ -531,7 +540,7 @@ TEST_P(MinimizeContainersTest, MaxFreeLimitAllButTwo) {
   spec.dimension() = "task_count";
 
   // all but 2 hosts should be empty
-  spec.maxFreeLimit() = 98;
+  setMaxFreeLimit(spec, 98);
   spec.formula() = MinimizeContainerSpecFormula::NEW;
   solver->addGoal(spec);
 
@@ -551,7 +560,7 @@ TEST_P(MinimizeContainersTest, MaxFreeLimitWithCosts) {
   MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = MinimizeContainerSpecFormula::NEW;
   spec.containerCosts() = {
       {"host0", 10000},
@@ -591,7 +600,7 @@ TEST_P(MinimizeContainersTest, MaxFreeLimitWithCostsAndCapacity) {
   MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = MinimizeContainerSpecFormula::NEW;
   spec.containerCosts() = {
       {"host0", 10000},
@@ -643,7 +652,7 @@ TEST_P(MinimizeContainersTest, MaxFreeLimitWithCostsAndCapacity2) {
   MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = MinimizeContainerSpecFormula::NEW;
   spec.containerCosts() = {
       {"host0", 1},
@@ -679,7 +688,7 @@ TEST_P(MinimizeContainersTest, MaxFreeLimitWithCostsAndCapacity3) {
   MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = MinimizeContainerSpecFormula::NEW;
   spec.containerCosts() = {
       {"host0", 1},
@@ -714,7 +723,7 @@ TEST_P(MinimizeContainersTest, MaxFreeLimitWithContainersOutOfScope) {
   MinimizeContainersSpec spec;
   spec.scope() = "rack";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 2;
+  setMaxFreeLimit(spec, 2);
   spec.formula() = MinimizeContainerSpecFormula::NEW;
 
   solver->addGoal(spec);
@@ -752,13 +761,29 @@ TEST_P(MinimizeContainersTest, UseContinuousMaxFreeLimitFormulaIsFalse) {
   MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "task_count";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = MinimizeContainerSpecFormula::LEGACY;
 
   solver->addGoal(spec);
   REBALANCER_EXPECT_RUNTIME_ERROR(
       solver->solve(),
-      "Custom max free limit not supported in minimize containers goal in LEGACY formula but is supported in NEW formula");
+      "Custom stopping condition (maxFreeLimit/minUsedLimit) not supported in minimize containers goal in LEGACY formula but is supported in NEW formula");
+}
+
+TEST_P(MinimizeContainersTest, DeprecatedMaxFreeLimitFieldRejected) {
+  auto solver = createScenario(GetParam());
+  MinimizeContainersSpec spec;
+  spec.scope() = "host";
+  spec.dimension() = "task_count";
+  FOLLY_PUSH_WARNING
+  FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
+  // NOLINTNEXTLINE(facebook-hte-Deprecated)
+  spec.maxFreeLimit() = 5;
+  FOLLY_POP_WARNING
+
+  REBALANCER_EXPECT_RUNTIME_ERROR(
+      solver->addGoal(spec),
+      "The field 'maxFreeLimit' in MinimizeContainersSpec is deprecated; use `MinimizeContainersSpec.target` instead");
 }
 
 TEST_P(
@@ -768,7 +793,7 @@ TEST_P(
   MinimizeContainersSpec spec;
   spec.scope() = "host";
   spec.dimension() = "weight";
-  spec.maxFreeLimit() = 5;
+  setMaxFreeLimit(spec, 5);
   spec.formula() = MinimizeContainerSpecFormula::NEW;
 
   solver->addGoal(spec);
@@ -802,7 +827,7 @@ TEST_P(MinimizeContainersTest, MaxFreeLimitGreaterThanScopeItems) {
       {"host8", 9},
       {"host9", 10},
   };
-  spec.maxFreeLimit() = 20;
+  setMaxFreeLimit(spec, 20);
 
   solver->addGoal(spec);
 
@@ -848,7 +873,7 @@ TEST_P(MinimizeContainersTest, MaxFreeLimitWhenAllDimensionsNegative) {
       {"host8", 9},
       {"host9", 10},
   };
-  spec.maxFreeLimit() = 20;
+  setMaxFreeLimit(spec, 20);
 
   solver->addGoal(spec);
 

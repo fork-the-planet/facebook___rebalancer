@@ -49,6 +49,11 @@ class MinimizeContainersSpecBuilder : public SpecBuilder {
   folly::coro::Task<ExprPtr> getMinimizeContainerLegacyFormulaExpr(
       ExpressionBuilder& expressionBuilder) const;
 
+  // translates the stopping condition to the minimum number of used scopeItems
+  // Once this minimum number is reached, the solver will not try to minimize
+  // the number of used scopeItems any further
+  int64_t numUsedScopeItemLimit(int64_t numScopeItems) const;
+
  private:
   interface::MinimizeContainersSpec spec_;
   bool continuousExpressions_;

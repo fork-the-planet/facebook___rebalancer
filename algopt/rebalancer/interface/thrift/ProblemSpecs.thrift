@@ -842,13 +842,24 @@ enum MinimizeContainerSpecFormula {
   NEW = 2,
 }
 
-// Minimize number of containers utilized
+// Stopping condition for the minimize-containers goal: how far to keep packing.
+union MinimizeContainersTarget {
+  // Stop once at least this many scope items are freed (emptied).
+  1: i32 maxFreeLimit;
+  // Stop once the number of occupied scope items drops to this value.
+  2: i32 minUsedLimit;
+}
+
+// The following spec is called "MinimizeContainersSpec", but actually does something more general.
+// It minimizes the number of utilized scope items in the provided `scope`. If an empty scope is
+// provided, the spec defaults to the container scope (hence the name).
 struct MinimizeContainersSpec {
   1: string name;
   2: string scope;
   3: string dimension;
+  // TODO: the key of the map is actually a scopeItem name of this spec's scope, rename this
+  // field to scopeItemCosts
   4: map<string, double> containerCosts;
-  5: optional i32 maxFreeLimit;
   6: Filter filter;
   // The new formula will maintain the same behavior as the legacy formula
   // however, the new formula will also work while using maxFreeLimit and localsearch
@@ -857,6 +868,14 @@ struct MinimizeContainersSpec {
   // see fbcode/algopt/rebalancer/interface/tests/MinimizeContainersTest.cpp for example test cases with new formula
   // Legacy formula will be deprecated once more services onboard to the new formula
   7: MinimizeContainerSpecFormula formula = MinimizeContainerSpecFormula.NEW;
+  // Stopping condition for packing (max free or min used). Only supported by the NEW formula.
+  8: optional MinimizeContainersTarget target;
+
+  // DEPRECATED: use `target` (field 8) instead. Retained only so that persisted
+  // instances can be migrated to `target` by BackwardCompatabilityUtils on
+  // replay; no forward code path reads this field.
+  @thrift.Deprecated{message = "Use target (MinimizeContainersTarget) instead."}
+  5: optional i32 maxFreeLimit;
 }
 
 // Minimize number of moves performed
