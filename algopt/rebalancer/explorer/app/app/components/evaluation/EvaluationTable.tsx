@@ -166,6 +166,11 @@ function SortLabel({
 // keeps digits equal), plus `3rem` padding.
 const NUMBER_COL_WIDTH = 'calc(17ch + 3rem)';
 
+// Name sizes to content (clamped) so short names free width for the auto-width
+// Description column.
+const MIN_NAME_CH = 10;
+const MAX_NAME_CH = 38;
+
 // Stacks the B - A value over its smaller "(%)" line, right-aligned. Used in the
 // header, the body cell, and the totals footer so all three line up.
 const STACKED_BA_SX = {
@@ -289,6 +294,17 @@ const EvaluationTable = memo(function EvaluationTable({
     [filteredRows, hideUnchanged],
   );
 
+  // Based on allRows, not the visible rows, so the width holds steady as
+  // filters and "hide unchanged" change what's shown.
+  const nameColWidth = useMemo(() => {
+    const longest = allRows.reduce(
+      (max, row) => Math.max(max, row.name.length),
+      0,
+    );
+    const ch = Math.min(Math.max(longest, MIN_NAME_CH), MAX_NAME_CH);
+    return `calc(${ch}ch + 3rem)`;
+  }, [allRows]);
+
   // Footer totals sum exactly the rows rendered in the table body, so they
   // always match what is on screen — both the evaluation filter and the
   // "hide unchanged" toggle are reflected.
@@ -318,7 +334,6 @@ const EvaluationTable = memo(function EvaluationTable({
           </Typography>
         ),
         enableSorting: false,
-        size: 180,
         meta: {
           tooltip:
             'Unique name of a goal or constraint. It can be customized with the parameter "name" when constructing a spec.',
@@ -515,7 +530,9 @@ const EvaluationTable = memo(function EvaluationTable({
                           ? 'auto'
                           : meta?.numeric
                             ? NUMBER_COL_WIDTH
-                            : header.getSize(),
+                            : header.column.id === 'name'
+                              ? nameColWidth
+                              : header.getSize(),
                         textAlign: meta?.numeric ? 'right' : 'left',
                         padding: '10px 16px',
                         borderBottom: `1px solid ${LINE_COLOR}`,
