@@ -18,8 +18,8 @@
 #include "algopt/rebalancer/common/CoroUtils.h"
 #include "algopt/rebalancer/entities/builders/AsyncUniverseBuilder.h"
 #include "algopt/rebalancer/entities/Universe.h"
-#include "algopt/rebalancer/interface/thrift/gen-cpp2/ProblemSolver_visitation.h"
-#include "algopt/rebalancer/interface/thrift/gen-cpp2/SolverSpecs_visitation.h"
+#include "algopt/rebalancer/interface/thrift/gen-cpp2/ProblemSolver_types.h"
+#include "algopt/rebalancer/interface/thrift/gen-cpp2/SolverSpecs_types.h"
 
 #include <folly/container/irange.h>
 #include <folly/coro/BlockingWait.h>
