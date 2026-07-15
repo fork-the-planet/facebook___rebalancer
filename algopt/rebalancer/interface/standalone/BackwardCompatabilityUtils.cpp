@@ -164,10 +164,11 @@ void remapIds(
     case Type::objectDynamicDimension: {
       auto& dyn = scalar.mutable_objectDynamicDimension();
       dyn.scopeId() = oldToNewIds.scopes.at(*dyn.scopeId());
-      remapKeys(*dyn.values(), oldToNewIds.scopeItems, [&](auto& objValues) {
-        remapKeys(objValues, oldToNewIds.objects);
-      });
       populateScopedValuesFromLegacyValues(dyn);
+      remapKeys(
+          *dyn.scopedValues(), oldToNewIds.scopeItems, [&](auto& objValues) {
+            remapKeys(*objValues.objectValues(), oldToNewIds.objects);
+          });
       return;
     }
     case Type::objectPartitionRoutingDimension: {
