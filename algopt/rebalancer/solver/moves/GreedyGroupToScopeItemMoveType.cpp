@@ -19,15 +19,28 @@
 #include "algopt/rebalancer/solver/moves/MovesEvaluator.h"
 
 #include <folly/container/irange.h>
+#include <folly/hash/Hash.h>
+#include <folly/Random.h>
 
 namespace facebook::rebalancer {
 
 namespace {
+// A local generator seeded from the scope item's containers keeps parallel
+// sampling race-free and deterministic; a shared generator would race. The seed
+// is order-independent, so it does not depend on the container list's order.
+folly::Random::DefaultGenerator makeRngForContainers(
+    const std::vector<entities::ContainerId>& containers) {
+  const auto seed = folly::hash::commutative_hash_combine_range(
+      containers.begin(), containers.end());
+  return folly::Random::DefaultGenerator(
+      static_cast<folly::Random::DefaultGenerator::result_type>(seed));
+}
+
 MoveSet generateRandomSampleAndMoveSet(
     std::vector<entities::ContainerId>& allContainers,
     const std::vector<entities::ObjectId>& groupObjectIds,
     const Problem& problem,
-    std::mt19937& rng) {
+    folly::Random::DefaultGenerator& rng) {
   std::shuffle(allContainers.begin(), allContainers.end(), rng);
 
   const int sampleSize = groupObjectIds.size();
@@ -89,13 +102,14 @@ MoveResult GreedyGroupToScopeItemMoveType::exploreMovingGroup(
               return MoveResult::makeEmpty();
             }
 
+            auto rng = makeRngForContainers(containerIds);
             MoveResult bestResult = MoveResult::makeEmpty();
             int nSampleSetsConsidered = 0;
             while (nSampleSetsConsidered < nSampleSetsToExplore_) {
               ++nSampleSetsConsidered;
 
               auto candidateMoveSet = generateRandomSampleAndMoveSet(
-                  containerIds, groupObjectIds, problem, rng_);
+                  containerIds, groupObjectIds, problem, rng);
               auto result = evaluator.evaluate(std::move(candidateMoveSet));
               stats.add(result);
 

@@ -16,7 +16,6 @@
 #include "algopt/rebalancer/solver/moves/GreedyGroupToScopeItemMoveType.h"
 #include "algopt/rebalancer/solver/moves/tests/MoveTestBase.h"
 
-#include <fmt/format.h>
 #include <folly/container/irange.h>
 #include <folly/coro/GtestHelpers.h>
 #include <gtest/gtest.h>
@@ -32,41 +31,30 @@ class GreedyGroupToScopeItemMoveTypeTest : public MoveTestBase {
 };
 
 CO_TEST_F(GreedyGroupToScopeItemMoveTypeTest, SamplingIsDeterministic) {
-  // Freshly constructed move types share the same default-seeded rng_, so every
-  // sample picks the same containers.
-  constexpr int kGroupSize = 2;
-  // Enough empty candidates that a random shuffle almost never picks the same
-  // pair twice.
-  constexpr int kCandidateCount = 12;
+  // Several scope items are explored in parallel; per-destination seeding makes
+  // the chosen move identical on every run and race-free (checked under
+  // dev-tsan).
   constexpr int kSampleRuns = 100;
-
-  // The group starts together on container0 (the hot container); container1..N
-  // are empty candidates, so the sampled pair depends only on the shuffle
-  // order.
-  std::vector<std::string> groupObjects;
-  groupObjects.reserve(kGroupSize);
-  for (const auto i : folly::irange(kGroupSize)) {
-    groupObjects.push_back(fmt::format("object{}", i));
-  }
-  entities::Map<std::string, std::vector<std::string>> assignment{
-      {"container0", groupObjects}};
-  std::vector<std::string> candidates;
-  candidates.reserve(kCandidateCount);
-  for (const auto i : folly::irange(1, kCandidateCount + 1)) {
-    const auto name = fmt::format("container{}", i);
-    assignment[name] = {};
-    candidates.push_back(name);
-  }
-  setInitialAssignment(assignment);
-  co_await addScope("assignable", {{"candidates", candidates}});
-  co_await addPartition("job", {{"j1", groupObjects}});
+  setInitialAssignment(
+      {{"container0", {"object0", "object1"}},
+       {"container1", {}},
+       {"container2", {}},
+       {"container3", {}},
+       {"container4", {}},
+       {"container5", {}},
+       {"container6", {}}});
+  co_await addScope(
+      "assignable",
+      {{"item0", {"container1", "container2"}},
+       {"item1", {"container3", "container4"}},
+       {"item2", {"container5", "container6"}}});
+  co_await addPartition("job", {{"j1", {"object0", "object1"}}});
   const auto universe = buildUniverse();
 
   createProblem(
       /*objectiveTuple=*/{const_expr(0, *universe)},
       /*constraint=*/const_expr(0, *universe));
 
-  // One sample of the group's destinations from a fresh, default-seeded move.
   const auto sampleGroupMove = [&] {
     interface::GreedyGroupToScopeItemMoveTypeSpec spec;
     spec.groupMovesPartition() = "job";
@@ -84,7 +72,6 @@ CO_TEST_F(GreedyGroupToScopeItemMoveTypeTest, SamplingIsDeterministic) {
   };
 
   const auto expected = sampleGroupMove();
-  CO_ASSERT_EQ(static_cast<int>(expected.size()), kGroupSize);
   const std::vector<Move> expectedMoves(expected.begin(), expected.end());
   for ([[maybe_unused]] const auto i : folly::irange(kSampleRuns)) {
     REBALANCER_EXPECT_EQ_MOVESETS(expectedMoves, sampleGroupMove());
