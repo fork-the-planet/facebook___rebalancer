@@ -62,24 +62,9 @@ double ObjectPartitionLookupWithMinPresencePolicy::Data::transformWeight(
     const entities::GroupId& groupId,
     const entities::ScopeItemId& scopeItemId,
     const Precision& precision) const {
-  if (makeContinuousPenaltyTerm) {
-    const auto extraAdditivePenalty =
-        groupToExtraAdditivePenalty.getLimit(scopeItemId, groupId);
-    if (!precision.isEqual(extraAdditivePenalty, 0.0)) {
-      weight = std::max(weight + extraAdditivePenalty, 0.0);
-    }
-    return applyWeights(
-        weight,
-        groupId,
-        scopeItemId,
-        {interface::GroupUtilMultiplierTarget::PRESENCE_WEIGHT,
-         interface::GroupUtilMultiplierTarget::UTILIZATION,
-         interface::GroupUtilMultiplierTarget::COMMON},
-        precision);
-  }
-
+  double unweightedPenalty = weight;
   // Apply multipliers which targets to actual util.
-  weight = applyWeights(
+  const auto actualUtil = applyWeights(
       weight,
       groupId,
       scopeItemId,
@@ -92,9 +77,10 @@ double ObjectPartitionLookupWithMinPresencePolicy::Data::transformWeight(
       folly::get_ptr(scopeItemToAlwaysPresentGroups, scopeItemId);
   const auto groupAlwaysPresent =
       presentGroupsPtr && presentGroupsPtr->contains(groupId);
-  if (precision.isStrictlyGtZero(weight) || groupAlwaysPresent) {
+  auto minContributionToUtil = 0.0;
+  if (precision.isStrictlyGtZero(actualUtil) || groupAlwaysPresent) {
     // Apply multipliers which targets to presence weight.
-    auto minContributionToUtil =
+    minContributionToUtil =
         groupToPresenceWeight.getLimit(scopeItemId, groupId);
     minContributionToUtil = applyWeights(
         minContributionToUtil,
@@ -104,11 +90,35 @@ double ObjectPartitionLookupWithMinPresencePolicy::Data::transformWeight(
          interface::GroupUtilMultiplierTarget::COMMON},
         precision,
         roundUpGroupUtilOnScopeItem);
-
-    weight = std::max(minContributionToUtil, weight);
+  }
+  const auto finalUtil = std::max(minContributionToUtil, actualUtil);
+  if (makeContinuousPenaltyTerm) {
+    double continuousPenalty = 0.0;
+    // Only apply non-zero continuous penalty if `U > lowerBound(U)` where `U =
+    // std::max(minContributionToUtil, actualUtil)` the final
+    // constraint/objective expression. LowerBound(U) >= minContributionToUTil
+    // when groupAlwaysPresent=true, and is at least 0 otherwise.
+    const auto lbEstimate = groupAlwaysPresent ? minContributionToUtil : 0.0;
+    if (precision.isstrictlyGreater(finalUtil, lbEstimate)) {
+      const auto extraAdditivePenalty =
+          groupToExtraAdditivePenalty.getLimit(scopeItemId, groupId);
+      if (!precision.isEqual(extraAdditivePenalty, 0.0)) {
+        unweightedPenalty =
+            std::max(unweightedPenalty + extraAdditivePenalty, 0.0);
+      }
+      continuousPenalty = applyWeights(
+          unweightedPenalty,
+          groupId,
+          scopeItemId,
+          {interface::GroupUtilMultiplierTarget::PRESENCE_WEIGHT,
+           interface::GroupUtilMultiplierTarget::UTILIZATION,
+           interface::GroupUtilMultiplierTarget::COMMON},
+          precision);
+    }
+    return continuousPenalty;
   }
 
-  return weight;
+  return finalUtil;
 }
 
 template <>
