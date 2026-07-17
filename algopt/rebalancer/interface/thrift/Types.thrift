@@ -25,16 +25,6 @@ namespace php rebalancer_interface
 namespace py rebalancer.interface.thrift.Types
 namespace py3 rebalancer.interface.thrift
 
-@cpp.Type{template = "folly::F14FastMap"}
-typedef map<string, i64> StringToI64Map
-
-// Represents a mapping of containers to objects in terms of their instance count
-struct ContainerAssignment {
-  // container -> object -> count
-  @cpp.Type{template = "folly::F14FastMap"}
-  1: map<string, StringToI64Map> objectsPerContainer;
-}
-
 enum ConstraintPolicy {
   /*
   If a constraint is broken initially, make “fixing it” a goal,
@@ -357,7 +347,7 @@ struct EquivalenceSetInfo {
 }
 
 @python.UseCAPI
-@thrift.ReserveIds{ids = [10, 16, 17, 18]}
+@thrift.ReserveIds{ids = [10, 16, 17, 18, 23, 24]}
 struct AssignmentSolution {
   @cpp.Type{template = "folly::F14FastMap"}
   1: map<string, string> assignment;
@@ -382,8 +372,6 @@ struct AssignmentSolution {
   20: Metrics.Metrics initialMetrics;
   21: Metrics.Metrics finalMetrics;
   22: EquivalenceSetInfo equivalenceSetInfo;
-  23: ContainerAssignment compactAssignmentInitial;
-  24: ContainerAssignment compactAssignment;
 }
 
 // Defines a routing ring as:
