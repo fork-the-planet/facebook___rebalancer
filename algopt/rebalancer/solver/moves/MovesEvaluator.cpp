@@ -166,6 +166,21 @@ bool MovesEvaluator::satisfiesConstraints(const MoveSet& moves) const {
   return !isPositive(problem_.getLabeledConstraints(), context);
 }
 
+bool MovesEvaluator::violatesAny(
+    const std::vector<ExprPtr>& constraints,
+    const Move& move) const {
+  if (constraints.empty()) {
+    return false;
+  }
+  static thread_local Context context;
+  context.clear();
+  context.changes() = move.getChangeSet();
+  return std::any_of(
+      constraints.begin(), constraints.end(), [&](const ExprPtr& expr) {
+        return isPositive(expr, context);
+      });
+}
+
 MoveResult MovesEvaluator::evaluate(MoveSet&& moves) const {
   checkMoves(moves);
   static thread_local Context context;

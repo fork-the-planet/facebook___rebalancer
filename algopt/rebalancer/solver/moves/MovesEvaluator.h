@@ -40,6 +40,11 @@ class MovesEvaluator {
   // Cheaper than evaluate() when only validity matters.
   bool satisfiesConstraints(const MoveSet& moves) const;
 
+  // Whether `move` violates any of `constraints` (a positive value means
+  // violated).
+  bool violatesAny(const std::vector<ExprPtr>& constraints, const Move& move)
+      const;
+
   // NOTE: apply changes to problem and also update internal state
   // needed since what we evaluate depends on what the intermediate 'applied'
   // state is

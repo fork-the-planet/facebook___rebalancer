@@ -67,6 +67,26 @@ folly::Random::DefaultGenerator makeRngForContainers(
       static_cast<folly::Random::DefaultGenerator::result_type>(seed));
 }
 
+std::vector<entities::ContainerId> getFeasibleContainers(
+    const MovesEvaluator& evaluator,
+    const std::vector<entities::ContainerId>& containers,
+    entities::ObjectId object,
+    const std::vector<ExprPtr>& pruningConstraints) {
+  if (pruningConstraints.empty()) {
+    return containers;
+  }
+  const auto source = evaluator.getProblem().assignment.getContainer(object);
+  std::vector<entities::ContainerId> kept;
+  kept.reserve(containers.size());
+  for (const auto container : containers) {
+    if (!evaluator.violatesAny(
+            pruningConstraints, Move(object, source, container))) {
+      kept.push_back(container);
+    }
+  }
+  return kept;
+}
+
 MoveSet generateRandomSampleAndMoveSet(
     std::vector<entities::ContainerId>& allContainers,
     const std::vector<entities::ObjectId>& groupObjectIds,
@@ -99,12 +119,14 @@ GreedyGroupToScopeItemMoveType::GreedyGroupToScopeItemMoveType(
     : MoveType(solverConfigs),
       partitionName_(requireGroupMovesPartition(spec)),
       nSampleSetsToExplore_(*spec.nSampleSetsToExplore()),
-      destinationsToExplore_(buildDestinationsToExplore(spec)) {}
+      destinationsToExplore_(buildDestinationsToExplore(spec)),
+      pruningConstraintNames_(*spec.candidatePruning()->constraintNames()) {}
 
 MoveResult GreedyGroupToScopeItemMoveType::exploreMovingGroup(
     const MovesEvaluator& evaluator,
     const std::vector<entities::ObjectId>& groupObjectIds,
     const ReferenceList<const std::vector<entities::ContainerId>>& destinations,
+    const std::vector<ExprPtr>& pruningConstraints,
     MoveStatsAggregator& stats,
     double timeLimit) const {
   const std::function<MoveResult(
@@ -123,7 +145,17 @@ MoveResult GreedyGroupToScopeItemMoveType::exploreMovingGroup(
               return MoveResult::makeEmpty();
             }
 
-            auto containerIds = folly::copy(containers); // copy to shuffle
+            // Prune destinations a representative group member cannot move
+            // into.
+            auto containerIds = getFeasibleContainers(
+                evaluator,
+                containers,
+                groupObjectIds.front(),
+                pruningConstraints);
+            if (containerIds.size() < groupObjectIds.size()) {
+              return MoveResult::makeEmpty();
+            }
+
             auto rng = makeRngForContainers(containerIds);
             MoveResult bestResult = MoveResult::makeEmpty();
             for (const auto _ : folly::irange(nSampleSetsToExplore_)) {
@@ -144,6 +176,17 @@ MoveResult GreedyGroupToScopeItemMoveType::exploreMovingGroup(
       getParallelExecutionConfig());
 }
 
+const std::vector<ExprPtr>&
+GreedyGroupToScopeItemMoveType::resolvePruningConstraints(
+    const Problem& problem) {
+  if (!pruningConstraints_.has_value()) {
+    pruningConstraints_ = pruningConstraintNames_.empty()
+        ? std::vector<ExprPtr>{}
+        : problem.getHardConstraintComponents(pruningConstraintNames_);
+  }
+  return *pruningConstraints_;
+}
+
 MoveResult GreedyGroupToScopeItemMoveType::findBestMove(
     const MovesEvaluator& evaluator,
     entities::ContainerId hotContainer,
@@ -154,6 +197,7 @@ MoveResult GreedyGroupToScopeItemMoveType::findBestMove(
 
   auto& problem = evaluator.getProblem();
   const auto& universe = problem.getUniverse();
+  const auto& pruningConstraints = resolvePruningConstraints(problem);
 
   // Do NOT deduplicate using equivalent sets because this moveType is
   // essentially impossing a constraint that all objects in a group must move
@@ -191,6 +235,7 @@ MoveResult GreedyGroupToScopeItemMoveType::findBestMove(
         groupObjectIds,
         getDestinationsToExplore(
             destinationsToExplore_, hotContainer, hotObjectId, problem),
+        pruningConstraints,
         stats,
         timeLimit - timer.getSeconds());
 

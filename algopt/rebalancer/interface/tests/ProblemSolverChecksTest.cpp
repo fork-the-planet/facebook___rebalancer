@@ -3842,6 +3842,54 @@ TEST_P(ProblemSolverChecksTest, CustomEquivalenceSet) {
   }
 }
 
+TEST_P(ProblemSolverChecksTest, MoveCandidatePruningConstraintNames) {
+  auto solver = makeInitializedSolver(GetParam());
+  solver->addScope(
+      "assignable",
+      std::map<std::string, std::string>{{"h1", "a1"}, {"h2", "a1"}});
+  solver->addPartition(
+      "job",
+      std::unordered_map<std::string, std::string>{{"s1", "j1"}, {"s2", "j1"}});
+
+  CapacitySpec capacitySpec;
+  capacitySpec.name() = "host_capacity";
+  capacitySpec.scope() = "host";
+  capacitySpec.dimension() = "shard_count";
+  capacitySpec.limit()->globalLimit() = 1;
+  capacitySpec.limit()->type() = LimitType::ABSOLUTE;
+  capacitySpec.bound() = CapacitySpecBound::MAX;
+  solver->addConstraint(capacitySpec);
+
+  MinimizeMovementSpec goalSpec;
+  goalSpec.name() = "a_goal";
+  solver->addGoal(goalSpec);
+
+  const auto solverSpecPruning = [](std::vector<std::string> constraintNames) {
+    GreedyGroupToScopeItemMoveTypeSpec moveTypeSpec;
+    moveTypeSpec.scopeItemMovesScope() = "assignable";
+    moveTypeSpec.groupMovesPartition() = "job";
+    moveTypeSpec.candidatePruning()->constraintNames() =
+        std::move(constraintNames);
+    LocalSearchSolverSpec solverSpec;
+    solverSpec.moveTypeList()->push_back(
+        ProblemSolver::makeMoveTypeSpec(std::move(moveTypeSpec)));
+    return solverSpec;
+  };
+
+  // A real constraint name is accepted.
+  solver->addSolver(solverSpecPruning({"host_capacity"}));
+
+  // An unknown name is rejected.
+  REBALANCER_EXPECT_RUNTIME_ERROR(
+      solver->addSolver(solverSpecPruning({"does_not_exist"})),
+      "Constraint 'does_not_exist' does not exist");
+
+  // A goal name is rejected: pruning names constraints, not goals.
+  REBALANCER_EXPECT_RUNTIME_ERROR(
+      solver->addSolver(solverSpecPruning({"a_goal"})),
+      "Constraint 'a_goal' does not exist");
+}
+
 TEST_P(ProblemSolverChecksTest, PerObjectiveValueCheck) {
   auto solver = makeInitializedSolver(GetParam());
   algopt::common::thrift::PerObjectiveValue perObjectiveValue;

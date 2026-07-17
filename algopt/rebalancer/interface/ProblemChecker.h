@@ -188,6 +188,18 @@ class ProblemChecker {
   void addSpec(const CapacityWithGroupPresenceSpec& spec);
   void addSpec(const DiversifyWithinScopeItemSpec& spec);
 
+  // Records a constraint spec's name so checkConstraintNameExists can reject
+  // goal names.
+  template <typename Spec>
+    requires FieldTypeExistsInThriftStructOrUnion<
+        interface::ConstraintSpecs,
+        Spec>
+  void recordConstraintName(const Spec& spec) {
+    if constexpr (requires { *spec.name(); }) {
+      addConstraintName(*spec.name());
+    }
+  }
+
   void checkLogicalOrSpec(const LogicalOrSpec& spec);
   void checkLogicalAndSpec(const LogicalAndSpec& spec);
   void checkCapacitySpec(const CapacitySpec& spec);
@@ -273,6 +285,7 @@ class ProblemChecker {
 
   void addSpecName(const std::string& name);
   void addSpecName(const folly::Optional<std::string>& name);
+  void addConstraintName(const std::string& name);
   void addGlobalName(const std::string& name, EntityType type);
   void addPartition(const std::string& partition);
   void addGroup(const std::string& partition, const std::string& group);
@@ -345,6 +358,7 @@ class ProblemChecker {
       const algopt::common::thrift::PerObjectiveValue& perObjectiveValue);
 
   void checkSpecNamesExists(const std::string& specName) const;
+  void checkConstraintNameExists(const std::string& constraintName) const;
 
   // captures what exactly an object represents, eg: 'shard', 'task'
   // not to be confused with name of a specific object
@@ -358,6 +372,7 @@ class ProblemChecker {
   algopt::MapImpl<std::string, algopt::SetImpl<std::string>> scopeContainers;
   algopt::MapImpl<std::string, algopt::SetImpl<std::string>> partitions;
   algopt::SetImpl<std::string> specNames;
+  algopt::SetImpl<std::string> constraintNames_;
   algopt::MapImpl<std::string, algopt::SetImpl<std::string>>
       dimensionToEntityTypes;
   algopt::MapImpl<std::string, EntityType> globalNameToType;

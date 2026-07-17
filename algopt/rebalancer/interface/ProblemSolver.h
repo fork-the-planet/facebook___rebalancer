@@ -867,6 +867,7 @@ ProblemSolver& ProblemSolver::addConstraint(
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
   checker.checkTuplePos(tuplePosIfBroken);
 
+  checker.recordConstraintName(spec);
   if constexpr (std::same_as<Spec, ToFreeSpec>) {
     checker.addSpec(spec, true /*isConstraint*/);
   } else {
@@ -883,6 +884,7 @@ ProblemSolver& ProblemSolver::addConstraint(Spec spec)
   requires(isSingleParameterConstraint<Spec>)
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
+  checker.recordConstraintName(spec);
   checker.addSpec(spec);
   getProblemBuilder().addConstraint(
       std::move(spec), std::nullopt, std::nullopt, std::nullopt, std::nullopt);

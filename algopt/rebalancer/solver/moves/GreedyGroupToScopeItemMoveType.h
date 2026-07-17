@@ -14,7 +14,11 @@
 
 #pragma once
 
+#include "algopt/rebalancer/solver/expressions/Expression.h"
 #include "algopt/rebalancer/solver/moves/MoveType.h"
+#include "algopt/rebalancer/solver/utils/Problem.h"
+
+#include <optional>
 
 namespace facebook::rebalancer {
 
@@ -50,11 +54,17 @@ class GreedyGroupToScopeItemMoveType : public MoveType {
       const std::vector<entities::ObjectId>& groupObjectIdsInt,
       const ReferenceList<const std::vector<entities::ContainerId>>&
           destinations,
+      const std::vector<ExprPtr>& pruningConstraints,
       MoveStatsAggregator& stats,
       double timeLimit) const;
+
+  // Resolves the pruning names to hard components once, caching the result.
+  const std::vector<ExprPtr>& resolvePruningConstraints(const Problem& problem);
 
   const std::string partitionName_;
   const int nSampleSetsToExplore_;
   const interface::DestinationsToExploreOptions destinationsToExplore_;
+  const std::vector<std::string> pruningConstraintNames_;
+  std::optional<std::vector<ExprPtr>> pruningConstraints_;
 };
 } // namespace facebook::rebalancer

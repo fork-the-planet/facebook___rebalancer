@@ -464,6 +464,19 @@ Problem::getMaterializedProblem() const {
   return materializedProblem_;
 }
 
+std::vector<ExprPtr> Problem::getHardConstraintComponents(
+    const std::vector<std::string>& constraintNames) const {
+  const auto& constraintIdToHardComponent =
+      getMaterializedProblem()->hardConstraints;
+  std::vector<ExprPtr> components;
+  components.reserve(constraintNames.size());
+  for (const auto& name : constraintNames) {
+    components.push_back(
+        constraintIdToHardComponent.at(universe_->getConstraintId(name)));
+  }
+  return components;
+}
+
 PackerSet<entities::EquivalenceSetId> Problem::getDynamicEquivalentSets(
     const PackerSet<ContainerId>& containerSet) const {
   PackerSet<entities::EquivalenceSetId> dynamicSets;

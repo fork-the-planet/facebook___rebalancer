@@ -150,3 +150,88 @@ TEST_P(GreedyGroupToScopeItemTest, RejectsInvalidSpecs) {
         "GreedyGroupToScopeItemMoveTypeSpec 'scopeItemsPerGroups' partition 'other' must match 'groupMovesPartition' 'job'");
   }
 }
+
+TEST_P(GreedyGroupToScopeItemTest, PruningSkipsFullHostButKeepsHostWithRoom) {
+  // task0 (1 gpu) starts in 'unassigned', which a ToFree constraint drains, so
+  // it must move. Scope 'rack' has two hosts, each its own scope item: 'full'
+  // (holds 2 tasks, already at the per-host cap of 2 gpu) and 'partial' (holds
+  // 1 task, room for one more). task0 fits only on 'partial'; the full host
+  // would overflow, so pruning drops it before it is evaluated.
+  // `pruneFullHost` toggles candidatePruning.
+  const auto solve = [&](bool pruneFullHost) {
+    auto solver =
+        initializeTestProblemSolver({.executorThreadCount = GetParam()});
+    solver->setObjectName("task");
+    solver->setContainerName("host");
+    solver->setAssignment(
+        folly::F14FastMap<std::string, std::vector<std::string>>{
+            {"unassigned", {"task0"}},
+            {"full", {"task1", "task2"}},
+            {"partial", {"task3"}}});
+    solver->addPartition(
+        "solo",
+        std::map<std::string, std::vector<std::string>>(
+            {{"solo0", {"task0"}}}));
+    solver->addScope(
+        "rack",
+        std::map<std::string, std::string>(
+            {{"full", "rack1"}, {"partial", "rack2"}}));
+    solver->addObjectDimension(
+        "gpu",
+        std::map<std::string, double>(
+            {{"task0", 1}, {"task1", 1}, {"task2", 1}, {"task3", 1}}));
+
+    CapacitySpec capacitySpec;
+    capacitySpec.name() = "host_gpu_capacity";
+    capacitySpec.scope() = "host";
+    capacitySpec.dimension() = "gpu";
+    capacitySpec.bound() = CapacitySpecBound::MAX;
+    Limit limit;
+    limit.type() = LimitType::ABSOLUTE;
+    limit.globalLimit() = 2;
+    capacitySpec.limit() = std::move(limit);
+    solver->addConstraint(capacitySpec);
+
+    {
+      // Drain 'unassigned' so task0 has to move.
+      ToFreeSpec spec;
+      spec.containers() = {"unassigned"};
+      solver->addConstraint(spec);
+    }
+
+    GreedyGroupToScopeItemMoveTypeSpec moveTypeSpec;
+    moveTypeSpec.scopeItemMovesScope() = "rack";
+    moveTypeSpec.groupMovesPartition() = "solo";
+    moveTypeSpec.nSampleSetsToExplore() = 1;
+    if (pruneFullHost) {
+      moveTypeSpec.candidatePruning()->constraintNames() = {
+          "host_gpu_capacity"};
+    }
+    LocalSearchSolverSpec spec;
+    spec.moveTypeList()->push_back(
+        ProblemSolver::makeMoveTypeSpec(std::move(moveTypeSpec)));
+    solver->addSolver(spec);
+    return solver->solve();
+  };
+
+  const auto numEvals = [](const AssignmentSolution& solution) {
+    auto evalStats = solution.solverSummaries()->at(0).evalStats();
+    if (!evalStats.has_value()) {
+      throw std::runtime_error("expected solver eval stats to be populated");
+    }
+    return *evalStats->numEvals();
+  };
+
+  const auto pruned = solve(/*pruneFullHost=*/true);
+  const auto unpruned = solve(/*pruneFullHost=*/false);
+
+  // task0 fits only on 'partial', so it lands there with or without pruning.
+  EXPECT_EQ(pruned.assignment()->at("task0"), "partial");
+  EXPECT_EQ(unpruned.assignment()->at("task0"), "partial");
+
+  // 'rack' has two scope items (the full host and the host with room), so the
+  // unpruned solve evaluates one candidate for each. Pruning drops the full
+  // host before evaluation, leaving only the host with room.
+  EXPECT_EQ(2, numEvals(unpruned));
+  EXPECT_EQ(1, numEvals(pruned));
+}

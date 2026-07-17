@@ -677,6 +677,14 @@ struct ReplicaDropMoveTypeSpec {
   2: string replicaDropScope;
 }
 
+// Prunes candidate moves before full (expensive) evaluation: a candidate that
+// would break any of the named hard constraints is dropped early. This only
+// steers which candidates are explored; the full evaluator still decides every
+// move.
+struct MoveCandidatePruningSpec {
+  1: list<string> constraintNames;
+}
+
 struct GreedyGroupToScopeItemMoveTypeSpec {
   1: string scopeItemMovesScope;
   2: string groupMovesPartition;
@@ -689,6 +697,10 @@ struct GreedyGroupToScopeItemMoveTypeSpec {
   // groups to a subset of scope items. All scope item in 'scopeItemMovesScope'
   // are explored if this field is not specified.
   4: optional DestinationsToExploreOptions destinationsToExplore;
+  // Prune candidate destinations that would break one of the named hard
+  // constraints before full (expensive) evaluation. Empty list means no
+  // pruning.
+  5: MoveCandidatePruningSpec candidatePruning;
 }
 
 enum MoveStrategyType {

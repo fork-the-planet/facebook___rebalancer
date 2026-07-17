@@ -1881,6 +1881,20 @@ void ProblemChecker::checkSpecNamesExists(const std::string& specName) const {
   }
 }
 
+void ProblemChecker::addConstraintName(const std::string& name) {
+  if (!name.empty()) {
+    constraintNames_.insert(name);
+  }
+}
+
+void ProblemChecker::checkConstraintNameExists(
+    const std::string& constraintName) const {
+  if (!constraintNames_.contains(constraintName)) {
+    throw std::runtime_error(
+        fmt::format("Constraint '{}' does not exist", constraintName));
+  }
+}
+
 void ProblemChecker::addDestinationsToExploreOptions(
     const std::string& name,
     const interface::DestinationsToExploreOptions&
@@ -2099,6 +2113,10 @@ void ProblemChecker::checkMoveTypeSpec(
       }
     }
     checkDestinationsToExploreOptions(destinations);
+  }
+  for (const auto& constraintName :
+       *spec.candidatePruning()->constraintNames()) {
+    checkConstraintNameExists(constraintName);
   }
 }
 
