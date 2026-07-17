@@ -685,6 +685,10 @@ struct GreedyGroupToScopeItemMoveTypeSpec {
   // scopeItem, where each set has the same size as the number of objects in the
   // group and the containers included in a set is random.
   3: i32 nSampleSetsToExplore = 2;
+  // Specify where each group may move. Use scopeItemsPerGroups to restrict specific
+  // groups to a subset of scope items. All scope item in 'scopeItemMovesScope'
+  // are explored if this field is not specified.
+  4: optional DestinationsToExploreOptions destinationsToExplore;
 }
 
 enum MoveStrategyType {

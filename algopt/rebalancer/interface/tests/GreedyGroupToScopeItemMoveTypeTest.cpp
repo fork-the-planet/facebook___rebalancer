@@ -87,16 +87,66 @@ TEST_P(GreedyGroupToScopeItemTest, Basic) {
   EXPECT_NE(assignment["task3"], "unassigned");
 }
 
-TEST_P(GreedyGroupToScopeItemTest, ThrowIfMoveParamsNotSet) {
-  // problem is setup in SetUp()
+TEST_P(GreedyGroupToScopeItemTest, RejectsInvalidSpecs) {
+  // A rejected spec throws in checkSolverSpec before any solver is added, so
+  // solver_ stays usable across cases.
+  const auto expectRejected =
+      [&](GreedyGroupToScopeItemMoveTypeSpec moveTypeSpec,
+          const std::string& error) {
+        LocalSearchSolverSpec spec;
+        spec.moveTypeList()->push_back(
+            ProblemSolver::makeMoveTypeSpec(std::move(moveTypeSpec)));
+        REBALANCER_EXPECT_RUNTIME_ERROR(solver_->addSolver(spec), error);
+      };
+
+  ScopeItemList item;
+  item.scopeName() = "assignable";
+  item.scopeItems() = {"assignable1"};
+
+  // Neither scopeItemMovesScope nor destinationsToExplore set: no destinations.
+  expectRejected(
+      GreedyGroupToScopeItemMoveTypeSpec(),
+      "GreedyGroupToScopeItemMoveTypeSpec must have at least one of 'scopeItemMovesScope' or 'destinationsToExplore' set");
+
+  // Destinations configured but no group partition.
   {
-    LocalSearchSolverSpec spec;
-    spec.moveTypeList()->push_back(
-        ProblemSolver::makeMoveTypeSpec(GreedyGroupToScopeItemMoveTypeSpec()));
-    solver_->addSolver(spec);
+    GreedyGroupToScopeItemMoveTypeSpec moveTypeSpec;
+    moveTypeSpec.scopeItemMovesScope() = "assignable";
+    expectRejected(
+        std::move(moveTypeSpec),
+        "GreedyGroupToScopeItemMoveTypeSpec requires 'groupMovesPartition' to be set");
   }
 
-  REBALANCER_EXPECT_RUNTIME_ERROR(
-      solver_->solve(),
-      "GreedyGroupToScopeItemMoveType requires the parameter 'groupMovesPartition' and 'scopeItemMovesScope' to be set");
+  // objectToScopeItems is per-object, ambiguous for a whole-group move.
+  {
+    MoveToScopeItemsSpec moveToScopeItems;
+    moveToScopeItems.defaultScopeItems() = item;
+    moveToScopeItems.objectToScopeItems() = {{"task0", item}};
+    DestinationsToExploreOptions destinationsToExplore;
+    destinationsToExplore.moveToScopeItems() = moveToScopeItems;
+    GreedyGroupToScopeItemMoveTypeSpec moveTypeSpec;
+    moveTypeSpec.groupMovesPartition() = "job";
+    moveTypeSpec.destinationsToExplore() = destinationsToExplore;
+    expectRejected(
+        std::move(moveTypeSpec),
+        "GreedyGroupToScopeItemMoveTypeSpec does not support 'objectToScopeItems' in 'destinationsToExplore'; it moves a whole group to one scope item. Use 'scopeItemsPerGroups' or 'defaultScopeItems' instead");
+  }
+
+  // scopeItemsPerGroups must resolve groups from the same partition we move.
+  {
+    GroupToScopeItemList perGroup;
+    perGroup.partitionName() = "other";
+    perGroup.groupToScopeItemList() = {{"job0", item}};
+    MoveToScopeItemsSpec moveToScopeItems;
+    moveToScopeItems.defaultScopeItems() = item;
+    moveToScopeItems.scopeItemsPerGroups() = perGroup;
+    DestinationsToExploreOptions destinationsToExplore;
+    destinationsToExplore.moveToScopeItems() = moveToScopeItems;
+    GreedyGroupToScopeItemMoveTypeSpec moveTypeSpec;
+    moveTypeSpec.groupMovesPartition() = "job";
+    moveTypeSpec.destinationsToExplore() = destinationsToExplore;
+    expectRejected(
+        std::move(moveTypeSpec),
+        "GreedyGroupToScopeItemMoveTypeSpec 'scopeItemsPerGroups' partition 'other' must match 'groupMovesPartition' 'job'");
+  }
 }

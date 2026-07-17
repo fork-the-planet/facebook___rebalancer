@@ -25,6 +25,37 @@
 namespace facebook::rebalancer {
 
 namespace {
+// Use 'destinationsToExplore' if set, else all scope items of
+// 'scopeItemMovesScope'.
+interface::DestinationsToExploreOptions buildDestinationsToExplore(
+    const interface::GreedyGroupToScopeItemMoveTypeSpec& spec) {
+  if (spec.destinationsToExplore().has_value()) {
+    return *spec.destinationsToExplore();
+  }
+  if (spec.scopeItemMovesScope()->empty()) {
+    throw std::runtime_error(
+        "GreedyGroupToScopeItemMoveType requires either 'destinationsToExplore' or 'scopeItemMovesScope' to be set");
+  }
+  interface::ScopeItemList defaultScopeItems;
+  defaultScopeItems.scopeName() = *spec.scopeItemMovesScope();
+  interface::MoveToScopeItemsSpec moveToScopeItems;
+  moveToScopeItems.defaultScopeItems() = std::move(defaultScopeItems);
+  interface::DestinationsToExploreOptions destinationsToExplore;
+  destinationsToExplore.moveToScopeItems() = std::move(moveToScopeItems);
+  return destinationsToExplore;
+}
+
+// Validates and returns 'groupMovesPartition'. Called from the member init list
+// so a missing partition is reported before the destination checks.
+const std::string& requireGroupMovesPartition(
+    const interface::GreedyGroupToScopeItemMoveTypeSpec& spec) {
+  if (spec.groupMovesPartition()->empty()) {
+    throw std::runtime_error(
+        "GreedyGroupToScopeItemMoveType requires the parameter 'groupMovesPartition' to be set");
+  }
+  return *spec.groupMovesPartition();
+}
+
 // A local generator seeded from the scope item's containers keeps parallel
 // sampling race-free and deterministic; a shared generator would race. The seed
 // is order-independent, so it does not depend on the container list's order.
@@ -65,54 +96,41 @@ std::string GreedyGroupToScopeItemMoveType::name() const {
 GreedyGroupToScopeItemMoveType::GreedyGroupToScopeItemMoveType(
     const interface::LocalSearchSolverSpec& solverConfigs,
     const interface::GreedyGroupToScopeItemMoveTypeSpec& spec)
-    : MoveType(solverConfigs) {
-  if (spec.groupMovesPartition()->empty() ||
-      spec.scopeItemMovesScope()->empty()) {
-    throw std::runtime_error(
-        "GreedyGroupToScopeItemMoveType requires the parameter 'groupMovesPartition' and 'scopeItemMovesScope' to be set");
-  }
-  partitionName_ = *spec.groupMovesPartition();
-  scopeName_ = *spec.scopeItemMovesScope();
-  nSampleSetsToExplore_ = *spec.nSampleSetsToExplore();
-}
+    : MoveType(solverConfigs),
+      partitionName_(requireGroupMovesPartition(spec)),
+      nSampleSetsToExplore_(*spec.nSampleSetsToExplore()),
+      destinationsToExplore_(buildDestinationsToExplore(spec)) {}
 
 MoveResult GreedyGroupToScopeItemMoveType::exploreMovingGroup(
     const MovesEvaluator& evaluator,
     const std::vector<entities::ObjectId>& groupObjectIds,
-    const std::vector<entities::ScopeItemId>& allScopeItemIds,
+    const ReferenceList<const std::vector<entities::ContainerId>>& destinations,
     MoveStatsAggregator& stats,
     double timeLimit) const {
-  const std::function<MoveResult(entities::ScopeItemId)>
+  const std::function<MoveResult(
+      std::reference_wrapper<const std::vector<entities::ContainerId>>)>
       sampleContainersAndEvaluate =
-          [&](entities::ScopeItemId destinationScopeItemId) {
+          [&](std::reference_wrapper<const std::vector<entities::ContainerId>>
+                  scopeItemContainers) {
             const auto& problem = evaluator.getProblem();
-            const auto& universe = problem.getUniverse();
-            const auto scopeId = universe.getScopeId(scopeName_);
-            const auto& scope = universe.getScope(scopeId);
-            const auto containerIdsPtr =
-                scope.getContainerIdsPtr(destinationScopeItemId);
-            auto containerIds = std::vector<entities::ContainerId>(
-                containerIdsPtr->begin(), containerIdsPtr->end());
-            if (containerIds.size() < groupObjectIds.size()) {
-              // This moveType tries to move each object
-              // in the group to a separate container.
-              // Therefore, a candidateScopeItem should
-              // have at least as many containers as the
-              // objects in the group
+            const auto& containers = scopeItemContainers.get();
+            // This moveType tries to move each object
+            // in the group to a separate container.
+            // Therefore, a candidateScopeItem should
+            // have at least as many containers as the
+            // objects in the group
+            if (containers.size() < groupObjectIds.size()) {
               return MoveResult::makeEmpty();
             }
 
+            auto containerIds = folly::copy(containers); // copy to shuffle
             auto rng = makeRngForContainers(containerIds);
             MoveResult bestResult = MoveResult::makeEmpty();
-            int nSampleSetsConsidered = 0;
-            while (nSampleSetsConsidered < nSampleSetsToExplore_) {
-              ++nSampleSetsConsidered;
-
+            for (const auto _ : folly::irange(nSampleSetsToExplore_)) {
               auto candidateMoveSet = generateRandomSampleAndMoveSet(
                   containerIds, groupObjectIds, problem, rng);
               auto result = evaluator.evaluate(std::move(candidateMoveSet));
               stats.add(result);
-
               bestResult.aggregate(std::move(result));
             }
             return bestResult;
@@ -120,7 +138,7 @@ MoveResult GreedyGroupToScopeItemMoveType::exploreMovingGroup(
 
   return MoveHelper::findBest(
       evaluator.getProblem().configs.threadPool.get(),
-      allScopeItemIds,
+      destinations,
       sampleContainersAndEvaluate,
       timeLimit,
       getParallelExecutionConfig());
@@ -136,8 +154,6 @@ MoveResult GreedyGroupToScopeItemMoveType::findBestMove(
 
   auto& problem = evaluator.getProblem();
   const auto& universe = problem.getUniverse();
-  const auto scopeId = universe.getScopeId(scopeName_);
-  const auto& scope = universe.getScope(scopeId);
 
   // Do NOT deduplicate using equivalent sets because this moveType is
   // essentially impossing a constraint that all objects in a group must move
@@ -173,7 +189,8 @@ MoveResult GreedyGroupToScopeItemMoveType::findBestMove(
     auto bestGroupMove = exploreMovingGroup(
         evaluator,
         groupObjectIds,
-        scope.getScopeItemIds(),
+        getDestinationsToExplore(
+            destinationsToExplore_, hotContainer, hotObjectId, problem),
         stats,
         timeLimit - timer.getSeconds());
 

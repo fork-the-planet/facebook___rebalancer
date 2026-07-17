@@ -23,12 +23,11 @@ constexpr folly::StringPiece kGreedyGroupToScopeItemMoveTypeName =
 
 /*
 GreedyGroupToScopeItemMoveType evaluates moving an entire group of objects from
-the given partition (as specified in the field 'groupMovesPartition') to a
-scopeItem in the given scope (as specified in the field 'scopeItemMovesScope').
-Note that in the current implementation, each object in the group is forced to
-move into a *unique* container in the chosen scopeItem. This in turn implies
-that moves are only explored to scopeItems that have as many containers as
-objects in the group being considered.
+the given partition (as specified in the field 'groupMovesPartition') to one of
+its candidate destination scopeItems (resolved from 'destinationsToExplore').
+Each object in the group is forced to move into a *unique* container in the
+chosen scopeItem, so moves are only explored to scopeItems that have at least as
+many containers as the group has objects.
 */
 class GreedyGroupToScopeItemMoveType : public MoveType {
  public:
@@ -49,12 +48,13 @@ class GreedyGroupToScopeItemMoveType : public MoveType {
   MoveResult exploreMovingGroup(
       const MovesEvaluator& evaluator,
       const std::vector<entities::ObjectId>& groupObjectIdsInt,
-      const std::vector<entities::ScopeItemId>& allScopeItemIds,
+      const ReferenceList<const std::vector<entities::ContainerId>>&
+          destinations,
       MoveStatsAggregator& stats,
       double timeLimit) const;
 
-  std::string partitionName_;
-  std::string scopeName_;
-  int nSampleSetsToExplore_;
+  const std::string partitionName_;
+  const int nSampleSetsToExplore_;
+  const interface::DestinationsToExploreOptions destinationsToExplore_;
 };
 } // namespace facebook::rebalancer

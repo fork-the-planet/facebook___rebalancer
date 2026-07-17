@@ -1678,6 +1678,11 @@ void ProblemChecker::checkMoveTypeSpecs(
         checkMoveTypeSpec(moveTypeSpec.get_singleFastMoveTypeSpec());
         break;
       }
+      case interface::MoveTypeSpec::Type::greedyGroupToScopeItemMoveTypeSpec: {
+        checkMoveTypeSpec(
+            moveTypeSpec.get_greedyGroupToScopeItemMoveTypeSpec());
+        break;
+      }
       case MoveTypeSpec::Type::__EMPTY__: {
         throw std::runtime_error(
             "MoveTypeSpec is empty; you need to specify one of the options");
@@ -2044,6 +2049,56 @@ void ProblemChecker::checkMoveTypeSpec(
     checkNonNegativeValue(
         *spec.defaultSampleSize(),
         "ColocateGroupsMoveTypeSpec.defaultSampleSize");
+  }
+}
+
+void ProblemChecker::checkMoveTypeSpec(
+    const interface::GreedyGroupToScopeItemMoveTypeSpec& spec) const {
+  // Destinations come from either scopeItemMovesScope (all its scope items) or
+  // an explicit destinationsToExplore; without one of them there is nowhere to
+  // move groups.
+  if (spec.scopeItemMovesScope()->empty() &&
+      !spec.destinationsToExplore().has_value()) {
+    throw std::runtime_error(
+        "GreedyGroupToScopeItemMoveTypeSpec must have at least one of 'scopeItemMovesScope' or 'destinationsToExplore' set");
+  }
+  if (spec.groupMovesPartition()->empty()) {
+    throw std::runtime_error(
+        "GreedyGroupToScopeItemMoveTypeSpec requires 'groupMovesPartition' to be set");
+  }
+  checkNonNegativeValue(
+      *spec.nSampleSetsToExplore(),
+      "GreedyGroupToScopeItemMoveTypeSpec.nSampleSetsToExplore");
+  checkPartitionExists(*spec.groupMovesPartition());
+  if (!spec.scopeItemMovesScope()->empty()) {
+    checkScopeExists(*spec.scopeItemMovesScope());
+  }
+  if (spec.destinationsToExplore().has_value()) {
+    const auto& destinations = *spec.destinationsToExplore();
+    if (destinations.getType() ==
+        interface::DestinationsToExploreOptions::Type::moveToScopeItems) {
+      const auto& moveToScopeItems = destinations.get_moveToScopeItems();
+      // This move type relocates a whole group to a single scope item.
+      // objectToScopeItems is per-object, so it is not supported.
+      if (!moveToScopeItems.objectToScopeItems()->empty()) {
+        throw std::runtime_error(
+            "GreedyGroupToScopeItemMoveTypeSpec does not support 'objectToScopeItems' in 'destinationsToExplore'; it moves a whole group to one scope item. Use 'scopeItemsPerGroups' or 'defaultScopeItems' instead");
+      }
+      // scopeItemsPerGroups looks up the moved group in its own partition to
+      // pick the destination, so that partition must be the one we move. An
+      // empty map is inert (its partitionName is never consulted), so we only
+      // check the partition when the map is non-empty.
+      const auto& perGroups = *moveToScopeItems.scopeItemsPerGroups();
+      if (!perGroups.groupToScopeItemList()->empty() &&
+          *perGroups.partitionName() != *spec.groupMovesPartition()) {
+        throw std::runtime_error(
+            fmt::format(
+                "GreedyGroupToScopeItemMoveTypeSpec 'scopeItemsPerGroups' partition '{}' must match 'groupMovesPartition' '{}'",
+                *perGroups.partitionName(),
+                *spec.groupMovesPartition()));
+      }
+    }
+    checkDestinationsToExploreOptions(destinations);
   }
 }
 

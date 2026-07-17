@@ -305,6 +305,8 @@ class ProblemChecker {
   void checkMoveTypeSpec(
       const interface::ColocateGroupsMoveTypeSpec& spec) const;
   void checkMoveTypeSpec(const interface::SingleFastMoveTypeSpec& spec) const;
+  void checkMoveTypeSpec(
+      const interface::GreedyGroupToScopeItemMoveTypeSpec& spec) const;
 
   void checkDestinationsToExploreOptions(
       const interface::DestinationsToExploreOptions& spec) const;
