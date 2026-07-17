@@ -349,22 +349,6 @@ class ProblemSolver:
         self._ps.setAssignment(containerToObjects)
         return self
 
-    def setCompactAssignment(
-        self, compactAssignmentInput: dict[str, dict[str, int]]
-    ) -> ProblemSolver:
-        """Set initial assignment using compact form (container -> object -> count).
-
-        Args:
-            compactAssignmentInput: Mapping of container name to
-                {object name: instance count}. Must be called before
-                adding dimensions, partitions, or specs.
-
-        Returns:
-            Self for method chaining.
-        """
-        self._ps.setCompactAssignment(compactAssignmentInput)
-        return self
-
     def setConstraintPolicy(self, policy: ConstraintPolicy) -> ProblemSolver:
         self._ps.setConstraintPolicy(policy)
         return self

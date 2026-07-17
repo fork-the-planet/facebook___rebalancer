@@ -419,14 +419,6 @@ class ProblemSolverPy {
     return *this;
   }
 
-  ProblemSolverPy& setCompactAssignment(
-      const std::unordered_map<
-          std::string,
-          std::unordered_map<std::string, int64_t>>& compactAssignmentInput) {
-    solver_->setAssignment(compactAssignmentInput);
-    return *this;
-  }
-
   ProblemSolverPy& setConstraintPolicy(nb::handle policy) {
     solver_->setConstraintPolicy(
         deserialize<interface::ConstraintPolicy>(policy));
@@ -917,17 +909,6 @@ NB_MODULE(_rebalancer, m) {
           "Returns:\n"
           "  self, for fluent chaining.")
       .def(
-          "set_compact_assignment",
-          &ProblemSolverPy::setCompactAssignment,
-          nb::arg("compact_assignment_input"),
-          self,
-          "Set the initial assignment in compact form: container ->\n"
-          "object name -> instance count. The solver internally expands\n"
-          "this into synthetic per-object names. MUST be called before\n"
-          "any dimensions, partitions, or specs are added.\n\n"
-          "Returns:\n"
-          "  self, for fluent chaining.")
-      .def(
           "set_constraint_policy",
           &ProblemSolverPy::setConstraintPolicy,
           nb::arg("policy"),
@@ -1049,8 +1030,6 @@ NB_MODULE(_rebalancer, m) {
           "Returns:\n"
           "  AssignmentSolution as a dict (Thrift-JSON shape). Notable\n"
           "  fields include ``assignment`` (object -> container),\n"
-          "  ``compactAssignment`` (container -> object -> count),\n"
-          "  ``compactAssignmentInitial`` (the input compact assignment),\n"
           "  ``initialMetrics`` and ``finalMetrics`` (when\n"
           "  ``publish_metrics`` is enabled).");
 }

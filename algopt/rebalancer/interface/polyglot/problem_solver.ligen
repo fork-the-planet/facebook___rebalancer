@@ -199,11 +199,6 @@ unique class ProblemSolverBinding {
     unordered_map<string, vec<string>> containerToObjects,
   ) throws;
 
-  @output_name(py="setCompactAssignment")
-  mut void setCompactAssignment(
-    unordered_map<string, unordered_map<string, i64>> compactAssignmentInput,
-  ) throws;
-
   @output_name(py="setConstraintPolicy")
   mut void setConstraintPolicy(Types.ConstraintPolicy policy) throws;
 

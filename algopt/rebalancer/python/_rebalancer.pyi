@@ -152,9 +152,6 @@ class ProblemSolver:
     def set_assignment(
         self, container_to_objects: dict[str, list[str]]
     ) -> ProblemSolver: ...
-    def set_compact_assignment(
-        self, compact_assignment_input: dict[str, dict[str, int]]
-    ) -> ProblemSolver: ...
     def set_constraint_policy(self, policy: ConstraintPolicy) -> ProblemSolver: ...
     def set_default_constraint_params(
         self, params: ConstraintParams
