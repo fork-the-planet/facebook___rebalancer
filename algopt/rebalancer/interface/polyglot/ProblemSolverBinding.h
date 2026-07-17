@@ -163,13 +163,6 @@ class ProblemSolverBinding {
       const std::unordered_map<std::string, std::vector<std::string>>&
           containerToObjects);
 
-  // Compact assignment: container -> object -> count.
-  // Uses a distinct name because ligen does not support overloading.
-  void setCompactAssignment(
-      const std::unordered_map<
-          std::string,
-          std::unordered_map<std::string, int64_t>>& compactAssignmentInput);
-
   void setConstraintPolicy(const interface::ConstraintPolicy& policy);
 
   void setDefaultConstraintParams(const interface::ConstraintParams& params);

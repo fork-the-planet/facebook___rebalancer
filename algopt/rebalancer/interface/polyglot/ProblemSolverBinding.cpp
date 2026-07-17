@@ -314,13 +314,6 @@ void ProblemSolverBinding::setAssignment(
   solver_->setAssignment(containerToObjects);
 }
 
-void ProblemSolverBinding::setCompactAssignment(
-    const std::unordered_map<
-        std::string,
-        std::unordered_map<std::string, int64_t>>& compactAssignmentInput) {
-  solver_->setAssignment(compactAssignmentInput);
-}
-
 void ProblemSolverBinding::setConstraintPolicy(
     const interface::ConstraintPolicy& policy) {
   solver_->setConstraintPolicy(policy);
