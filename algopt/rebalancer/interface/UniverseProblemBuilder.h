@@ -112,14 +112,13 @@ class UniverseProblemBuilder {
         std::string,
         std::vector<std::string>>;
 
-  template <typename ObjectToValue, typename ScaleByUsageMap = ObjectToValue>
+  template <typename ObjectToValue>
   void addObjectDimension(
       const std::string& dimensionName,
       ObjectToValue objectToValue,
       double defaultValue = 0,
-      std::optional<ScaleByUsageMap> scaleByUsageMap = std::nullopt)
-    requires IsIterableOverPairs<ObjectToValue, std::string, double> &&
-      IsIterableOverPairs<ScaleByUsageMap, std::string, double>;
+      std::optional<ObjectToValue> scaleByUsageMap = std::nullopt)
+    requires IsIterableOverPairs<ObjectToValue, std::string, double>;
 
   template <typename ObjectToValues>
   void addObjectDimension(
@@ -313,14 +312,13 @@ class UniverseProblemBuilder {
         std::string,
         std::vector<std::string>>;
 
-  template <typename ObjectToValue, typename ScaleByUsageMap>
+  template <typename ObjectToValue>
   folly::coro::Task<void> addObjectDimensionImpl(
       entities::DimensionId dimensionId,
       ObjectToValue objectToValue,
       double defaultValue,
-      std::optional<ScaleByUsageMap> scaleByUsageMap)
-    requires IsIterableOverPairs<ObjectToValue, std::string, double> &&
-      IsIterableOverPairs<ScaleByUsageMap, std::string, double>;
+      std::optional<ObjectToValue> scaleByUsageMap)
+    requires IsIterableOverPairs<ObjectToValue, std::string, double>;
 
   template <typename ObjectToValues>
   folly::coro::Task<void> addObjectDimensionImpl(
@@ -656,14 +654,13 @@ void UniverseProblemBuilder::setAssignment(
   universe_.setInitialAssignment(containerToObjects);
 }
 
-template <typename ObjectToValue, typename ScaleByUsageMap>
+template <typename ObjectToValue>
 void UniverseProblemBuilder::addObjectDimension(
     const std::string& dimensionName,
     ObjectToValue objectToValue,
     double defaultValue,
-    std::optional<ScaleByUsageMap> scaleByUsageMap)
-  requires IsIterableOverPairs<ObjectToValue, std::string, double> &&
-    IsIterableOverPairs<ScaleByUsageMap, std::string, double>
+    std::optional<ObjectToValue> scaleByUsageMap)
+  requires IsIterableOverPairs<ObjectToValue, std::string, double>
 {
   const auto dimensionId = universe_.makeObjectDimensionId(dimensionName);
   maybeExecuteAsync(addObjectDimensionImpl(
@@ -673,14 +670,13 @@ void UniverseProblemBuilder::addObjectDimension(
       std::move(scaleByUsageMap)));
 }
 
-template <typename ObjectToValue, typename ScaleByUsageMap>
+template <typename ObjectToValue>
 folly::coro::Task<void> UniverseProblemBuilder::addObjectDimensionImpl(
     entities::DimensionId dimensionId,
     ObjectToValue objectToValue,
     double defaultValue,
-    std::optional<ScaleByUsageMap> scaleByUsageMap)
-  requires IsIterableOverPairs<ObjectToValue, std::string, double> &&
-    IsIterableOverPairs<ScaleByUsageMap, std::string, double>
+    std::optional<ObjectToValue> scaleByUsageMap)
+  requires IsIterableOverPairs<ObjectToValue, std::string, double>
 {
   const auto objects = universe_.getObjects();
   const auto totalObjects = objects->numObjects;

@@ -15,7 +15,6 @@
 #pragma once
 
 #include "algopt/rebalancer/common/log/RebalancerLog.h"
-#include "algopt/rebalancer/interface/ObjectCountExpander.h"
 #include "algopt/rebalancer/interface/ProblemChecker.h"
 #include "algopt/rebalancer/interface/thrift/gen-cpp2/AssignmentProblem_types.h"
 #include "algopt/rebalancer/interface/thrift/gen-cpp2/ProblemSpecs_types.h"
@@ -32,8 +31,6 @@
 #include <folly/executors/ThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
 
-#include <cstdint>
-#include <map>
 #include <optional>
 #include <string>
 #include <type_traits>
@@ -48,20 +45,6 @@ inline constexpr bool isSingleParameterConstraint =
     std::same_as<std::remove_cvref_t<Spec>, interface::AvoidMovingSpec> ||
     std::same_as<std::remove_cvref_t<Spec>, interface::MoveGroupSpec> ||
     std::same_as<std::remove_cvref_t<Spec>, interface::MovesInProgressSpec>;
-
-// Matches iterable<(string, iterable<(string, int64_t)>)> representing
-// container -> object -> count, e.g. map<string, map<string, int64_t>>.
-template <typename CompactAssignmentInput>
-concept IsCompactAssignmentInput = requires {
-  requires IsIterableOverPairs<
-      CompactAssignmentInput,
-      std::string,
-      typename CompactAssignmentInput::value_type::second_type>;
-  requires IsIterableOverPairs<
-      typename CompactAssignmentInput::value_type::second_type,
-      std::string,
-      int64_t>;
-};
 
 // Manages asynchronous Manifold uploads on a background thread pool.
 // ProblemSolver enqueues upload coroutines via add(); the caller must
@@ -223,19 +206,6 @@ class ProblemSolver {
         std::string,
         std::vector<std::string>>;
 
-  // Explicit Thrift overload for callers that already have counted
-  // assignments materialized.
-  ProblemSolver& setAssignment(const ContainerAssignment& compactAssignment);
-
-  // Compact-assignment overload: container -> object -> count.
-  // Accepts data in ContainerAssignment shape and expands it into synthetic
-  // per-object names internally.
-  // MUST be called before any dimensions, partitions, or specs are added.
-  template <typename CompactAssignmentInput>
-  ProblemSolver& setAssignment(
-      const CompactAssignmentInput& compactAssignmentInput)
-    requires IsCompactAssignmentInput<CompactAssignmentInput>;
-
   // Override the solver's container "hotness" ranking. Currently consumed
   // only by OptimalSubsetSolver to bias subset selection.
   ProblemSolver& overrideContainerHotnessRanking(
@@ -313,14 +283,13 @@ class ProblemSolver {
           std::map<std::string, double>
           std::vector<std::pair<std::string, double>>
     */
-  template <typename ObjectToValue, typename ScaleByUsageMap = ObjectToValue>
+  template <typename ObjectToValue>
   ProblemSolver& addObjectDimension(
       const std::string& dimensionName,
       ObjectToValue objectToValue,
       double defaultValue = 0,
-      std::optional<ScaleByUsageMap> scaleByUsageMap = std::nullopt)
-    requires IsIterableOverPairs<ObjectToValue, std::string, double> &&
-      IsIterableOverPairs<ScaleByUsageMap, std::string, double>;
+      std::optional<ObjectToValue> scaleByUsageMap = std::nullopt)
+    requires IsIterableOverPairs<ObjectToValue, std::string, double>;
 
   /**
       ObjectToValues is a map of the following form:
@@ -608,67 +577,7 @@ class ProblemSolver {
 
   void logProblemSetupTime() const;
 
-  template <typename ScopeItemToObjectToValue>
-  ProblemSolver& addDynamicObjectDimensionInner(
-      const std::string& dimensionName,
-      const std::string& scopeName,
-      ScopeItemToObjectToValue scopeItemToObjectToValue,
-      double defaultValue)
-    requires IsMapOfMap<
-        ScopeItemToObjectToValue,
-        std::string,
-        std::string,
-        double>;
-
-  template <typename ObjectToGroup>
-  ProblemSolver& addPartitionInner(
-      const std::string& partitionName,
-      ObjectToGroup objectToGroup)
-    requires IsIterableOverPairs<ObjectToGroup, std::string, std::string>;
-
-  template <typename GroupToObjects>
-  ProblemSolver& addPartitionInner(
-      const std::string& partitionName,
-      GroupToObjects groupToObjects)
-    requires IsIterableOverPairs<
-        GroupToObjects,
-        std::string,
-        std::vector<std::string>>;
-
-  template <typename ObjectToValue, typename ScaleByUsageMap>
-  ProblemSolver& addObjectDimensionInner(
-      const std::string& dimensionName,
-      ObjectToValue objectToValue,
-      double defaultValue,
-      std::optional<ScaleByUsageMap> scaleByUsageMap)
-    requires IsIterableOverPairs<ObjectToValue, std::string, double> &&
-      IsIterableOverPairs<ScaleByUsageMap, std::string, double>;
-
-  template <typename ObjectToValues>
-  ProblemSolver& addObjectDimensionInner(
-      const std::string& dimensionName,
-      ObjectToValues objectToValues,
-      double defaultValue)
-    requires IsIterableOverPairs<
-        ObjectToValues,
-        std::string,
-        std::vector<double>>;
-
-  template <typename ContainerToObjects>
-  ProblemSolver& setExpandedAssignment(
-      const ContainerToObjects& containerToObjects)
-    requires IsIterableOverPairs<
-        ContainerToObjects,
-        std::string,
-        std::vector<std::string>>;
-
-  ProblemSolver& setCompactAssignmentInner(
-      const ContainerAssignment& compactAssignment);
-
   void persistToManifoldImpl(AsyncManifoldUploadHandle& manifoldUploadHandle);
-
-  template <typename Spec>
-  Spec expandSpecForCompactAssignment(Spec spec) const;
 
  private:
   std::shared_ptr<folly::ThreadPoolExecutor> executor;
@@ -723,7 +632,6 @@ class ProblemSolver {
   std::shared_ptr<AsyncManifoldUploadHandle> manifoldUploadHandle_{nullptr};
 
   algopt::Timer problemSetupTime_;
-  std::optional<ObjectCountExpander> objectCountExpander_;
 };
 
 // implementations
@@ -743,84 +651,6 @@ ProblemSolver& ProblemSolver::addContainerDimension(
 }
 
 template <typename ScopeItemToObjectToValue>
-ProblemSolver& ProblemSolver::addDynamicObjectDimensionInner(
-    const std::string& dimensionName,
-    const std::string& scopeName,
-    ScopeItemToObjectToValue scopeItemToObjectToValue,
-    double defaultValue)
-  requires IsMapOfMap<
-      ScopeItemToObjectToValue,
-      std::string,
-      std::string,
-      double>
-{
-  checker.addDynamicObjectDimension(
-      dimensionName, scopeName, scopeItemToObjectToValue);
-  getProblemBuilder().addDynamicObjectDimension(
-      dimensionName,
-      scopeName,
-      std::move(scopeItemToObjectToValue),
-      defaultValue);
-  return *this;
-}
-
-template <typename ObjectToGroup>
-ProblemSolver& ProblemSolver::addPartitionInner(
-    const std::string& partitionName,
-    ObjectToGroup objectToGroup)
-  requires IsIterableOverPairs<ObjectToGroup, std::string, std::string>
-{
-  checker.addPartition(partitionName, objectToGroup);
-  getProblemBuilder().addPartition(partitionName, std::move(objectToGroup));
-  return *this;
-}
-
-template <typename GroupToObjects>
-ProblemSolver& ProblemSolver::addPartitionInner(
-    const std::string& partitionName,
-    GroupToObjects groupToObjects)
-  requires IsIterableOverPairs<
-      GroupToObjects,
-      std::string,
-      std::vector<std::string>>
-{
-  checker.addPartition(partitionName, groupToObjects);
-  getProblemBuilder().addPartition(partitionName, std::move(groupToObjects));
-  return *this;
-}
-
-template <typename ObjectToValue, typename ScaleByUsageMap>
-ProblemSolver& ProblemSolver::addObjectDimensionInner(
-    const std::string& dimensionName,
-    ObjectToValue objectToValue,
-    double defaultValue,
-    std::optional<ScaleByUsageMap> scaleByUsageMap)
-  requires IsIterableOverPairs<ObjectToValue, std::string, double> &&
-    IsIterableOverPairs<ScaleByUsageMap, std::string, double>
-{
-  checker.addObjectDimension(dimensionName, objectToValue);
-  getProblemBuilder().addObjectDimension(
-      dimensionName,
-      std::move(objectToValue),
-      defaultValue,
-      std::move(scaleByUsageMap));
-  return *this;
-}
-
-template <typename ObjectToValues>
-ProblemSolver& ProblemSolver::addObjectDimensionInner(
-    const std::string& dimensionName,
-    ObjectToValues objectToValues,
-    double defaultValue)
-  requires IsIterableOverPairs<ObjectToValues, std::string, std::vector<double>>
-{
-  checker.addObjectDimension(dimensionName, objectToValues);
-  getProblemBuilder().addObjectDimension(
-      dimensionName, std::move(objectToValues), defaultValue);
-  return *this;
-}
-
-template <typename ScopeItemToObjectToValue>
 ProblemSolver& ProblemSolver::addDynamicObjectDimension(
     const std::string& dimensionName,
     const std::string& scopeName,
@@ -833,21 +663,14 @@ ProblemSolver& ProblemSolver::addDynamicObjectDimension(
       double>
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
-  if (!objectCountExpander_) {
-    return addDynamicObjectDimensionInner(
-        dimensionName,
-        scopeName,
-        std::move(scopeItemToObjectToValue),
-        defaultValue);
-  }
-
-  folly::F14FastMap<std::string, folly::F14FastMap<std::string, double>>
-      expanded;
-  for (const auto& [scopeItem, objectToValue] : scopeItemToObjectToValue) {
-    expanded[scopeItem] = objectCountExpander_->expandObjectMap(objectToValue);
-  }
-  return addDynamicObjectDimensionInner(
-      dimensionName, scopeName, std::move(expanded), defaultValue);
+  checker.addDynamicObjectDimension(
+      dimensionName, scopeName, scopeItemToObjectToValue);
+  getProblemBuilder().addDynamicObjectDimension(
+      dimensionName,
+      scopeName,
+      std::move(scopeItemToObjectToValue),
+      defaultValue);
+  return *this;
 }
 
 template <typename ScopeItemToGroupToValue>
@@ -860,8 +683,6 @@ ProblemSolver& ProblemSolver::addDynamicObjectDimension(
   requires IsMapOfMap<ScopeItemToGroupToValue, std::string, std::string, double>
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
-  // Partition-based dynamic dimensions operate on group names, not object
-  // names, so no expansion is needed regardless of objectCountExpander_.
   checker.addDynamicObjectDimension(
       dimensionName, scopeName, partitionName, scopeItemToGroupToValue);
   getProblemBuilder().addDynamicObjectDimension(
@@ -881,13 +702,9 @@ ProblemSolver& ProblemSolver::addPartition(
   requires IsIterableOverPairs<ObjectToGroup, std::string, std::string>
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
-  if (!objectCountExpander_) {
-    return addPartitionInner(partitionName, std::move(objectToGroup));
-  }
-
-  auto expandedObjectToGroup =
-      objectCountExpander_->expandObjectMap(objectToGroup);
-  return addPartitionInner(partitionName, std::move(expandedObjectToGroup));
+  checker.addPartition(partitionName, objectToGroup);
+  getProblemBuilder().addPartition(partitionName, std::move(objectToGroup));
+  return *this;
 }
 
 template <typename GroupToObjects>
@@ -900,18 +717,9 @@ ProblemSolver& ProblemSolver::addPartition(
       std::vector<std::string>>
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
-  if (!objectCountExpander_) {
-    // No compact-assignment expansion is active, so pass through unchanged.
-    // Converting to
-    // object->group would lose data when objects belong to multiple groups.
-    return addPartitionInner(partitionName, std::move(groupToObjects));
-  }
-
-  // Expand group->objects directly: replace each original object name
-  // with its synthetic names, preserving the many-to-many relationship.
-  auto expandedGroupToObjects = objectCountExpander_->expandGroupToObjects(
-      groupToObjects, "addPartition");
-  return addPartitionInner(partitionName, std::move(expandedGroupToObjects));
+  checker.addPartition(partitionName, groupToObjects);
+  getProblemBuilder().addPartition(partitionName, std::move(groupToObjects));
+  return *this;
 }
 
 template <typename ScopeItemToValue>
@@ -981,17 +789,6 @@ ProblemSolver& ProblemSolver::setAssignment(
       std::vector<std::string>>
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
-  return setExpandedAssignment(containerToObjects);
-}
-
-template <typename ContainerToObjects>
-ProblemSolver& ProblemSolver::setExpandedAssignment(
-    const ContainerToObjects& containerToObjects)
-  requires IsIterableOverPairs<
-      ContainerToObjects,
-      std::string,
-      std::vector<std::string>>
-{
   checker.resetAssignment();
   for (auto& [containerName, objectNames] : containerToObjects) {
     checker.addContainer(containerName);
@@ -1004,50 +801,22 @@ ProblemSolver& ProblemSolver::setExpandedAssignment(
   return *this;
 }
 
-template <typename CompactAssignmentInput>
-ProblemSolver& ProblemSolver::setAssignment(
-    const CompactAssignmentInput& compactAssignmentInput)
-  requires IsCompactAssignmentInput<CompactAssignmentInput>
-{
-  REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
-
-  ContainerAssignment compactAssignment;
-  auto& objectsPerContainer = *compactAssignment.objectsPerContainer();
-  for (const auto& [container, objectCounts] : compactAssignmentInput) {
-    auto& containerObjectCounts = objectsPerContainer[container];
-    for (const auto& [objectName, count] : objectCounts) {
-      containerObjectCounts[objectName] = count;
-    }
-  }
-
-  return setCompactAssignmentInner(compactAssignment);
-}
-
-template <typename ObjectToValue, typename ScaleByUsageMap>
+template <typename ObjectToValue>
 ProblemSolver& ProblemSolver::addObjectDimension(
     const std::string& dimensionName,
     ObjectToValue objectToValue,
     double defaultValue,
-    std::optional<ScaleByUsageMap> scaleByUsageMap)
-  requires IsIterableOverPairs<ObjectToValue, std::string, double> &&
-    IsIterableOverPairs<ScaleByUsageMap, std::string, double>
+    std::optional<ObjectToValue> scaleByUsageMap)
+  requires IsIterableOverPairs<ObjectToValue, std::string, double>
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
-  if (!objectCountExpander_) {
-    return addObjectDimensionInner(
-        dimensionName,
-        std::move(objectToValue),
-        defaultValue,
-        std::move(scaleByUsageMap));
-  }
-
-  auto expandedObjectToValue =
-      objectCountExpander_->expandObjectMap(objectToValue);
-  return addObjectDimensionInner(
+  checker.addObjectDimension(dimensionName, objectToValue);
+  getProblemBuilder().addObjectDimension(
       dimensionName,
-      std::move(expandedObjectToValue),
+      std::move(objectToValue),
       defaultValue,
       std::move(scaleByUsageMap));
+  return *this;
 }
 
 template <typename ObjectToValues>
@@ -1058,15 +827,11 @@ ProblemSolver& ProblemSolver::addObjectDimension(
   requires IsIterableOverPairs<ObjectToValues, std::string, std::vector<double>>
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
-  if (!objectCountExpander_) {
-    return addObjectDimensionInner(
-        dimensionName, std::move(objectToValues), defaultValue);
-  }
+  checker.addObjectDimension(dimensionName, objectToValues);
 
-  auto expandedObjectToValues =
-      objectCountExpander_->expandObjectMap(objectToValues);
-  return addObjectDimensionInner(
-      dimensionName, std::move(expandedObjectToValues), defaultValue);
+  getProblemBuilder().addObjectDimension(
+      dimensionName, std::move(objectToValues), defaultValue);
+  return *this;
 }
 
 template <typename Spec>
@@ -1076,7 +841,6 @@ ProblemSolver::addGoal(Spec spec, double weight, std::optional<int> tuplePos)
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
   checker.checkTuplePos(tuplePos);
-  spec = expandSpecForCompactAssignment(std::move(spec));
 
   if constexpr (std::same_as<Spec, ToFreeSpec>) {
     checker.addSpec(spec, false /*isConstraint*/);
@@ -1102,7 +866,6 @@ ProblemSolver& ProblemSolver::addConstraint(
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
   checker.checkTuplePos(tuplePosIfBroken);
-  spec = expandSpecForCompactAssignment(std::move(spec));
 
   if constexpr (std::same_as<Spec, ToFreeSpec>) {
     checker.addSpec(spec, true /*isConstraint*/);
@@ -1120,19 +883,10 @@ ProblemSolver& ProblemSolver::addConstraint(Spec spec)
   requires(isSingleParameterConstraint<Spec>)
 {
   REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
-  spec = expandSpecForCompactAssignment(std::move(spec));
   checker.addSpec(spec);
   getProblemBuilder().addConstraint(
       std::move(spec), std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   return *this;
-}
-
-template <typename Spec>
-Spec ProblemSolver::expandSpecForCompactAssignment(Spec spec) const {
-  if (objectCountExpander_) {
-    return objectCountExpander_->maybeExpandSpec(std::move(spec));
-  }
-  return spec;
 }
 
 } // namespace facebook::rebalancer::interface

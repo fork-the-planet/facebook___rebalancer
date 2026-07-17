@@ -398,18 +398,6 @@ ProblemSolver& ProblemSolver::setContainerName(
   return *this;
 }
 
-ProblemSolver& ProblemSolver::setAssignment(
-    const ContainerAssignment& compactAssignment) {
-  REBALANCER_PROBLEM_SETUP_TIMER_SCOPE();
-  return setCompactAssignmentInner(compactAssignment);
-}
-
-ProblemSolver& ProblemSolver::setCompactAssignmentInner(
-    const ContainerAssignment& compactAssignment) {
-  objectCountExpander_.emplace(compactAssignment);
-  return setExpandedAssignment(objectCountExpander_->getExpandedAssignment());
-}
-
 ProblemSolver& ProblemSolver::addObjectPartitionRoutingDimension(
     const std::string& dimensionName,
     const std::string& partitionName,
@@ -696,10 +684,6 @@ AssignmentSolution ProblemSolver::solve() {
         useParallelizedNewMaterializer_,
         universe_,
         logger_);
-
-    if (objectCountExpander_) {
-      objectCountExpander_->compressSolution(solution.value());
-    }
 
     if (shouldBackup(manifoldBackupParams, *solution->problemProfile())) {
       persistToManifold();

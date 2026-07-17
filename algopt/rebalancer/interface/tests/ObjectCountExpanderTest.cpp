@@ -135,42 +135,6 @@ TEST(ObjectCountExpanderTest, ExpandMovesInProgressSpecThrowsOnUnknownObject) {
   EXPECT_THROW(expander.expandMovesInProgressSpec(spec), std::invalid_argument);
 }
 
-TEST(ObjectCountExpanderTest, MaybeExpandSpecDispatchesToSupportedSpecLogic) {
-  const ObjectCountExpander expander(makeStandardCompactAssignment());
-
-  MovesInProgressSpec spec;
-  spec.name() = "moves-spec";
-
-  MoveInProgress move;
-  move.objName() = "taskA";
-  move.toContainer() = "host2";
-  spec.moves() = {move};
-
-  const auto expanded = expander.maybeExpandSpec(spec);
-
-  EXPECT_EQ(*expanded.name(), "moves-spec");
-  ASSERT_EQ(expanded.moves()->size(), 3);
-  for (const auto& expandedMove : *expanded.moves()) {
-    EXPECT_TRUE(expandedMove.objName()->starts_with("taskA__"));
-    EXPECT_EQ(*expandedMove.toContainer(), "host2");
-  }
-}
-
-TEST(ObjectCountExpanderTest, MaybeExpandSpecThrowsForUnsupportedFlowSpec) {
-  const ObjectCountExpander expander(makeStandardCompactAssignment());
-
-  FlowSpec spec;
-  spec.scope() = "host";
-  spec.dimension() = "cpu";
-
-  ObjectPair pair;
-  pair.object1() = "taskA";
-  pair.object2() = "taskB";
-  spec.pairs() = {pair};
-
-  EXPECT_THROW(expander.maybeExpandSpec(spec), std::invalid_argument);
-}
-
 // -- compressSolution --
 
 TEST(ObjectCountExpanderTest, RoundTripWithMovementPreservesCounts) {
