@@ -40,19 +40,15 @@ class DestinationsToExploreGenerator {
   ReferenceList<const std::vector<entities::ContainerId>>
   getAcceptingDestinations(
       const interface::MoveToScopeItemsSpec& moveToScopeItems,
-      const entities::ObjectId hotObject,
-      const entities::ContainerId hotContainerId);
+      const entities::ObjectId hotObject);
 
   ReferenceList<const std::vector<entities::ContainerId>>
   getAcceptingDestinations(
-      const interface::MoveToScopeItemsSpec& moveToScopeItems,
-      const entities::ContainerId hotContainerId);
+      const interface::MoveToScopeItemsSpec& moveToScopeItems);
 
  private:
   ReferenceList<const std::vector<entities::ContainerId>>
-  getAcceptingContainersList(
-      const interface::ScopeItemList& scopeItemList,
-      const entities::ContainerId hotContainerId);
+  getAcceptingContainersList(const interface::ScopeItemList& scopeItemList);
 
   const std::vector<entities::ContainerId>& getAcceptingContainers(
       entities::ScopeItemId scopeItemId,

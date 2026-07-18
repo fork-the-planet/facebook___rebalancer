@@ -36,7 +36,7 @@ DestinationsToExploreGenerator::getAcceptingDestinations(
     // in the given scope
     interface::ScopeItemList scopeItemList;
     scopeItemList.scopeName() = scopeName;
-    return getAcceptingContainersList(scopeItemList, hotContainerId);
+    return getAcceptingContainersList(scopeItemList);
   }
 
   return ReferenceList<const std::vector<entities::ContainerId>>{
@@ -46,15 +46,14 @@ DestinationsToExploreGenerator::getAcceptingDestinations(
 ReferenceList<const std::vector<entities::ContainerId>>
 DestinationsToExploreGenerator::getAcceptingDestinations(
     const interface::MoveToScopeItemsSpec& moveToScopeItems,
-    const entities::ObjectId hotObject,
-    const entities::ContainerId hotContainerId) {
+    const entities::ObjectId hotObject) {
   auto& objectToScopeItems = *moveToScopeItems.objectToScopeItems();
   auto& hotObjectName = universe_.getEntityName(hotObject);
 
   // if an object is specified in objectToScopeItems, use that.
   auto scopeItemListPtr = folly::get_ptr(objectToScopeItems, hotObjectName);
   if (scopeItemListPtr) {
-    return getAcceptingContainersList(*scopeItemListPtr, hotContainerId);
+    return getAcceptingContainersList(*scopeItemListPtr);
   }
 
   // if a group is specified in groupToScopeItems and hotObject belongs to that
@@ -82,30 +81,27 @@ DestinationsToExploreGenerator::getAcceptingDestinations(
           groupToScopeItem,
           universe_.getEntityName(onlyGroupId),
           defaultScopeItems);
-      return getAcceptingContainersList(scopeItemList, hotContainerId);
+      return getAcceptingContainersList(scopeItemList);
     }
   }
 
   // use defaultScopeItems if there is no specialization for hotObject
-  return getAcceptingContainersList(defaultScopeItems, hotContainerId);
+  return getAcceptingContainersList(defaultScopeItems);
 }
 
 ReferenceList<const std::vector<entities::ContainerId>>
 DestinationsToExploreGenerator::getAcceptingDestinations(
-    const interface::MoveToScopeItemsSpec& moveToScopeItems,
-    const entities::ContainerId hotContainerId) {
+    const interface::MoveToScopeItemsSpec& moveToScopeItems) {
   if (!moveToScopeItems.objectToScopeItems()->empty()) {
     throw std::runtime_error(
         "this function requires that objectToScopeItems is empty");
   }
-  return getAcceptingContainersList(
-      *moveToScopeItems.defaultScopeItems(), hotContainerId);
+  return getAcceptingContainersList(*moveToScopeItems.defaultScopeItems());
 }
 
 ReferenceList<const std::vector<entities::ContainerId>>
 DestinationsToExploreGenerator::getAcceptingContainersList(
-    const interface::ScopeItemList& scopeItemList,
-    const entities::ContainerId hotContainerId) {
+    const interface::ScopeItemList& scopeItemList) {
   ReferenceList<const std::vector<entities::ContainerId>> destinations;
   auto& scopeName = *scopeItemList.scopeName();
   auto scopeId = universe_.getScopeId(scopeName);
@@ -115,16 +111,6 @@ DestinationsToExploreGenerator::getAcceptingContainersList(
     for (auto& scopeItemName : scopeItemNames) {
       auto scopeItemId = universe_.getScopeItemId(scopeId, scopeItemName);
       destinations.emplace_back(getAcceptingContainers(scopeItemId, scope));
-    }
-  } else if (scopeItemList.exploreCurrentScopeItem().value()) {
-    const auto scopeItemId = scope.getScopeItemId(hotContainerId);
-    if (!scopeItemId.has_value()) {
-      interface::ScopeItemList newScopeItemList;
-      newScopeItemList.scopeName() = scopeName;
-      return getAcceptingContainersList(newScopeItemList, hotContainerId);
-    } else {
-      return ReferenceList<const std::vector<entities::ContainerId>>{
-          getAcceptingContainers(scopeItemId.value(), scope)};
     }
   } else {
     // if scopeItems are not explicitly listed, all scopeItems in the specified

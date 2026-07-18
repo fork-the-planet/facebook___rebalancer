@@ -1975,10 +1975,6 @@ void ProblemChecker::check(
     const interface::ScopeItemList& scopeItemList) const {
   checkScopeExists(*scopeItemList.scopeName());
   if (scopeItemList.scopeItems().has_value()) {
-    if (scopeItemList.exploreCurrentScopeItem().value()) {
-      throw std::runtime_error(
-          "Both exploreCurrentScopeItem and scopeItems are set in ScopeItemList. Only one of them should be set");
-    }
     for (auto& scopeItem : scopeItemList.scopeItems().value()) {
       checkScopeItemExists(*scopeItemList.scopeName(), scopeItem);
     }

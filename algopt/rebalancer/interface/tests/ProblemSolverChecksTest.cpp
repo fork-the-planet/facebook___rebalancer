@@ -2588,12 +2588,10 @@ TEST_P(ProblemSolverChecksTest, GroupMoveLimitSpecUnknownDimension) {
 
 TEST_P(ProblemSolverChecksTest, MoveToScopeItemSpecsTest) {
   auto makeScopeItemList = [](const std::string& scopeName,
-                              const std::vector<std::string>& scopeItems = {},
-                              const bool exploreCurrentScopeItem = false) {
+                              const std::vector<std::string>& scopeItems = {}) {
     ScopeItemList scopeItemList;
     scopeItemList.scopeName() = scopeName;
     scopeItemList.scopeItems() = scopeItems;
-    scopeItemList.exploreCurrentScopeItem() = exploreCurrentScopeItem;
 
     return scopeItemList;
   };
@@ -2754,26 +2752,6 @@ TEST_P(ProblemSolverChecksTest, MoveToScopeItemSpecsTest) {
         solver->addDestinationsToExploreOptions(
             "name2", destinationsToExploreOption),
         "unknown group j3 in partition job");
-  }
-
-  {
-    // check that both scope items and move to scope
-    DestinationsToExploreOptions destinationsToExploreOption;
-    MoveToScopeItemsSpec moveToScopeItemsSpec;
-    moveToScopeItemsSpec.defaultScopeItems() = makeScopeItemList("rack");
-
-    GroupToScopeItemList groupToScopeItemList;
-    groupToScopeItemList.groupToScopeItemList()->emplace(
-        "j1", makeScopeItemList("host", {"h1"}, true));
-    groupToScopeItemList.partitionName() = "job";
-    moveToScopeItemsSpec.scopeItemsPerGroups() = groupToScopeItemList;
-
-    destinationsToExploreOption.set_moveToScopeItems(moveToScopeItemsSpec);
-
-    REBALANCER_EXPECT_RUNTIME_ERROR(
-        solver->addDestinationsToExploreOptions(
-            "destinationsToExploreOptionName", destinationsToExploreOption),
-        "Both exploreCurrentScopeItem and scopeItems are set in ScopeItemList. Only one of them should be set");
   }
 }
 

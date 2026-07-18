@@ -464,7 +464,7 @@ std::vector<MoveSet> GroupMoveWithHintStrategiesMoveType::generateAllMoveSets(
 
     auto acceptingContainersPerScopeItem =
         problem.getDestinationsGenerator().getAcceptingDestinations(
-            *hintOptions.moveToScopeItems(), hotObjectId, hotContainer);
+            *hintOptions.moveToScopeItems(), hotObjectId);
 
     std::vector<MoveSet> newMoveSets;
     if (hintOptions.tertiaryPartition().has_value() &&

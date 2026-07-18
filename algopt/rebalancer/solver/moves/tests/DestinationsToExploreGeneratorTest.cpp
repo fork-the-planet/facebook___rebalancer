@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "algopt/rebalancer/algopt_common/TestUtils.h"
 #include "algopt/rebalancer/solver/expressions/Expression.h"
 #include "algopt/rebalancer/solver/expressions/Operators.h"
 #include "algopt/rebalancer/solver/moves/DestinationsToExploreGenerator.h"
@@ -165,9 +166,9 @@ CO_TEST_F(
   moveToScopeItemsSpec.defaultScopeItems() = defaultScopeItems;
 
   auto object1Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(1), container(1));
+      moveToScopeItemsSpec, object(1));
   auto object2Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(2), container(2));
+      moveToScopeItemsSpec, object(2));
 
   EXPECT_EQ(object1Destinations.size(), 2);
   EXPECT_EQ(object2Destinations.size(), 2);
@@ -222,9 +223,9 @@ CO_TEST_F(
   moveToScopeItemsSpec.objectToScopeItems() = {{"object2", scopeItemList}};
 
   auto object1Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(1), container(1));
+      moveToScopeItemsSpec, object(1));
   auto object2Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(2), container(2));
+      moveToScopeItemsSpec, object(2));
 
   EXPECT_EQ(object1Destinations.size(), 2);
   EXPECT_EQ(object2Destinations.size(), 1);
@@ -272,9 +273,9 @@ CO_TEST_F(
       {"object1", scopeItemList1}, {"object2", scopeItemList2}};
 
   auto object1Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(1), container(1));
+      moveToScopeItemsSpec, object(1));
   auto object2Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(2), container(2));
+      moveToScopeItemsSpec, object(2));
 
   EXPECT_EQ(object1Destinations.size(), 1);
   EXPECT_EQ(object2Destinations.size(), 1);
@@ -321,11 +322,11 @@ CO_TEST_F(
       {"object3", scopeItemList3}};
 
   auto object1Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(1), container(1));
+      moveToScopeItemsSpec, object(1));
   auto object2Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(2), container(2));
+      moveToScopeItemsSpec, object(2));
   auto object3Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(3), container(3));
+      moveToScopeItemsSpec, object(3));
 
   EXPECT_EQ(object1Destinations.size(), 0);
   EXPECT_EQ(object2Destinations.size(), 1);
@@ -368,11 +369,11 @@ CO_TEST_F(DestinationsToExploreGeneratorTest, groupToScopeItems) {
   moveToScopeItemsSpec.scopeItemsPerGroups() = groupToScopeItems;
 
   auto object1Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(1), container(1));
+      moveToScopeItemsSpec, object(1));
   auto object2Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(2), container(2));
+      moveToScopeItemsSpec, object(2));
   auto object3Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(3), container(3));
+      moveToScopeItemsSpec, object(3));
 
   EXPECT_EQ(object1Destinations.size(), 1);
   EXPECT_EQ(object2Destinations.size(), 1);
@@ -431,11 +432,11 @@ CO_TEST_F(
   moveToScopeItemsSpec.objectToScopeItems() = {{"object3", scopeItemList3}};
 
   auto object1Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(1), container(1));
+      moveToScopeItemsSpec, object(1));
   auto object2Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(2), container(2));
+      moveToScopeItemsSpec, object(2));
   auto object3Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(3), container(3));
+      moveToScopeItemsSpec, object(3));
 
   EXPECT_EQ(object1Destinations.size(), 1);
   EXPECT_EQ(object2Destinations.size(), 1);
@@ -457,125 +458,7 @@ CO_TEST_F(
 
 CO_TEST_F(
     DestinationsToExploreGeneratorTest,
-    exploreCurrentScopeItemAsDefault) {
-  // In contrast to getAcceptingDestinationsWithMoveToScopeItemsSpecAllDefault
-  // test, we explore only the current current scope item as default here.
-  co_await setUpProblem(/*nonAcceptingContainerIndices=*/{3});
-  auto& problem = getProblem();
-  auto& destinationsGenerator = problem.getDestinationsGenerator();
-  interface::ScopeItemList defaultScopeItems;
-  defaultScopeItems.scopeName() = "region";
-  defaultScopeItems.exploreCurrentScopeItem() = true;
-
-  interface::MoveToScopeItemsSpec moveToScopeItemsSpec;
-  moveToScopeItemsSpec.defaultScopeItems() = defaultScopeItems;
-
-  auto object1Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(1), container(1));
-  auto object2Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(2), container(2));
-
-  EXPECT_EQ(object1Destinations.size(), 1);
-  EXPECT_EQ(object2Destinations.size(), 1);
-
-  {
-    auto& object1FirstContainerSet = object1Destinations.at(0).get();
-    // container(1) is in region1, so only region1 is explored
-    const std::set<entities::ContainerId> expectedContainers = {
-        container(1), container(4)};
-    verifyContainersAreAsExpected(expectedContainers, object1FirstContainerSet);
-  }
-
-  {
-    auto& object2FirstContainerSet = object2Destinations.at(0).get();
-    // container(2) is in region2, so only region2 is explored
-    const std::set<entities::ContainerId> expectedContainers = {container(2)};
-    verifyContainersAreAsExpected(expectedContainers, object2FirstContainerSet);
-  }
-}
-
-CO_TEST_F(
-    DestinationsToExploreGeneratorTest,
-    exploreAllScopeItemsObjectSpecific) {
-  co_await setUpProblem(/*nonAcceptingContainerIndices=*/{3});
-  auto& problem = getProblem();
-  auto& destinationsGenerator = problem.getDestinationsGenerator();
-  interface::ScopeItemList defaultScopeItems;
-  defaultScopeItems.scopeName() = "region";
-  defaultScopeItems.exploreCurrentScopeItem() = true;
-
-  interface::ScopeItemList object2ScopeItems;
-  object2ScopeItems.scopeName() = "region";
-  object2ScopeItems.scopeItems() = {"region1", "region2"};
-
-  interface::ScopeItemList object3ScopeItems;
-  object3ScopeItems.scopeName() = "region";
-  object3ScopeItems.exploreCurrentScopeItem() = true;
-
-  interface::ScopeItemList object4ScopeItems;
-  object4ScopeItems.scopeName() = "region";
-  object4ScopeItems.scopeItems() = {"region2"};
-
-  interface::MoveToScopeItemsSpec moveToScopeItemsSpec;
-  moveToScopeItemsSpec.defaultScopeItems() = defaultScopeItems;
-  moveToScopeItemsSpec.objectToScopeItems() = {
-      {"object4", object4ScopeItems},
-      {"object2", object2ScopeItems},
-      {"object3", object3ScopeItems}};
-
-  auto object1Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(1), container(1));
-  auto object2Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(2), container(2));
-  auto object3Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(3), container(3));
-
-  // please note that object4 is not in the initial assignment, but we assume
-  // all input is correct
-  auto object4Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(4), container(1));
-
-  EXPECT_EQ(object1Destinations.size(), 1);
-  EXPECT_EQ(object2Destinations.size(), 2);
-  EXPECT_EQ(object3Destinations.size(), 1);
-  EXPECT_EQ(object4Destinations.size(), 1);
-
-  {
-    auto& object1FirstContainerSet = object1Destinations.at(0).get();
-    // container(1) is in region1, so only region1 is explored
-    const std::set<entities::ContainerId> expectedContainers = {
-        container(1), container(4)};
-    verifyContainersAreAsExpected(expectedContainers, object1FirstContainerSet);
-  }
-
-  {
-    auto& object2FirstContainerSet = object2Destinations.at(0).get();
-    const std::set<entities::ContainerId> expectedContainers = {
-        container(1), container(4)};
-    verifyContainersAreAsExpected(expectedContainers, object2FirstContainerSet);
-  }
-  {
-    auto& object2SecondContainerSet = object2Destinations.at(1).get();
-    const std::set<entities::ContainerId> expectedContainers = {container(2)};
-    verifyContainersAreAsExpected(
-        expectedContainers, object2SecondContainerSet);
-  }
-  {
-    auto& object3FirstContainerSet = object3Destinations.at(0).get();
-    const std::set<entities::ContainerId> expectedContainers = {
-        container(1), container(4)};
-    verifyContainersAreAsExpected(expectedContainers, object3FirstContainerSet);
-  }
-  {
-    auto& object4FirstContainerSet = object4Destinations.at(0).get();
-    const std::set<entities::ContainerId> expectedContainers = {container(2)};
-    verifyContainersAreAsExpected(expectedContainers, object4FirstContainerSet);
-  }
-}
-
-CO_TEST_F(
-    DestinationsToExploreGeneratorTest,
-    getAcceptingDestinationsWithContainerIdOnly) {
+    getAcceptingDestinationsWithSpecOnly) {
   co_await setUpProblem(/*nonAcceptingContainerIndices=*/{3});
   auto& problem = getProblem();
   auto& destinationsGenerator = problem.getDestinationsGenerator();
@@ -588,9 +471,8 @@ CO_TEST_F(
   moveToScopeItemsSpec.defaultScopeItems() = defaultScopeItems;
   // objectToScopeItems is empty by default
 
-  // Call the method that takes only MoveToScopeItemsSpec and hotContainerId
-  auto containerDestinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, container(1));
+  auto containerDestinations =
+      destinationsGenerator.getAcceptingDestinations(moveToScopeItemsSpec);
 
   // Should return destinations for all scope items in the region
   EXPECT_EQ(containerDestinations.size(), 2);
@@ -611,45 +493,7 @@ CO_TEST_F(
 
 CO_TEST_F(
     DestinationsToExploreGeneratorTest,
-    getAcceptingDestinationsExploreCurrentScopeItemNotInScope) {
-  co_await setUpProblem(/*nonAcceptingContainerIndices=*/{3});
-  auto& problem = getProblem();
-  auto& destinationsGenerator = problem.getDestinationsGenerator();
-
-  // Create a ScopeItemList with exploreCurrentScopeItem set to true
-  interface::ScopeItemList defaultScopeItems;
-  defaultScopeItems.scopeName() = "region";
-  defaultScopeItems.exploreCurrentScopeItem() = true;
-
-  interface::MoveToScopeItemsSpec moveToScopeItemsSpec;
-  moveToScopeItemsSpec.defaultScopeItems() = defaultScopeItems;
-
-  // Use container(5) which is NOT in the "region" scope
-  // This should trigger the code path where scopeItemId.has_value() is false
-  auto object1Destinations = destinationsGenerator.getAcceptingDestinations(
-      moveToScopeItemsSpec, object(1), container(5));
-
-  // Since container(5) is not in the region scope, it should explore all
-  // scope items in the region (similar to the default behavior)
-  EXPECT_EQ(object1Destinations.size(), 2);
-
-  {
-    auto& firstContainerSet = object1Destinations.at(0).get();
-    const std::set<entities::ContainerId> expectedContainers = {
-        container(1), container(4)};
-    verifyContainersAreAsExpected(expectedContainers, firstContainerSet);
-  }
-
-  {
-    auto& secondContainerSet = object1Destinations.at(1).get();
-    const std::set<entities::ContainerId> expectedContainers = {container(2)};
-    verifyContainersAreAsExpected(expectedContainers, secondContainerSet);
-  }
-}
-
-CO_TEST_F(
-    DestinationsToExploreGeneratorTest,
-    getAcceptingDestinationsWithContainerIdOnlyThrowsWhenObjectToScopeItemsNotEmpty) {
+    getAcceptingDestinationsWithSpecOnlyThrowsWhenObjectToScopeItemsNotEmpty) {
   co_await setUpProblem(/*nonAcceptingContainerIndices=*/{3});
   auto& problem = getProblem();
   auto& destinationsGenerator = problem.getDestinationsGenerator();
@@ -666,12 +510,10 @@ CO_TEST_F(
   moveToScopeItemsSpec.defaultScopeItems() = defaultScopeItems;
   moveToScopeItemsSpec.objectToScopeItems() = {{"object1", objectScopeItems}};
 
-  // Call the method that takes only MoveToScopeItemsSpec and hotContainerId
-  // This should throw an exception because objectToScopeItems is not empty
-  EXPECT_THROW(
-      destinationsGenerator.getAcceptingDestinations(
-          moveToScopeItemsSpec, container(1)),
-      std::runtime_error);
+  // throws because objectToScopeItems is not empty
+  REBALANCER_EXPECT_RUNTIME_ERROR(
+      destinationsGenerator.getAcceptingDestinations(moveToScopeItemsSpec),
+      "this function requires that objectToScopeItems is empty");
 }
 
 } // namespace facebook::rebalancer::packer::tests

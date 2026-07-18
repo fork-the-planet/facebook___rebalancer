@@ -856,7 +856,6 @@ class MoveToCurrentScopeItemSpec(TypedDict, total=False):
 class ScopeItemList(TypedDict, total=False):
     scopeName: str
     scopeItems: list[str]
-    exploreCurrentScopeItem: bool  # default False
 
 
 class GroupToScopeItemList(TypedDict, total=False):

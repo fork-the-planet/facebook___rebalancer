@@ -387,15 +387,11 @@ struct MoveToCurrentScopeItemSpec {
   1: string scopeNameForExploringMovesToCurrentScopeItem;
 }
 
+@thrift.ReserveIds{ids = [3]}
 struct ScopeItemList {
   1: string scopeName;
   // if scopeItems are not explicitly listed, all scopeItems in the specified scopeName are taken
   2: optional list<string> scopeItems;
-  // for an object O, if S is the scope name specified below, I is the current scopeItem O is present in, and
-  // C is the set of containers that are part of I, then the destination set is only the ones in C
-  // (which in turn may or may not be sampled depending on the move type this is used with).
-  // If O is not present in scope S, then by default all destinations are considered
-  3: bool exploreCurrentScopeItem = false;
 }
 
 struct GroupToScopeItemList {
